@@ -1,0 +1,126 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/ADMIN/MasterPage.master" AutoEventWireup="true" CodeFile="Corporhospchg.aspx.cs" Inherits="ADMIN_Corporhospchg" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" Runat="Server">
+    <asp:Label ID="lblid" runat="server" Text="Label"></asp:Label>( <asp:Label ID="lblfyear" runat="server" Text="Label" Font-Size="Smaller" ForeColor="#CCCCCC"></asp:Label>)
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+     <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%; text-align: center;" align="right" class="auto-style1"><strong>Corporate Hospital Charge</strong></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+         <asp:Label ID="lblorgid" runat="server" Text="Label" Visible="false"></asp:Label>
+    </td>
+</tr>
+</table>
+   <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:10%" align="left">Corporate Name:</td>
+    <td style="width:20%;" align="right" >
+         <asp:DropDownList ID="dropCorport" runat="server" >           
+        </asp:DropDownList>
+    </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:30%" align="center"></td>
+</tr>
+</table>
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right">&nbsp;</td>
+    <td style="width:20%; text-align: right;" align="left"><asp:Label ID="Label1" runat="server" style="color: #CC0000" Text="*"></asp:Label>Ward Name :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:DropDownList ID="dropwardname" runat="server" >           
+        </asp:DropDownList>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+        <asp:Label ID="lblslno" runat="server" Text="Label" Visible="false"></asp:Label>
+         </td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left"><asp:Label ID="Label2" runat="server" style="color: #CC0000" Text="*"></asp:Label>No. of Bed :</td>
+    <td style="width:20%; text-align: left;" align="right">
+         <asp:TextBox ID="txtnoofbed" runat="server" type="number" MaxLength="3" Text="0"></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left"><asp:Label ID="Label3" runat="server" style="color: #CC0000" Text="*"></asp:Label>Prifix :</td>
+    <td style="width:20%; text-align: left;" align="right">
+          <asp:TextBox ID="txtprifix" runat="server" ></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="right"><asp:Label ID="Label4" runat="server" style="color: #CC0000" Text="*"></asp:Label>Price :</td>
+     <td style="width:20%; text-align: left;" align="right">
+          <asp:TextBox ID="txtprice" runat="server" ></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"> <asp:TextBox ID="txtid" runat="server" Visible="false"></asp:TextBox></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="text-align: left;" align="right">
+         <asp:Button ID="btncreate" runat="server" Text="Create" CssClass="btn btn-primary btn-sm"  OnClick="btncreate_Click"/>
+&nbsp;<asp:Button ID="btnupdate" runat="server" Text="Update" CssClass="btn btn-success btn-sm" OnClick="btnupdate_Click" Visible="False" />
+         &nbsp;<asp:Button ID="btncancel" runat="server" Text="Cancel" CssClass="btn btn-danger btn-sm"  OnClick="btncancel_Click"/>
+         </td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="text-align: center;" align="center">
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="ID" PageSize="2"  AllowPaging="True" AllowSorting="True"  CssClass="table table-bordered"  OnPageIndexChanging="GridView1_PageIndexChanging" OnSelectedIndexChanging="GridView1_SelectedIndexChanging" OnRowDataBound="GridView1_RowDataBound" OnRowDeleting="GridView1_RowDeleting">
+            <Columns>
+                 <asp:TemplateField HeaderText="NAME" HeaderStyle-CssClass="text-center">
+            <ItemTemplate>
+                <asp:Label ID="lbl_name" runat="server" Text='<%#Eval("CORPRATE")%>' ></asp:Label>
+            </ItemTemplate>
+        </asp:TemplateField>
+                   <asp:TemplateField HeaderText="BED" HeaderStyle-CssClass="text-center">
+            <ItemTemplate>
+                <asp:Label ID="lbl_bed" runat="server" Text='<%#Eval("BED")%>' ></asp:Label>
+            </ItemTemplate>
+        </asp:TemplateField>
+                  <asp:TemplateField HeaderText="PRIFIX" HeaderStyle-CssClass="text-center">
+            <ItemTemplate>
+                <asp:Label ID="lbl_prifix" runat="server" Text='<%#Eval("PRIFIX")%>' ></asp:Label>
+            </ItemTemplate>
+        </asp:TemplateField>
+                <asp:CommandField ShowDeleteButton="true" ShowEditButton="False" ShowSelectButton="true" HeaderText="ACTION" HeaderStyle-CssClass="text-center"/>
+            </Columns>
+            <SelectedRowStyle BackColor="LightPink" Font-Italic="true" ForeColor="Crimson" />
+              <FooterStyle BackColor="#99CCCC" ForeColor="#003399" />
+              <HeaderStyle BackColor="#003399" Font-Bold="True" ForeColor="#CCCCFF" />
+              <PagerStyle BackColor="#99CCCC" ForeColor="#003399" HorizontalAlign="Left" />
+              <RowStyle BackColor="White" ForeColor="#003399" />
+              <SelectedRowStyle BackColor="#009999" Font-Bold="True" ForeColor="#CCFF99" />
+              <SortedAscendingCellStyle BackColor="#EDF6F6" />
+              <SortedAscendingHeaderStyle BackColor="#0D4AC4" />
+              <SortedDescendingCellStyle BackColor="#D6DFDF" />
+              <SortedDescendingHeaderStyle BackColor="#002876" />
+        </asp:GridView>
+    </td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+</asp:Content>
+

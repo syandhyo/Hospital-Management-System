@@ -1,0 +1,121 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Text;
+using System.Configuration;
+using System.Web.Services;
+using System.IO;
+
+public partial class ADMIN_admin_database_backup : System.Web.UI.Page
+{
+    string num1 = "SJ000";
+    SqlConnection con;
+    SqlDataAdapter da, da1, da2, da3, da4, da5, da6, da7;
+    DataSet ds = new DataSet();
+    SqlCommand com, cmd, cmd1;
+    SqlDataReader dr, dr1, dr2;
+    DataTable dt;
+    DataRow dtr;
+    GridViewRow gr;
+    string PAIDMAT, SS;
+    DriveInfo[] drives;
+    decimal amount = 0;
+
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        try
+        {
+            lblid.Text = Session["NAME"].ToString();
+            lbluid.Text = Session["UID"].ToString();
+            lblorgid.Text = Session["ORGID"].ToString();
+
+            drives = DriveInfo.GetDrives();
+            DropDownList1.DataSource = drives;
+            //DropDownList1.DataTextField = drives.ToString();
+            //DropDownList1.DataValueField = drives.ToString();
+            if (!IsPostBack)
+            {
+                DropDownList1.DataBind();
+                DropDownList1.Items.Insert(0, "-----Select Drives-----");
+                binddata();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    public void binddata()
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                SqlDataReader dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            //string path = 'D:\BACKUP\PANDAHMS.bak'+ "_" + DateTime.Today.Day.ToString() + "-" + DateTime.Today.Month.ToString() + "-" + DateTime.Today.Year.ToString() + ".bak";
+            string path = DropDownList2.Text + @"\PANDAHMS" + "_" + DateTime.Today.Day.ToString() + "-" + DateTime.Today.Month.ToString() + "-" + DateTime.Today.Year.ToString() + ".bak";
+            cmd = new SqlCommand("BACKUP DATABASE [PANDAHMS] TO  DISK = N'" + path + "' WITH NOFORMAT, INIT,  NAME = 'PANDAHMS-Full Database Backup', SKIP, NOREWIND, NOUNLOAD,  STATS = 10", con);
+            cmd.ExecuteNonQuery();
+            string message1 = "Backedup Successfully";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+            // pictureBox1.Visible = true;
+            //btn_start.Enabled = false;
+            // btn_browse.Enabled = false;
+
+            //timer1.Enabled = true;
+            //pictureBox1.Visible = true;
+
+            //pictureBox_loading.Image = global::MSM.Properties.Resources.bandwidth_animation;
+            //    //timer1.Enabled = true;
+        }
+        catch (Exception ex)
+        {
+            string message1 = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        }
+
+    }
+    protected void DropDownList1_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            string[] ae = Directory.GetDirectories(DropDownList1.SelectedItem.Text.ToString());
+            DropDownList2.DataSource = ae;
+            DropDownList2.DataBind();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+}

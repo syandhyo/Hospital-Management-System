@@ -1,0 +1,276 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class ADMIN_Radiologyentry : System.Web.UI.Page
+{
+    string num1 = "PK000";
+    SqlConnection con;
+    SqlCommand com, cmd;
+    SqlDataReader dr;
+    SqlDataAdapter da;
+    DataTable dt;
+    decimal total_amt = 0;
+    decimal total_vat_amt = 0;
+    int i, no, no1, sl;
+    GridViewRow gr;
+    string SS;
+    public void auto()
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            string qry1 = "select ID as ID from TBL_RADIOLOGYADM";
+
+            com = new SqlCommand(qry1, con);
+            dr = null;
+
+            dr = com.ExecuteReader();
+
+            while (dr.Read())
+            {
+                num1 = dr["ID"].ToString();
+            }
+            num1 = string.Format("RL{0}", (Convert.ToUInt32(num1.Substring(2)) + 1).ToString("D4"));
+            txtid.Text = num1;
+
+            dr.Close();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        try
+        {
+            if (Session["out"] == "INACTIVE")
+            {
+                Response.Redirect("~/index.aspx");
+            }
+            Response.Buffer = true;
+
+            Response.CacheControl = "no-cache";
+            if (Session["NAME"] == null)
+            {
+                Response.Redirect("~/index.aspx");
+            }
+            // lbldate.Text = DateTime.Now.ToString("dd-MM-yyyy");
+            lblid.Text = Session["NAME"].ToString();
+            lblorgid.Text = Session["ORGID"].ToString();
+            if (!IsPostBack)
+            {
+                binddata();
+                //  auto();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        //SqlDataAdapter da = new SqlDataAdapter("SELECT ID as ID,NAME FROM TEST_CATEGORY_TABLE WHERE  ORGID='" + lblorgid.Text + "' ORDER BY ID DESC", con);
+        //DataTable dt = new DataTable();
+        //da.Fill(dt);
+        //GridView1.SelectedIndex = 0;
+        //GridView1.DataSource = dt;
+        //GridView1.DataKeyNames = new string[] { "ID" };
+        //GridView1.DataBind();
+        DataTable dt = new DataTable();
+        dt.Columns.AddRange(new DataColumn[3] { new DataColumn("ID"), new DataColumn("INV"), new DataColumn("PRICE") });
+        ViewState["ITEM"] = dt;
+        this.BindGrid();
+
+        try
+        {
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+
+        da = new SqlDataAdapter("select ID,NAME from RADIOLOGY_CATEGORY_TABLE where ORGID='" + lblorgid.Text + "'", con);
+        DataTable ds = new DataTable();
+        da.Fill(ds);
+        droptesttype.DataSource = ds;
+        droptesttype.DataTextField = "NAME";
+        droptesttype.DataValueField = "ID";
+        droptesttype.DataBind();
+        droptesttype.Items.Insert(0, "Please Select");
+
+        SqlDataAdapter da1 = new SqlDataAdapter("select * from  TBL_RADIOLOGYADM ORDER BY ID DESC", con);
+        DataTable dt1 = new DataTable();
+        da1.Fill(dt1);
+        grdradiology.DataSource = dt1;
+        grdradiology.DataBind();
+
+    }
+    protected void droptesttype_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            DataTable dt = (DataTable)ViewState["ITEM"];
+            // SqlDataAdapter da = new SqlDataAdapter("select A.slno AS ID ,A.NAME AS NAME,A.INV AS INV,A.PRICE AS PRICE,A.REF AS RANGE, A.UNIT AS UNIT from TEST_COMPONENT_TABLE A,TEST_CATEGORY_TABLE B,TEST_NAME_TABLE C WHERE A.ID=C.ID AND C.CATEGORY=B.ID AND B.ID='" + droptesttype.SelectedValue.ToString() + "' AND A.ORGID='" + lblorgid.Text + "'", con);
+            SqlDataAdapter da = new SqlDataAdapter("select b.ID,b.INV,b.PRICE from RADIOLOGY_CATEGORY_TABLE a,RADIOLOGY_COMPONENT_TABLE b where a.ID=b.ID and a.NAME='" + droptesttype.SelectedItem.Text + "'", con);
+            da.Fill(dt);
+            ViewState["ITEM"] = dt;
+            this.BindGrid();
+
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void BindGrid()
+    {
+        try
+        {
+            GridView1.DataSource = (DataTable)ViewState["ITEM"];
+            GridView1.DataBind();
+        }
+        catch(Exception ex)
+        {
+
+        }
+    }
+    protected void btncreate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtname.Text == "")
+            {
+                string message = "alert('* Please Enter Name.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            //SqlCommand com = new SqlCommand("select * from TEST_CATEGORY_TABLE where NAME='" + txtname.Text.ToUpper() + "' and ORGID='" + lblorgid.Text + "'", con);
+            //dr = com.ExecuteReader();
+            //if (dr.Read())
+            //{
+            //    string message = "alert('Alredy Exist.')";
+            //    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+            //    return;
+            //}
+            //dr.Close();
+            auto();
+            package_item();
+            if (SS == "FALSE")
+            {
+                string message = "alert('*Please select any item to save.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+           // SqlCommand cmd1 = new SqlCommand("insert into TBL_RADIOLOGYADM (ID,RADIOLOGYNAME,FYEAR,ORGID) values (@ID,@RADIOLOGYNAME,@FYEAR,@ORGID)", con);
+            using (SqlCommand cmd1 = new SqlCommand("ADMIN_RADIOLOGY_PACKAGE_ENTRY", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd1.Parameters.Add("@RADIOLOGYNAME", SqlDbType.VarChar).Value = txtname.Text.ToUpper();
+                cmd1.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+                cmd1.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                cmd1.ExecuteNonQuery();
+            }
+            binddata();
+            string message1 = "alert('Save Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/Radiologyentry.aspx");
+    }
+    public void package_item()
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SS = "FALSE";
+            foreach (GridViewRow row in GridView1.Rows)
+            {
+                if (row.RowType == DataControlRowType.DataRow)
+                {
+                    Label IdIt = (row.Cells[0].FindControl("lblid") as Label);
+                    Label invIt = (row.Cells[1].FindControl("lblinv") as Label);
+                    TextBox priceIt = (row.Cells[2].FindControl("lblprice") as TextBox);
+                    CheckBox chkRow = (row.Cells[3].FindControl("chkRow") as CheckBox);
+
+                    if (chkRow.Checked)
+                    {
+                        SS = "TRUE";
+                        //if (Inv.Text == "WIDAL AGGULUTINATION TEST")
+                        //{
+
+                        var INV = Convert.ToInt32(GridView1.DataKeys[row.RowIndex].Values[0]);
+                      //  SqlCommand stock_cmd = new SqlCommand("INSERT INTO TBL_RADIOLGADMITEM (ID,TESTID,INV,PRICE,CHKSEL) VALUES (@ID,@TESTID,@INV,@PRICE,@CHKSEL)", con);
+                        using (SqlCommand stock_cmd = new SqlCommand("ADMIN_Radiology_Entry", con))
+                        {
+                            stock_cmd.CommandType = CommandType.StoredProcedure;
+                            stock_cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                            stock_cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                            stock_cmd.Parameters.Add("@TESTID", SqlDbType.VarChar).Value = IdIt.Text;
+                            stock_cmd.Parameters.Add("@INV", SqlDbType.VarChar).Value = invIt.Text;
+                            stock_cmd.Parameters.Add("@PRICE", SqlDbType.VarChar).Value = priceIt.Text.ToString();
+                            stock_cmd.Parameters.Add("@CHKSEL", SqlDbType.VarChar).Value = chkRow.Checked;
+                            stock_cmd.ExecuteNonQuery();
+                        }
+                        //}
+                        //else
+                        //{
+                        //    var INV = Convert.ToInt32(GridView1.DataKeys[row.RowIndex].Values[0]);
+                        //    SqlCommand stock_cmd = new SqlCommand("INSERT INTO LABRESULT_TABLE (ID,INV,PRICE) VALUES (@ID,@INV,@PRICE)", con);
+                        //    stock_cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+                        //    stock_cmd.Parameters.Add("@INV", SqlDbType.VarChar).Value = INV.ToString();
+                        //    stock_cmd.Parameters.Add("@PRICE", SqlDbType.VarChar).Value = price.Text.ToString();
+                        //    stock_cmd.ExecuteNonQuery();
+                        //}
+                    }
+                }
+            }
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+}

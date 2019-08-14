@@ -1,0 +1,189 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Data;
+public partial class ACCOUNTS_Percentage_Payment : System.Web.UI.Page
+{
+    string num1 = "SJ000";
+    SqlConnection con;
+    SqlCommand com, cmd;
+    SqlDataReader dr,dr1;
+    SqlDataAdapter da;
+    DataTable dt;
+    decimal total_amt = 0;
+    decimal total_vat_amt = 0;
+    int i, no, no1, sl;
+    GridViewRow gr;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+        if (!IsPostBack)
+        {
+            binddata();
+        }
+        //if (txtname.Text == "")
+        //{
+        //    btncreate.Visible = true;
+        //    btnupdate.Visible = false;
+        //}
+        //else
+        //{
+        //    btncreate.Visible = false;
+        //    btnupdate.Visible = true;
+        //}
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        try
+        {
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+
+
+        using (SqlCommand com = new SqlCommand("USP_empbroker", con))
+        {
+            com.CommandType = CommandType.StoredProcedure;
+            SqlDataAdapter da3 = new SqlDataAdapter(com);
+            DataTable dt3 = new DataTable();
+            da3.Fill(dt3);
+            //dropbedno.SelectedIndex = 0;
+            droprecipient.DataSource = dt3;
+            droprecipient.DataTextField = "NAME";
+            droprecipient.DataValueField = "ID";
+            droprecipient.DataBind();
+            droprecipient.Items.Insert(0, "NONE");
+        }
+       
+        con.Close();
+    }
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtdate.Text == "")
+            {
+                string message = "alert('* Date is mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            else if (txtamt.Text == "")
+            {
+                string message = "alert('* Amount is mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            else if (Convert.ToDecimal(txtamt.Text) <= 0)
+            {
+                string message = "alert('* Amount is mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            using (SqlCommand cm = new SqlCommand("USP_PERCENTAGE_PAYMENT", con))
+            {
+                cm.CommandType = CommandType.StoredProcedure;
+                cm.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cm.Parameters.Add("@DATE", SqlDbType.DateTime).Value = Convert.ToDateTime(txtdate.Text).ToString("yyyy-MM-dd");
+                cm.Parameters.Add("@REC", SqlDbType.VarChar).Value = droprecipient.SelectedValue;
+                cm.Parameters.Add("@TOTALAMOUNT", SqlDbType.Decimal).Value = txttotalamt.Text;
+                cm.Parameters.Add("@PAIDAMOUNT", SqlDbType.Decimal).Value = txtpaidamt.Text;
+                cm.Parameters.Add("@AMTBP", SqlDbType.Decimal).Value = txttopaid.Text;
+                cm.Parameters.Add("@AMOUNT", SqlDbType.Decimal).Value = txtamt.Text;
+                cm.Parameters.Add("@PMODE", SqlDbType.VarChar).Value = droppaymode.SelectedItem.Text;
+                cm.Parameters.Add("@VOUCHERNO", SqlDbType.VarChar).Value = txtvcno.Text;
+                cm.ExecuteNonQuery();
+            }
+            con.Close();
+            droprecipient.SelectedIndex = 0;
+            txtamt.Text = "0.00";
+            txtpaidamt.Text = "0.00";
+            txttopaid.Text = "0.00";
+            txttotalamt.Text = "0.00";
+            txtvcno.Text = "";
+            string message1 = "alert('* Saved Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+
+    }
+    protected void droprecipient_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            txtamt.Text = "0.00";
+            txtpaidamt.Text = "0.00";
+            txttopaid.Text = "0.00";
+            txttotalamt.Text = "0.00";
+            txtvcno.Text = "";
+            SqlCommand com = new SqlCommand("select SUM(PCHARGE)AS PHARMACY,PP,SUM(LCHARGE)AS LCHARGE,LP,SUM(BCHARGE)AS BCHARGE,BP,(SUM(PCHARGE)/100)*PP+(SUM(LCHARGE)/100)*LP+(SUM(BCHARGE)/100)*BP AS TOTALAMOUNT from REF_TRAN WHERE REF='" + droprecipient.SelectedValue + "' GROUP BY REF,PP,LP,BP", con);
+
+            dr = com.ExecuteReader();
+            if (dr.Read())
+            {
+                txttotalamt.Text = dr["TOTALAMOUNT"].ToString();
+            }
+            dr.Close();
+            SqlCommand com1 = new SqlCommand("SELECT ISNULL(SUM(AMT),0) AS AMOUNT FROM BROKER_PAY_TABLE WHERE REC='" + droprecipient.SelectedValue + "'", con);
+
+            dr1 = com1.ExecuteReader();
+            if (dr1.Read())
+            {
+                txtpaidamt.Text = dr1["AMOUNT"].ToString();
+            }
+            dr1.Close();
+
+            txttopaid.Text = (Convert.ToDouble(txttotalamt.Text) - Convert.ToDouble(txtpaidamt.Text)).ToString();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+       
+       // Response.Redirect("~/ACCOUNTS/Percentage_Payment.aspx");
+    }
+}

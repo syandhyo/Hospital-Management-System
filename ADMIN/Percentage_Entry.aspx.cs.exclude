@@ -1,0 +1,220 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Data;
+public partial class ADMIN_Corporate_Emp : System.Web.UI.Page
+{    
+    SqlConnection con;
+    SqlCommand com, cmd;
+    SqlDataReader dr;
+    SqlDataAdapter da;
+    DataTable dt;
+    decimal total_amt = 0;
+    decimal total_vat_amt = 0;
+    int i, no, no1, sl;
+    GridViewRow gr;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+
+        if (!IsPostBack)
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                SqlDataReader dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            } 
+
+            using (SqlCommand com = new SqlCommand("USP_empbroker", con))
+            {
+                com.CommandType = CommandType.StoredProcedure;
+                SqlDataAdapter da1 = new SqlDataAdapter(com);
+                DataTable dt1 = new DataTable();
+                da1.Fill(dt1);
+                //dropbedno.SelectedIndex = 0;
+                droprecipient.DataSource = dt1;
+                droprecipient.DataTextField = "NAME";
+                droprecipient.DataValueField = "ID";
+                droprecipient.DataBind();
+                droprecipient.Items.Insert(0, "Please Select");
+            }
+            con.Close();
+        }
+        //if (txtname.Text == "")
+        //{
+        //    btncreate.Visible = true;
+        //    btnupdate.Visible = false;
+        //}
+        //else
+        //{
+        //    btncreate.Visible = false;
+        //    btnupdate.Visible = true;
+        //}
+    }
+    protected void drptype_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            if (drptype.Text == "Staff")
+            {
+                string str = "Select EMPID,Sname from tblStaff ";
+                SqlDataAdapter da = new SqlDataAdapter(str, con);
+                DataTable dt=new DataTable();
+                da.Fill(dt);
+                droprecipient.DataSource = dt;
+                droprecipient.DataTextField = "Sname";
+                droprecipient.DataValueField = "EMPID";
+                droprecipient.DataBind();
+                droprecipient.Items.Insert(0, "---select---");
+            }
+            else if (drptype.Text == "Broker")
+            {
+                string str = "select ID,NAME from Broker_Table   ";
+                SqlDataAdapter da = new SqlDataAdapter(str, con);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                droprecipient.DataSource = dt;
+                droprecipient.DataTextField = "NAME";
+                droprecipient.DataValueField = "ID";
+                droprecipient.DataBind();
+                droprecipient.Items.Insert(0, "---select---");
+            }
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+            //  Response.Write(ex.Message);
+        }
+    }
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (droprecipient.SelectedIndex == 0)
+            {
+                string message = "alert('* Please Select Recipient .')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtroomcharge.Text == "")
+            {
+                string message = "alert('*Field is Mandatory .')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtdiscpharmacy.Text == "")
+            {
+                string message = "alert('*Field is Mandatory ')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtdisclab.Text == "")
+            {
+                string message = "alert('* Field is Mandatory')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+           // SqlCommand cmd1 = new SqlCommand("insert into Percentage_Table (RES,ROOMRENT,PHARMACY,LAB,OTHERS) values (@RES,@ROOMRENT,@PHARMACY,@LAB,@OTHERS)", con);
+            using (SqlCommand cmd1 = new SqlCommand("ADMIN_PERCNT_ENTRY", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd1.Parameters.Add("@RES", SqlDbType.VarChar).Value = droprecipient.SelectedValue;
+                cmd1.Parameters.Add("@ROOMRENT", SqlDbType.VarChar).Value = txtroomcharge.Text;
+                cmd1.Parameters.Add("@PHARMACY", SqlDbType.VarChar).Value = txtdiscpharmacy.Text;
+                cmd1.Parameters.Add("@LAB", SqlDbType.VarChar).Value = txtdisclab.Text;
+                cmd1.Parameters.Add("@OTHERS", SqlDbType.VarChar).Value = discothers.Text;
+                cmd1.Parameters.Add("@RADIO", SqlDbType.VarChar).Value = txtradiology.Text;
+                cmd1.Parameters.Add("@ID", SqlDbType.Int).Value = 1;
+                cmd1.ExecuteNonQuery();
+            }
+            string message1 = "alert('Created Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/Percentage_Entry.aspx");
+    }
+    protected void Button2_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (droprecipient.SelectedItem.Text == "")
+            {
+                string message = "alert('* Please Select Recipient .')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtroomcharge.Text == "")
+            {
+                string message = "alert('*Field is Mondatary .')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtdiscpharmacy.Text == "")
+            {
+                string message = "alert('*Field is Mondatary ')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtdisclab.Text == "")
+            {
+                string message = "alert('* Field is Mondatary')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            SqlCommand cmd1 = new SqlCommand("insert into Percentage_Table (RES,ROOMRENT,PHARMACY,LAB,OTHERS) values (@RES,@ROOMRENT,@PHARMACY,@LAB,@OTHERS)", con);
+            cmd1.Parameters.Add("@RES", SqlDbType.VarChar).Value = droprecipient.SelectedValue;
+            cmd1.Parameters.Add("@ROOMRENT", SqlDbType.VarChar).Value = txtroomcharge.Text;
+            cmd1.Parameters.Add("@PHARMACY", SqlDbType.VarChar).Value = txtdiscpharmacy.Text;
+            cmd1.Parameters.Add("@LAB", SqlDbType.VarChar).Value = txtdisclab.Text;
+            cmd1.Parameters.Add("@OTHERS", SqlDbType.VarChar).Value = discothers.Text;
+            cmd1.ExecuteNonQuery();
+            string message1 = "alert('Updated Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/Percentage_Entry.aspx");
+    }
+}

@@ -1,0 +1,381 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class LABORATORY_Pathology_rate_insurance : System.Web.UI.Page
+{
+    string num1 = "PR000";
+    SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+    SqlCommand com, cmd, cmd1,cmd2;
+    SqlDataReader dr;
+    SqlDataAdapter da, da1;
+    DataTable dt;
+    public void auto()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        string qry1 = " select ID from dbo.PATHO_INSURANCE_CATA";
+
+        com = new SqlCommand(qry1, con);
+        dr = null;
+
+        dr = com.ExecuteReader();
+
+        while (dr.Read())
+        {
+            num1 = dr["ID"].ToString();
+        }
+        num1 = string.Format("PR{0}", (Convert.ToUInt32(num1.Substring(2)) + 1).ToString("D4"));
+        TXTID.Text = num1;
+     
+
+        dr.Close();
+        con.Close();
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand COM = new SqlCommand("SELECT FYEAR FROM FYEAR1_TABLE WHERE  ORGID='" + lblorgid.Text + "'", con);
+        dr = COM.ExecuteReader();
+        if (dr.Read())
+        {
+
+            lblfyear.Text = dr["FYEAR"].ToString();
+        }
+        dr.Close();
+        con.Close();
+
+    }
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+        if (IsPostBack != true)
+        {
+            //DataTable dt = new DataTable();
+            //dt.Columns.AddRange(new DataColumn[6] { new DataColumn("ID"), new DataColumn("NAME"), new DataColumn("INV"), new DataColumn("RANGE"), new DataColumn("UNIT"), new DataColumn("PRICE") });
+            //ViewState["ITEM"] = dt;
+           
+
+            SqlDataAdapter da = new SqlDataAdapter("select * from [INSURANCE_TBL]", con);
+            DataTable ds = new DataTable();
+            da.Fill(ds);
+            Ddlincrnce.DataSource = ds;
+            Ddlincrnce.DataTextField = "COMNYNAME";
+            Ddlincrnce.DataValueField = "ID";
+            Ddlincrnce.DataBind();
+            Ddlincrnce.Items.Insert(0, "---Select---");
+
+            SqlDataAdapter da1 = new SqlDataAdapter("select * from [dbo].[TEST_CATEGORY_TABLE]", con);
+            DataTable ds1 = new DataTable();
+            da1.Fill(ds1);
+            ddltesttype.DataSource = ds1;
+            ddltesttype.DataTextField = "NAME";
+            ddltesttype.DataValueField = "ID";
+            ddltesttype.DataBind();
+            ddltesttype.Items.Insert(0, "---Select---");
+        }
+        con.Close();
+        binddata();
+        bind();
+    }
+    public void bind()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlDataAdapter Adp = new SqlDataAdapter("select * from dbo.PATHO_INSURANCE_CATA order by SLNO desc", con);
+        DataTable Dt = new DataTable();
+        Adp.Fill(Dt);
+        GridView2.DataSource = Dt;
+        GridView2.DataBind();
+        con.Close();
+    }
+    protected void btncancel_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("Pathology_rate_insurance.aspx");
+    }
+    protected void ddltesttype_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        if (ddltesttype.SelectedIndex != 0)
+        {
+            DataTable dt = new DataTable();
+            SqlDataAdapter da = new SqlDataAdapter("select A.slno AS ID ,A.NAME AS NAME,A.INV AS INV,A.PRICE AS PRICE,A.REF AS RANGE, A.UNIT AS UNIT from TEST_COMPONENT_TABLE A,TEST_CATEGORY_TABLE B,TEST_NAME_TABLE C WHERE A.ID=C.ID AND C.CATEGORY=B.ID AND B.ID='" + ddltesttype.SelectedValue.ToString() + "'", con);
+            da.Fill(dt);
+            GridView1.DataSource = null;
+            GridView1.DataBind();
+            GridView1.DataSource = dt;
+            //GridView1.SelectedIndex = 0;
+            GridView1.DataKeyNames = new string[] { "ID" };
+            GridView1.DataBind();
+        }
+        con.Close();
+        Txtdate.Enabled = true;
+    }
+    protected void btncreate_Click(object sender, EventArgs e)
+    {
+        try
+
+        {
+        if (Ddlincrnce.SelectedIndex == 0)
+        {
+            string message = "alert('Please!! Select The Insurance Name..')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+        }
+        else if (ddltesttype.SelectedIndex == 0)
+        {
+            string message = "alert('Please!! Select The Catagory..')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+        }
+        else if (Txtdate.Text == "")
+        {
+            string message = "alert('Please Select The Apply Date..')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+        }
+        else
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            if (Ddlincrnce.SelectedIndex != 0 && ddltesttype.SelectedIndex != 0 && Txtdate.Text != "")
+            {
+
+                SqlCommand cmd = new SqlCommand("SELECT * from dbo.PATHO_INSURANCE_CATA where INSURANCE='" + Ddlincrnce.SelectedItem.Text + "' and CATAGORY='" + ddltesttype.SelectedItem.Text + "' and APPLY_DATE='" + Txtdate.Text + "'", con);
+                dr = cmd.ExecuteReader();
+                if (dr.Read() == true)
+                {
+                    dr.Close();
+
+                    string message4 = "alert(' Please Change The Apply Date..')";
+                    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message4, true);
+                    return;
+                }
+                dr.Close();
+            }
+            auto();
+
+            foreach (GridViewRow row in GridView1.Rows)
+            {
+                var name = row.FindControl("lblname") as Label;
+                var inv = row.FindControl("lblinv") as Label;
+                var rnge = row.FindControl("lblrange") as Label;
+                var unt = row.FindControl("Label1") as Label;
+                var AMT = row.FindControl("txtprice") as TextBox;
+                if (AMT.Text == "")
+                {
+                    AMT.Text = "0";
+                }
+                {
+                    //var INV = Convert.ToInt32(GridView1.DataKeys[row.RowIndex].Values[0]);
+
+                    SqlCommand cmd = new SqlCommand("insert into dbo.PATHO_INSURANCE_RATES (ID,ORGID,INV,REF,UNIT,NAME,PRICE) values(@ID,@ORGID,@INV,@REF,@UNIT,@NAME,@PRICE)", con);
+                    cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+                    cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                    cmd.Parameters.Add("@INV", SqlDbType.VarChar).Value = inv.Text.ToString();
+                    cmd.Parameters.Add("@REF", SqlDbType.VarChar).Value = rnge.Text.ToString();
+                    cmd.Parameters.Add("@UNIT", SqlDbType.VarChar).Value = unt.Text.ToString();
+                    cmd.Parameters.Add("@NAME", SqlDbType.VarChar).Value = name.Text.ToString();
+                    cmd.Parameters.Add("@PRICE", SqlDbType.VarChar).Value = AMT.Text.ToString();
+                    cmd.ExecuteNonQuery();
+
+                }
+                SqlCommand cmd2 = new SqlCommand("insert into dbo.PATHO_INSURANCE_TESTNAME (ID,ORGID,TEST_NAME,CATAGORY,INSURANCE) values(@ID,@ORGID,@TEST_NAME,@CATAGORY,@INSURANCE)", con);
+                cmd2.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+                cmd2.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                cmd2.Parameters.Add("@TEST_NAME", SqlDbType.VarChar).Value = name.Text.ToString();
+                cmd2.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = ddltesttype.SelectedItem.Text;
+                cmd2.Parameters.Add("@INSURANCE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+                cmd2.ExecuteNonQuery();
+            }
+
+            SqlCommand cmd1 = new SqlCommand("insert into dbo.PATHO_INSURANCE_CATA (ID,ORGID,INSURANCE,CATAGORY,DATE,APPLY_DATE) values(@ID,@ORGID,@INSURANCE,@CATAGORY,@DATE,@APPLY_DATE)", con);
+            cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+            cmd1.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+            cmd1.Parameters.Add("@INSURANCE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+            cmd1.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = ddltesttype.SelectedItem.Text;
+            cmd1.Parameters.Add("@DATE", SqlDbType.Date).Value = DateTime.Now.ToString("yyyy/MM/dd");
+            cmd1.Parameters.Add("@APPLY_DATE", SqlDbType.Date).Value = Txtdate.Text;
+            cmd1.ExecuteNonQuery();
+            dr.Close();
+            con.Close();
+        }
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+            Response.Redirect("Pathology_rate_insurance.aspx");
+            bind();
+
+        
+
+    }
+    protected void GridView2_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        var slno = GridView2.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlDataAdapter da = new SqlDataAdapter("  select * from PATHO_INSURANCE_RATES where ID='" + slno + "'", con);
+        DataSet ds = new DataSet();
+        da.Fill(ds);
+        btncreate.Visible = false;
+        btndelete.Visible = true;
+        btnupdate.Visible = true;
+        TXTID.Text = ds.Tables[0].Rows[0]["ID"].ToString();
+        GridView3.DataSource = ds;
+        GridView3.DataBind();
+        GridView1.Visible = false;
+        SqlCommand Cm = new SqlCommand("select * from PATHO_INSURANCE_CATA where ID='" + slno + "'", con);
+        dr = Cm.ExecuteReader();
+        if (dr.Read() == true)
+        {
+            Ddlincrnce.SelectedItem.Text = dr["INSURANCE"].ToString();
+            ddltesttype.SelectedItem.Text = dr["CATAGORY"].ToString();
+            Txtdate.Text = dr["APPLY_DATE"].ToString();
+        }
+        dr.Close();
+      
+        Txtdate.Enabled = true;
+
+        SqlDataAdapter da1 = new SqlDataAdapter("select * from [dbo].[TEST_CATEGORY_TABLE] where NAME='"+ddltesttype.SelectedItem.Text+"'", con);
+        DataTable ds1 = new DataTable();
+        da1.Fill(ds1);
+        ddltesttype.DataSource = ds1;
+        ddltesttype.DataTextField = "NAME";
+        ddltesttype.DataValueField = "ID";
+        ddltesttype.DataBind();
+
+        SqlDataAdapter da2 = new SqlDataAdapter("select * from [INSURANCE_TBL] where COMNYNAME='" + Ddlincrnce.SelectedItem.Text + "'", con);
+        DataTable ds2 = new DataTable();
+        da2.Fill(ds2);
+        Ddlincrnce.DataSource = ds2;
+        Ddlincrnce.DataTextField = "COMNYNAME";
+        Ddlincrnce.DataValueField = "ID";
+        Ddlincrnce.DataBind();
+        con.Close();
+    }
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (Txtdate.Text == "")
+            {
+                string message = "alert('Please Select The Apply Date..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand cm1 = new SqlCommand("delete from dbo.PATHO_INSURANCE_RATES where ID='" + TXTID.Text + "'", con);
+            cm1.ExecuteNonQuery();
+            foreach (GridViewRow row in GridView3.Rows)
+            {
+                var name = row.FindControl("lblname1") as Label;
+                var inv = row.FindControl("lblinv1") as Label;
+                var rnge = row.FindControl("lblrange1") as Label;
+                var unt = row.FindControl("Label2") as Label;
+                var AMT = row.FindControl("txtprice1") as TextBox;
+                if (AMT.Text == "")
+                {
+                    AMT.Text = "0";
+                }
+                //var INV = Convert.ToInt32(GridView1.DataKeys[row.RowIndex].Values[0]);
+
+                SqlCommand cmd = new SqlCommand("insert into dbo.PATHO_INSURANCE_RATES (ID,ORGID,INV,REF,UNIT,NAME,PRICE) values(@ID,@ORGID,@INV,@REF,@UNIT,@NAME,@PRICE)", con);
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+                cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                cmd.Parameters.Add("@INV", SqlDbType.VarChar).Value = inv.Text.ToString();
+                cmd.Parameters.Add("@REF", SqlDbType.VarChar).Value = rnge.Text.ToString();
+                cmd.Parameters.Add("@UNIT", SqlDbType.VarChar).Value = unt.Text.ToString();
+                cmd.Parameters.Add("@NAME", SqlDbType.VarChar).Value = name.Text.ToString();
+                cmd.Parameters.Add("@PRICE", SqlDbType.VarChar).Value = AMT.Text.ToString();
+                cmd.ExecuteNonQuery();
+
+            }
+            SqlCommand cmd1 = new SqlCommand("update PATHO_INSURANCE_TESTNAME set INSURANCE=@INSURANCE where ID='" + TXTID.Text + "'", con);
+            cmd1.Parameters.Add("@INSURANCE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+            cmd1.ExecuteNonQuery();
+
+            SqlCommand cmd2 = new SqlCommand("update PATHO_INSURANCE_CATA set INSURANCE=@INSURANCE,APPLY_DATE=@APPLY_DATE where ID='" + TXTID.Text + "'", con);
+            cmd2.Parameters.Add("@INSURANCE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+            cmd2.Parameters.Add("@APPLY_DATE", SqlDbType.Date).Value = Txtdate.Text;
+            cmd2.ExecuteNonQuery();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("Pathology_rate_insurance.aspx");
+        bind();
+    }
+    protected void btndelete_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand cm = new SqlCommand("delete from PATHO_INSURANCE_CATA where ID='" + TXTID.Text + "'", con);
+            cm.ExecuteNonQuery();
+
+
+            SqlCommand cm1 = new SqlCommand("delete from dbo.PATHO_INSURANCE_RATES where ID='" + TXTID.Text + "'", con);
+            cm1.ExecuteNonQuery();
+
+            SqlCommand cm2 = new SqlCommand("delete from dbo.PATHO_INSURANCE_TESTNAME where ID='" + TXTID.Text + "'", con);
+            cm2.ExecuteNonQuery();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+
+        Response.Redirect("Pathology_rate_insurance.aspx");
+        bind();
+    }
+    protected void GridView2_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlDataAdapter Adp = new SqlDataAdapter("select * from dbo.PATHO_INSURANCE_CATA order by SLNO desc", con);
+            DataTable Dt = new DataTable();
+            Adp.Fill(Dt);
+            GridView2.DataSource = Dt;
+            GridView2.PageIndex = e.NewPageIndex;
+            GridView2.DataKeyNames = new string[] { "ID" };
+            GridView2.DataBind();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+}

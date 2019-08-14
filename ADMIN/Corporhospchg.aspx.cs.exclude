@@ -1,0 +1,211 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Data;
+public partial class ADMIN_Corporhospchg : System.Web.UI.Page
+{
+    string num1 = "SJ000";
+    SqlConnection con;
+    SqlCommand com, cmd;
+    SqlDataReader dr;
+    SqlDataAdapter da, da1;
+    DataTable dt;
+    decimal total_amt = 0;
+    decimal total_vat_amt = 0;
+    int i, no, no1, sl;
+    GridViewRow gr;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+        if (!IsPostBack)
+        {
+            binddata();
+        }
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlDataAdapter Adp = new SqlDataAdapter("select * from TBL_CORPHOSPCHG", con);
+        DataTable Dt = new DataTable();
+        Adp.Fill(Dt);
+        GridView1.DataSource = Dt;
+        GridView1.DataBind();
+        //----------------------
+        da = new SqlDataAdapter("select distinct ID,CNAME from Corporate_Table", con);
+        DataTable ds = new DataTable();
+        da.Fill(ds);
+        dropCorport.DataSource = ds;
+        dropCorport.DataTextField = "CNAME";
+        dropCorport.DataValueField = "ID";
+        dropCorport.DataBind();
+        dropCorport.Items.Insert(0, "Please Select");
+
+        da1 = new SqlDataAdapter("select distinct ID,NAME from WARD_TABLE", con);
+        DataTable ds1 = new DataTable();
+        da1.Fill(ds1);
+        dropwardname.DataSource = ds1;
+        dropwardname.DataTextField = "NAME";
+        dropwardname.DataValueField = "ID";
+        dropwardname.DataBind();
+        dropwardname.Items.Insert(0, "Please Select");
+
+        SqlCommand COM = new SqlCommand("SELECT FYEAR FROM FYEAR1_TABLE WHERE  ORGID='" + lblorgid.Text + "'", con);
+        dr = COM.ExecuteReader();
+        if (dr.Read())
+        {
+            //Label1.Text = dr["FYEAR"].ToString();
+            lblfyear.Text = dr["FYEAR"].ToString();
+        }
+        dr.Close();
+
+
+        con.Close();
+    }
+    protected void btncreate_Click(object sender, EventArgs e)
+    {
+        //if (dropCorport.SelectedValue =="0")
+        //{
+        //    string message = "alert('* Ward are mandatory.')";
+        //    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        //    return;
+        //}
+        if (txtprice.Text == "")
+        {
+            string message = "alert('* Price are mandatory.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+        }
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand cmd1 = new SqlCommand("insert into TBL_CORPHOSPCHG (CORPRATE,WARDNM,BED,PRIFIX,PRICE,FYEAR) values (@CORPRATE,@WARDNM,@BED,@PRIFIX,@PRICE,@FYEAR)", con);
+        cmd1.Parameters.Add("@CORPRATE", SqlDbType.VarChar).Value = dropCorport.SelectedValue;
+        cmd1.Parameters.Add("@WARDNM", SqlDbType.VarChar).Value = dropwardname.SelectedValue;
+        cmd1.Parameters.Add("@BED", SqlDbType.VarChar).Value = txtnoofbed.Text;
+        cmd1.Parameters.Add("@PRIFIX", SqlDbType.VarChar).Value = txtprifix.Text.ToUpper();
+        cmd1.Parameters.Add("@PRICE", SqlDbType.Decimal).Value = txtprice.Text.ToUpper();
+        cmd1.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+
+        cmd1.ExecuteNonQuery();
+        string message1 = "alert('Created Successfully.')";
+        ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        resetCt();
+        binddata();
+        con.Close();
+    }
+    public void resetCt()
+    {
+        txtprice.Text = "";
+        dropCorport.SelectedIndex = 0;
+        dropCorport.SelectedIndex = 0;
+        txtnoofbed.Text = "";
+        txtprifix.Text = "";
+    }
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        if (txtprice.Text == "")
+        {
+            string message = "alert('* Price are mandatory.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+        }
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand cmd1 = new SqlCommand("insert into TBL_CORPHOSPCHG (CORPRATE,WARDNM,BED,PRIFIX,PRICE,FYEAR) values (@CORPRATE,@WARDNM,@BED,@PRIFIX,@PRICE,@FYEAR)", con);
+        cmd1.Parameters.Add("@CORPRATE", SqlDbType.VarChar).Value = dropCorport.SelectedValue;
+        cmd1.Parameters.Add("@WARDNM", SqlDbType.VarChar).Value = dropwardname.SelectedValue;
+        cmd1.Parameters.Add("@BED", SqlDbType.VarChar).Value = txtnoofbed.Text;
+        cmd1.Parameters.Add("@PRIFIX", SqlDbType.VarChar).Value = txtprifix.Text.ToUpper();
+        cmd1.Parameters.Add("@PRICE", SqlDbType.Decimal).Value = txtprice.Text.ToUpper();
+        cmd1.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+
+        cmd1.ExecuteNonQuery();
+        string message1 = "alert('updated Successfully.')";
+        ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        resetCt();
+        binddata();
+        con.Close();
+    }
+    protected void btncancel_Click(object sender, EventArgs e)
+    {
+
+    }
+
+   
+  
+    protected void GridView1_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlDataAdapter da = new SqlDataAdapter("select * from TBL_CORPHOSPCHG", con);
+        DataTable dt = new DataTable();
+        da.Fill(dt);
+        GridView1.DataSource = dt;
+        GridView1.DataKeyNames = new string[] { "ID" };
+        GridView1.PageIndex = e.NewPageIndex;
+        GridView1.DataBind();
+        con.Close();
+    }
+    protected void GridView1_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        var slno = GridView1.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand com = new SqlCommand("select * from TBL_CORPHOSPCHG where ID='" + slno + "'", con);
+        dr = com.ExecuteReader();
+        if (dr.Read())
+        {
+            btncreate.Visible = false;
+            btnupdate.Visible = true;
+            txtid.Text = slno.ToString();
+            dropCorport.Text = dr["CORPRATE"].ToString();
+            dropwardname.Text = dr["WARDNM"].ToString();
+            txtnoofbed.Text = dr["BED"].ToString();
+            txtprifix.Text = dr["PRIFIX"].ToString();
+            txtprice.Text = dr["PRICE"].ToString();
+
+        }
+        dr.Close();
+        con.Close();
+    }
+    protected void GridView1_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            // reference the Delete LinkButton
+            LinkButton db = (LinkButton)e.Row.Cells[3].Controls[0];
+
+            db.OnClientClick = "return confirm('Are you sure want to delete this item ?');";
+        }
+    }
+    protected void GridView1_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+
+        string slno = GridView1.DataKeys[e.RowIndex].Values["ID"].ToString();
+        SqlCommand cm = new SqlCommand("delete from TBL_CORPHOSPCHG where ID='" + slno + "'", con);
+        cm.ExecuteNonQuery();
+        binddata();
+        con.Close();
+    }
+}

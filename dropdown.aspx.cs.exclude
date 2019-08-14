@@ -1,0 +1,56 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+public partial class dropdown : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if(!IsPostBack)
+        {
+        DropDownList1.Items.Insert(0, "select");
+        DropDownList1.Items.Insert(1, "+2");
+        DropDownList1.Items.Insert(2, "+3");
+        }
+    }
+
+
+    protected void DropDownList2_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        DropDownList3.Items.Clear();
+        if (DropDownList1.SelectedIndex == 1)
+        {
+
+            DropDownList3.Items.Insert(0, "1st Year");
+            DropDownList3.Items.Insert(1, "2nd Year");
+        }
+        else if (DropDownList1.SelectedIndex == 2)
+        {
+            DropDownList3.Items.Insert(0, "1st Year");
+            DropDownList3.Items.Insert(1, "2nd Year");
+            DropDownList3.Items.Insert(2, "3rd Year");
+
+        }
+    }
+    protected void DropDownList1_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+        DropDownList3.Items.Clear();
+        if (DropDownList1.SelectedIndex == 1)
+        {
+           
+            DropDownList3.Items.Insert(0, "1st Year");
+            DropDownList3.Items.Insert(1, "2nd Year");
+        }
+        else if (DropDownList1.SelectedIndex == 2)
+        {
+            DropDownList3.Items.Insert(0, "1st Year");
+            DropDownList3.Items.Insert(1, "2nd Year");
+            DropDownList3.Items.Insert(2, "3rd Year");
+           
+        }
+    }
+}

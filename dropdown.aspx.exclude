@@ -1,0 +1,32 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="dropdown.aspx.cs" Inherits="dropdown" %>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title></title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+        <asp:DropDownList ID="DropDownList1" runat="server" AutoPostBack="true" OnSelectedIndexChanged="DropDownList1_SelectedIndexChanged"></asp:DropDownList>
+        <br />
+         <asp:DropDownList ID="DropDownList2" runat="server" OnSelectedIndexChanged="DropDownList2_SelectedIndexChanged"></asp:DropDownList>
+        <br />
+     <asp:DropDownList ID="DropDownList3" runat="server">
+        
+     </asp:DropDownList>
+        <br />
+        <asp:Button ID="Button1" runat="server" Text="Button" />
+    </div>
+        <table>
+            <tr><td>
+                <asp:TextBox ID="TextBox1" runat="server"></asp:TextBox></td></tr>
+             <tr><td> <asp:TextBox ID="TextBox2" runat="server"></asp:TextBox></td></tr>
+             <tr><td> <asp:TextBox ID="TextBox3" runat="server"></asp:TextBox></td></tr>
+             <tr><td> <asp:TextBox ID="TextBox4" runat="server"></asp:TextBox></td></tr>
+             <tr><td></td></tr>
+        </table>
+    </form>
+</body>
+</html>

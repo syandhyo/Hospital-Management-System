@@ -1,0 +1,165 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Data;
+
+
+public partial class ADMIN_Corporate_Emp : System.Web.UI.Page
+{
+    string num1 = "SJ000";
+    SqlConnection con;
+    SqlCommand com, cmd;
+    SqlDataReader dr;
+    SqlDataAdapter da;
+    DataTable dt;
+    decimal total_amt = 0;
+    decimal total_vat_amt = 0;
+    int i, no, no1, sl;
+    GridViewRow gr;
+
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        try
+        {
+            if (Session["out"] == "INACTIVE")
+            {
+                Response.Redirect("~/index.aspx");
+            }
+            Response.Buffer = true;
+
+            Response.CacheControl = "no-cache";
+            if (Session["NAME"] == null)
+            {
+                Response.Redirect("~/index.aspx");
+            }
+
+            lblid.Text = Session["NAME"].ToString();
+            lblorgid.Text = Session["ORGID"].ToString();
+
+            if (!IsPostBack)
+            {
+                binddata();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+       
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        try
+        {
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                SqlDataReader dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+            using (SqlCommand cmd1 = new SqlCommand("ADMIN_DISC_TO_DEPENDENCY", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT";
+                cmd1.Parameters.Add("@ROOMRENT", SqlDbType.Decimal).Value = 0.00;
+                cmd1.Parameters.Add("@PHARMACY", SqlDbType.Decimal).Value = 0.00;
+                cmd1.Parameters.Add("@LAB", SqlDbType.Decimal).Value = 0.00;
+                cmd1.Parameters.Add("@OTHERS", SqlDbType.Decimal).Value = 0.00;
+                cmd1.Parameters.Add("@ID", SqlDbType.Int).Value = 1;
+                SqlDataReader dr = cmd1.ExecuteReader();
+                if (dr.Read())
+                {
+                    txtdiscpharmacy.Text = dr["PHARMACY"].ToString();
+                    txtdisclab.Text = dr["LAB"].ToString();
+                    txtroomcharge.Text = dr["ROOMRENT"].ToString();
+                    discothers.Text = dr["OTHERS"].ToString();
+                }
+                dr.Close();
+                if (txtroomcharge.Text == "0.00" && txtdisclab.Text == "0.00" && txtdiscpharmacy.Text == "0.00" && discothers.Text == "0.00")
+                {
+                    btncreate.Text = "Insert";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        con.Close();
+    }
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            // Validation
+            if (txtdiscpharmacy.Text == "" || Convert.ToDecimal(txtdiscpharmacy.Text) <= 0)
+            {
+                string message = "alert('*Fields are mandatory ')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtdisclab.Text == "" || Convert.ToDecimal(txtdiscpharmacy.Text) <= 0)
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtroomcharge.Text == "" || Convert.ToDecimal(txtdiscpharmacy.Text) <= 0)
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (discothers.Text == "" || Convert.ToDecimal(txtdiscpharmacy.Text) <= 0)
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+          //  SqlCommand cmd1 = new SqlCommand("insert into Dependancy_Table (ROOMRENT,PHARMACY,LAB,OTHERS) values (@ROOMRENT,@PHARMACY,@LAB,@OTHERS)", con);
+            // cmd1.Parameters.Add("@DESIG", SqlDbType.VarChar).Value = dropdesignation.SelectedValue;
+
+            using (SqlCommand cmd1 = new SqlCommand("ADMIN_DISC_TO_DEPENDENCY", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+                cmd1.Parameters.Add("@ROOMRENT", SqlDbType.VarChar).Value = txtroomcharge.Text;
+                cmd1.Parameters.Add("@PHARMACY", SqlDbType.VarChar).Value = txtdiscpharmacy.Text;
+                cmd1.Parameters.Add("@LAB", SqlDbType.VarChar).Value = txtdisclab.Text;
+                cmd1.Parameters.Add("@OTHERS", SqlDbType.VarChar).Value = discothers.Text;
+                cmd1.Parameters.Add("@ID", SqlDbType.Int).Value = 1;
+                cmd1.ExecuteNonQuery();
+            }
+            string message1 = "alert('Updated Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+            con.Close();
+            binddata();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/Disctodependancy.aspx");
+    }
+  
+    protected void GridView1_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+
+    }
+}

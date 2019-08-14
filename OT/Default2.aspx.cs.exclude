@@ -1,0 +1,61 @@
+﻿using System;
+using System.Collections;
+using System.Configuration;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+using System.Xml.Linq;
+using CrystalDecisions.Shared;
+using CrystalDecisions.CrystalReports;
+using CrystalDecisions.ReportAppServer;
+using CrystalDecisions.Reporting;
+using CrystalDecisions.ReportSource;
+using System.Data.Sql;
+using System.Data.SqlClient;
+using System.Data.SqlTypes;
+using CrystalDecisions.CrystalReports.Engine;
+using CrystalDecisions.Web;
+
+public partial class OT_Default2 : System.Web.UI.Page
+{
+    SqlConnection con;
+    SqlDataAdapter da, da1;
+    DataSet ds, ds1;
+    DataRow dtr;
+    DataSet1 ds2 = new DataSet1();
+    DataTable dt1 = new DataTable();
+    ReportDocument rodc = new ReportDocument();
+    string fr, to;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        da = new SqlDataAdapter("SELECT * FROM tblDepartment", con);
+        ds = new DataSet();
+        DataTable dt1 = new DataTable();
+        da.Fill(ds, "STOCK");
+        dt1 = ds.Tables["STOCK"];
+        int i = 0, k = 0;
+        ds2.DEPTDT.Rows.Clear();
+        while (i < dt1.Rows.Count)
+        {
+            dtr = dt1.Rows[i];
+            ds2.DEPTDT.Rows.Add(new string[] { dtr["id"].ToString(), dtr["ORGID"].ToString(), dtr["DeptName"].ToString(), dtr["DateStamp"].ToString() });
+            k++;
+            i += 1;
+        }
+        OT_Default2 cr = new OT_Default2();
+        rodc.Load(Server.MapPath("~/REPORTS/deptreport.rpt"));
+        rodc.SetDataSource(dt1);
+        CrystalReportViewer1.ReportSource = rodc;
+        CrystalReportViewer1.DataBind();
+        cr.rodc.Close();
+        cr.rodc.Dispose();
+        con.Close();
+    }
+}

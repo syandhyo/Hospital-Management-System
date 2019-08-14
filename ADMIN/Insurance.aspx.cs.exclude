@@ -1,0 +1,260 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Data;
+
+public partial class ADMIN_Insurance : System.Web.UI.Page
+{
+    string num1 = "SJ000";
+    SqlConnection con;
+    SqlCommand com, cmd;
+    SqlDataReader dr;
+    SqlDataAdapter da;
+    DataTable dt;
+    decimal total_amt = 0;
+    decimal total_vat_amt = 0;
+    int i, no, no1, sl;
+    GridViewRow gr;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+        if (!IsPostBack)
+        {
+            binddata();
+        }
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+
+        try
+        {
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+
+
+        //-----------------------------------
+        SqlDataAdapter Adp = new SqlDataAdapter("select ID,COMNYNAME,ADRESS,ISACTIVE from INSURANCE_TBL order by ID desc", con);
+        DataTable Dt = new DataTable();
+        Adp.Fill(Dt);
+        grvrooment.DataSource = Dt;
+        grvrooment.DataBind();
+    }
+    protected void btncreate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtname.Text == "")
+            {
+                string message = "alert('* Name is mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtaddress.Text == "")
+            {
+                string message = "alert('* Address is mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            //SqlCommand cmd1 = new SqlCommand("insert into INSURANCE_TBL (COMNYNAME,ADRESS,ISACTIVE) values (@COMNYNAME,@ADRESS,@ISACTIVE)", con);
+
+            using (SqlCommand cmd1 = new SqlCommand("ADMIN_INSURANCE_MASTER", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd1.Parameters.Add("@COMNYNAME", SqlDbType.VarChar).Value = txtname.Text.ToUpper();
+                cmd1.Parameters.Add("@ADRESS", SqlDbType.VarChar).Value = txtaddress.Text;
+                cmd1.Parameters.Add("@ISACTIVE", SqlDbType.VarChar).Value = CheckBox1.Checked;
+                cmd1.Parameters.Add("@ID",SqlDbType.Int).Value = 1;
+                cmd1.ExecuteNonQuery();
+            }
+            clear();
+            binddata();
+            string message1 = "alert('Created Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/Insurance.aspx");
+    }
+    public void clear()
+    {
+        txtname.Text = "";
+        txtaddress.Text = "";
+        CheckBox1.Checked = false;
+    }
+    protected void grvrooment_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+            var slno = grvrooment.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand com = new SqlCommand("select ID,COMNYNAME,ADRESS,ISACTIVE from INSURANCE_TBL where ID='" + slno + "'", con);
+            dr = com.ExecuteReader();
+            if (dr.Read())
+            {
+                btncreate.Visible = false;
+                btnupdate.Visible = true;
+                txtid.Text = slno.ToString();
+                txtname.Text = dr["COMNYNAME"].ToString();
+                txtaddress.Text = dr["ADRESS"].ToString();
+                string chkDisp = dr["ISACTIVE"].ToString();
+                if (chkDisp == "True")
+                {
+                    CheckBox1.Checked = true;
+                }
+                else
+                {
+                    CheckBox1.Checked = false;
+                }
+            }
+            dr.Close();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtname.Text == "")
+            {
+                string message = "alert('* Name is mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtaddress.Text == "")
+            {
+                string message = "alert('* Address is mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+           // SqlCommand cmd1 = new SqlCommand("update INSURANCE_TBL  set COMNYNAME=@COMNYNAME,ADRESS=@ADRESS,ISACTIVE=@ISACTIVE where ID='" + txtid.Text + "'", con);
+            using (SqlCommand cmd1 = new SqlCommand("ADMIN_INSURANCE_MASTER", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+                cmd1.Parameters.Add("@COMNYNAME", SqlDbType.VarChar).Value = txtname.Text.ToUpper();
+                cmd1.Parameters.Add("@ADRESS", SqlDbType.VarChar).Value = txtaddress.Text;
+                cmd1.Parameters.Add("@ISACTIVE", SqlDbType.VarChar).Value = CheckBox1.Checked;
+                cmd1.Parameters.Add("@ID", SqlDbType.Int).Value = txtid.Text;
+                cmd1.ExecuteNonQuery();
+            }
+            clear();
+            binddata();
+            string message1 = "alert('Updated Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/Insurance.aspx");
+    }
+    protected void grvrooment_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        try
+        {
+            if (e.Row.RowType == DataControlRowType.DataRow)
+            {
+                // reference the Delete LinkButton
+                LinkButton db = (LinkButton)e.Row.Cells[4].Controls[0];
+
+                db.OnClientClick = "return confirm('Are you sure want to delete this item ?');";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void grvrooment_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            string slno = grvrooment.DataKeys[e.RowIndex].Values["ID"].ToString();
+            SqlCommand cm = new SqlCommand("delete from INSURANCE_TBL where ID='" + slno + "'", con);
+            cm.ExecuteNonQuery();
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex); 
+        }
+    }
+    protected void grvrooment_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlDataAdapter Adp = new SqlDataAdapter("select ID,COMNYNAME,ADRESS,ISACTIVE from INSURANCE_TBL order by ID desc", con);
+            DataTable dt = new DataTable();
+            Adp.Fill(dt);
+            grvrooment.DataSource = dt;
+            grvrooment.PageIndex = e.NewPageIndex;
+            grvrooment.DataKeyNames = new string[] { "id" };
+            grvrooment.DataBind();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void Button3_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/ADMIN/Insurance.aspx");
+    }
+}

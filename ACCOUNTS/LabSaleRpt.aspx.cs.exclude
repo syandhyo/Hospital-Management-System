@@ -1,0 +1,144 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Text;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class ACCOUNTS_LabSaleRpt : System.Web.UI.Page
+{
+    string num1 = "SJ000";
+    SqlConnection con;
+    SqlDataAdapter da, da1;
+    DataSet ds = new DataSet();
+    SqlCommand com, cmd;
+    SqlDataReader dr;
+    DataTable dt;
+    DataRow dtr;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {        
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        lbluid.Text = Session["UID"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+
+        if (!IsPostBack)
+        {
+            binddata();
+        }
+
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand COM = new SqlCommand("SELECT FYEAR FROM FYEAR1_TABLE WHERE  ORGID='" + lblorgid.Text + "'", con);
+        dr = COM.ExecuteReader();
+        if (dr.Read())
+        {
+            lblfyear.Text = dr["FYEAR"].ToString();
+        }
+        dr.Close();
+    }
+    protected void btnShow_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlDataAdapter da = new SqlDataAdapter("SELECT * FROM LABRES_TABLE  where DATE between '" + txt_Fdate.Text + " 00:01:00' and '" + txt_Todate.Text + " 23:59:59'", con);
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            if (dt.Rows.Count == 0)
+            {
+                btn_Download.Visible = false;
+                string message = "alert(' No Record Found')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            }
+            else
+            {
+                btn_Download.Visible = true;
+                GridView1.SelectedIndex = 0;
+                GridView1.DataSource = dt;
+                GridView1.DataBind();
+            }
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void btn_Download_Click(object sender, EventArgs e)
+    {
+        if (GridView1.Rows.Count > 0)
+        {
+            Response.ClearContent();
+            Response.Buffer = true;
+            Response.AddHeader("content-disposition", string.Format("attachment; filename={0}", "opconsutancy.xls"));
+            Response.ContentType = "application/ms-excel";
+
+            //Response.ContentType = "application/ms-excel";
+            StringWriter sw = new StringWriter();
+            HtmlTextWriter htw = new HtmlTextWriter(sw);
+            GridView1.AllowPaging = false;
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlDataAdapter Adp = new SqlDataAdapter("SELECT * FROM LABRES_TABLE  where DATE between '" + txt_Fdate.Text + " 00:01:00' and '" + txt_Todate.Text + " 23:59:59'", con);
+          
+            DataTable Dt = new DataTable();
+            Adp.Fill(ds);
+            GridView1.DataSource = ds.Tables[0];
+            GridView1.DataBind();
+            con.Close();
+
+            GridView1.HeaderRow.Style.Add("background-color", "#FFFFFF");
+            //Applying stlye to gridview header cells
+            for (int i = 0; i < GridView1.HeaderRow.Cells.Count; i++)
+            {
+                GridView1.HeaderRow.Cells[i].Style.Add("background-color", "#df5015");
+            }
+            GridView1.RenderControl(htw);
+            Response.Write(sw.ToString());
+            Response.End();
+        }
+    }
+
+    public override void VerifyRenderingInServerForm(Control control)
+    {
+        //base.VerifyRenderingInServerForm(control);
+    }
+    protected void GridView1_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlDataAdapter Adp = new SqlDataAdapter("SELECT * FROM LABRES_TABLE", con);
+        DataTable dt = new DataTable();
+        Adp.Fill(dt);
+        GridView1.DataSource = dt;
+        GridView1.PageIndex = e.NewPageIndex;
+        GridView1.DataKeyNames = new string[] { "id" };
+        GridView1.DataBind();
+        con.Close();
+    }
+}

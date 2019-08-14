@@ -1,0 +1,324 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/ADMIN/MasterPage.master" AutoEventWireup="true" CodeFile="Disctoemployee.aspx.cs" Inherits="ADMIN_Corporate_Emp" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" Runat="Server">
+    <asp:Label ID="lblid" runat="server" Text="Label"></asp:Label>(<asp:Label ID="lblfyear" runat="server" Text="Label"></asp:Label>)
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+   
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"> <asp:Label ID="lblorgid" runat="server" Text="Label" Visible="false"></asp:Label>
+
+    </td>
+</tr>
+</table>
+      <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+    </td>
+</tr>
+</table>
+      <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+    </td>
+</tr>
+</table>
+      <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+    </td>
+</tr>
+</table>  <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+    </td>
+</tr>
+</table>  <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+    </td>
+</tr>
+</table>  <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+    </td>
+</tr>
+</table>  <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+    </td>
+</tr>
+</table>
+      <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+    </td>
+</tr>
+</table>  <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+    </td>
+</tr>
+</table>  <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+    </td>
+</tr>
+</table>  <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+    </td>
+</tr>
+</table>
+   
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%; text-align: center;" align="right" class="auto-style1"><strong>Card Entry&nbsp;</strong></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+         <asp:Label ID="Label1" runat="server" Text="Label" Visible="false"></asp:Label>
+    </td>
+</tr>
+</table>
+   <br />
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label2" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        Card Type:</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:TextBox ID="txtcardname" runat="server"   CssClass="form-control input-sm m-bot15"></asp:TextBox></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label3" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        Disc% In Pharmacy :</td>
+    <td style="width:20%; text-align: left;" align="right"> <asp:TextBox ID="txtdiscpharmacy" runat="server" value="0.00" 
+            onclick="if(this.value=='0.00'){this.value=''}" onblur="if(this.value==''){this.value='0.00'}" pattern="[0-9]+([,\.][0-9]+)?" MaxLength="3" CssClass="form-control input-sm m-bot15"></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label4" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        Disc% In Lab :&nbsp;:</td>
+    <td style="width:20%; text-align: left;" align="right"> 
+          <asp:TextBox ID="txtdisclab" runat="server" CssClass="form-control input-sm m-bot15" value="0.00" 
+            onclick="if(this.value=='0.00'){this.value=''}" onblur="if(this.value==''){this.value='0.00'}" pattern="[0-9]+([,\.][0-9]+)?" MaxLength="3"></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label5" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        Disc% In Room Charge :</td>
+    <td style="width:20%; text-align: left;" align="right"> <asp:TextBox ID="txtroomcharge" runat="server" value="0.00" 
+            onclick="if(this.value=='0.00'){this.value=''}" onblur="if(this.value==''){this.value='0.00'}" pattern="[0-9]+([,\.][0-9]+)?" MaxLength="3" CssClass="form-control input-sm m-bot15"></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label6" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        Disc% In Radiology :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:TextBox ID="txtdiscradilogy" runat="server" CssClass="form-control input-sm m-bot15" Enabled="true" value="0.00" 
+            onclick="if(this.value=='0.00'){this.value=''}" onblur="if(this.value==''){this.value='0.00'}" pattern="[0-9]+([,\.][0-9]+)?" MaxLength="3"></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+        <asp:TextBox ID="txtid" runat="server" Visible="False"></asp:TextBox>
+         </td>
+</tr>
+</table>
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label7" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        Disc% In OT :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:TextBox ID="txtdiscot" runat="server" CssClass="form-control input-sm m-bot15" Enabled="true" value="0.00" 
+            onclick="if(this.value=='0.00'){this.value=''}" onblur="if(this.value==''){this.value='0.00'}" pattern="[0-9]+([,\.][0-9]+)?" MaxLength="3"></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+        <asp:TextBox ID="TextBox1" runat="server" Visible="False"></asp:TextBox>
+         </td>
+</tr>
+</table>
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="right">&nbsp;</td>
+    <td style="width:20%" align="left">
+        &nbsp;</td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left"></td>
+    <td style="width:20%; text-align: left;" align="right">
+         <asp:Button ID="btncreate" runat="server" Text="Create" CssClass="btn btn-primary btn-sm" OnClick="Button1_Click" />
+&nbsp;<asp:Button ID="btnupdate" runat="server" Text="Update" CssClass="btn btn-success btn-sm"  OnClick="Button2_Click" Visible="False" />
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+       <table width="100%">
+     <tr>
+    <td style="width:10%" align="right">
+        <asp:HiddenField ID="hdntype" runat="server" />
+    </td>
+    <td style="width:70%" align="center"> 
+   <asp:GridView ID="grvdoctor" runat="server" AutoGenerateColumns="False"  BackColor="White" DataKeyNames="ID"  BorderColor="#336666" BorderStyle="Double" BorderWidth="3px" CellPadding="4" AllowPaging="True"  PageSize="10"  GridLines="Horizontal" OnSelectedIndexChanging="grvdoctor_SelectedIndexChanging" OnRowDataBound="grvdoctor_RowDataBound" OnRowDeleting="grvdoctor_RowDeleting" OnPageIndexChanging="grvdoctor_PageIndexChanging">
+           <Columns>
+           
+                 <asp:TemplateField HeaderText="SL&nbsp;No" Visible="true" >
+            <ItemTemplate>
+              <%#Container.DisplayIndex+1 %>
+            </ItemTemplate>
+
+        </asp:TemplateField>
+         <asp:TemplateField HeaderText="CARD&nbsp;NAME" Visible="true" >
+            <ItemTemplate>
+                <asp:Label ID="lblname" runat="server" Text='<%#Eval("CARDNAME")%>'></asp:Label>
+            </ItemTemplate>
+
+        </asp:TemplateField>
+         <asp:TemplateField HeaderText="ROOM&nbsp;RENT" Visible="true" >
+            <ItemTemplate>
+                 <asp:Label ID="lbldtype" runat="server" Text='<%#Eval("ROOMRENT")%>'></asp:Label>
+            </ItemTemplate>
+
+        </asp:TemplateField>
+                 <asp:TemplateField HeaderText="PHARMACY" Visible="true" >
+            <ItemTemplate>
+                 <asp:Label ID="lblmob" runat="server" Text='<%#Eval("PHARMACY")%>'></asp:Label>
+              <%--  <asp:TextBox ID="lblprice" runat="server" Text='<%#Eval("")%>' ></asp:TextBox>--%>
+            </ItemTemplate>
+
+        </asp:TemplateField>
+                 <asp:TemplateField HeaderText="Laboratory" Visible="true" >
+            <ItemTemplate>
+                 <asp:Label ID="lbllab" runat="server" Text='<%#Eval("LAB")%>'></asp:Label>
+                <%--<asp:TextBox ID="lblprice" runat="server" Text='<%#Eval("")%>' ></asp:TextBox>--%>
+            </ItemTemplate>
+
+        </asp:TemplateField>
+                 <asp:TemplateField HeaderText="RADIOLOGY" Visible="true" >
+            <ItemTemplate>
+                 <asp:Label ID="lblradiology" runat="server" Text='<%#Eval("RADIOLOGY")%>'></asp:Label>
+               <%-- <asp:TextBox ID="lblprice" runat="server" Text='<%#Eval("")%>' ></asp:TextBox>--%>
+            </ItemTemplate>
+
+        </asp:TemplateField>
+                <asp:TemplateField HeaderText="OT" Visible="true" >
+            <ItemTemplate>
+                 <asp:Label ID="lblot" runat="server" Text='<%#Eval("OT")%>'></asp:Label>
+               <%-- <asp:TextBox ID="lblprice" runat="server" Text='<%#Eval("")%>' ></asp:TextBox>--%>
+            </ItemTemplate>
+
+        </asp:TemplateField>
+        <asp:CommandField  ShowEditButton="False" ShowSelectButton="true" ShowDeleteButton="true" SelectText="&nbsp;&nbsp;&nbsp;Edit" HeaderText="Action" />
+
+    </Columns>
+            <FooterStyle BackColor="White" ForeColor="#333333" />
+            <HeaderStyle BackColor="#336666" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#336666" ForeColor="White" HorizontalAlign="Center" />
+            <RowStyle BackColor="White" ForeColor="#333333" />
+            <SelectedRowStyle BackColor="#339966" Font-Bold="True" ForeColor="White" />
+            <SortedAscendingCellStyle BackColor="#F7F7F7" />
+            <SortedAscendingHeaderStyle BackColor="#487575" />
+            <SortedDescendingCellStyle BackColor="#E5E5E5" />
+            <SortedDescendingHeaderStyle BackColor="#275353" />
+        </asp:GridView>    
+    </td>
+
+    <td style="width:20%" align="right"></td>
+   
+</tr>
+</table>
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:30%; text-align: left;" align="right">
+&nbsp;&nbsp;</td>
+    <td style="width:10%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+</asp:Content>
+

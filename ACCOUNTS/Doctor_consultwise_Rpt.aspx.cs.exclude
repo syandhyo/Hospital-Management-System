@@ -1,0 +1,358 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Data;
+using System.IO;
+
+public partial class ACCOUNTS_Doctor_consultwise_Rpt : System.Web.UI.Page
+{
+
+    SqlConnection con;
+    SqlDataAdapter da, da1, da2;
+    DataSet ds = new DataSet();
+    SqlCommand com, cmd, cmd1, cmd2, cmd3;
+    SqlDataReader dr, dr1, dr2;
+    DataTable dt;
+    string DBOPERATION;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+
+        SqlCommand COM = new SqlCommand("SELECT FYEAR FROM FYEAR1_TABLE WHERE  ORGID='OR0001'", con);
+        dr = COM.ExecuteReader();
+        if (dr.Read())
+        {
+            lblfyear.Text = dr["FYEAR"].ToString();
+        }
+        dr.Close();
+
+        if (!IsPostBack)
+        {
+           // datacorp();
+        }
+    }
+
+    public void datacorp()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlDataAdapter da4 = new SqlDataAdapter("select EMPID,Sname from tblStaff", con);
+        DataTable dt4 = new DataTable();
+        da4.Fill(dt4);
+        //dropbedno.selectedindex = 0;
+        dropdoctor.DataSource = dt4;
+        dropdoctor.DataTextField = "Sname";
+        dropdoctor.DataValueField = "EMPID";
+        dropdoctor.DataBind();
+        dropdoctor.Items.Insert(0, "--No Doctor--");
+        con.Close();
+    }
+    protected void Show_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (CheckBox1.Checked == true)
+            {
+
+                if (dropdoctor.SelectedItem.Text == "")
+                {
+                    string message = "alert('* Fields are mandatory.')";
+                    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                    return;
+                }
+                else if (txtfrom.Text == "")
+                {
+                    string message = "alert('* Fields are mandatory.')";
+                    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                    return;
+                }
+                else if (txtto.Text == "")
+                {
+                    string message = "alert('* Fields are mandatory.')";
+                    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                    return;
+                }
+                SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+                con.Open();
+
+                Session["DBOPERATION"] = "DISPLAY_DOCTOR";
+                DBOPERATION = Session["DBOPERATION"].ToString();
+                //SqlDataAdapter da = new SqlDataAdapter("select A.id,A.OPNo,CONVERT(VARCHAR(10),A.CDate,105) as DATE,A.fee,B.NAME,C.Sname,A.Followup from tblOPConsultancy A, PATIENT_REG_TABLE B,tblStaff C WHERE A.OPNo= B.ID and C.id=A.Staffid and c.Sname='" + dropdoctor.SelectedItem.Text + "' and a.CDate between '" + Convert.ToDateTime(txtfrom.Text).ToString("yyyy-MM-dd") + " 00:01:00' AND '" + Convert.ToDateTime(txtto.Text).ToString("yyyy-MM-dd") + " 23:59:00'", con);
+                using (SqlCommand cm = new SqlCommand("SP_DOCTORWise_RPT", con))
+                {
+                    cm.CommandType = CommandType.StoredProcedure;
+                    cm.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = DBOPERATION.ToString();
+                    cm.Parameters.Add("@Sname", SqlDbType.VarChar).Value = dropdoctor.SelectedItem.Text;
+                    cm.Parameters.Add("@FDATE", SqlDbType.DateTime).Value = txtfrom.Text;
+                    cm.Parameters.Add("@TDATE", SqlDbType.DateTime).Value = txtto.Text;
+                    SqlDataAdapter da = new SqlDataAdapter(cm);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    if (dt.Rows.Count == 0)
+                    {
+
+                        string message = "alert(' No Record Found')";
+                        ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                    }
+                    else
+                    {
+
+                        GridView1.SelectedIndex = 0;
+                        GridView1.DataSource = dt;
+                        GridView1.DataBind();
+
+                        if (dt.Rows.Count == 0)
+                        {
+                            Button2.Visible = false;
+                        }
+                        else
+                        {
+                            Button2.Visible = true;
+                        }
+                    }
+                }
+
+
+
+            }
+            else
+            {
+               
+                if (txtfrom.Text == "")
+                {
+                    string message = "alert('* Fields are mandatory.')";
+                    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                    return;
+                }
+                else if (txtto.Text == "")
+                {
+                    string message = "alert('* Fields are mandatory.')";
+                    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                    return;
+                }
+                SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+                con.Open();
+
+                Session["DBOPERATION"] = "DISPLAY_DATE";
+                DBOPERATION = Session["DBOPERATION"].ToString();
+                // SqlDataAdapter da = new SqlDataAdapter("select A.id,A.OPNo,CONVERT(VARCHAR(10),A.CDate,105) as DATE,A.fee,B.NAME,C.Sname,A.Followup from tblOPConsultancy A, PATIENT_REG_TABLE B,tblStaff C WHERE A.OPNo= B.ID and C.id=A.Staffid and a.CDate between '" + Convert.ToDateTime(txtfrom.Text).ToString("yyyy-MM-dd") + " 00:01:00' AND '" + Convert.ToDateTime(txtto.Text).ToString("yyyy-MM-dd") + " 23:59:00'", con);
+                using (SqlCommand cm = new SqlCommand("SP_DOCTORWise_RPT", con))
+                {
+                    cm.CommandType = CommandType.StoredProcedure;
+                    cm.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = DBOPERATION.ToString();
+                    cm.Parameters.Add("@Sname", SqlDbType.VarChar).Value = "";
+                    cm.Parameters.Add("@FDATE", SqlDbType.DateTime).Value = txtfrom.Text;
+                    cm.Parameters.Add("@TDATE", SqlDbType.DateTime).Value = txtto.Text;
+                    SqlDataAdapter da = new SqlDataAdapter(cm);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    GridView1.DataSource = dt;
+                    // GridView1.Columns[4].Visible = false;
+                    //GridView1.PageIndex = e.NewPageIndex;
+                    GridView1.DataKeyNames = new string[] { "id" };
+                    GridView1.DataBind();
+
+
+                    if (dt.Rows.Count == 0)
+                    {
+                        Button2.Visible = false;
+                    }
+                    else
+                    {
+                        Button2.Visible = true;
+                    }
+                }
+            }
+      }
+     
+        catch(Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+
+
+    }
+    protected void CheckBox1_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (CheckBox1.Checked == true)
+        {
+
+            datacorp();
+            dropdoctor.Visible = true;
+
+
+        }
+        else
+        {
+            dropdoctor.Visible = false;
+            txtfrom.Text = "";
+            txtto.Text = "";
+            GridView1.Visible = false;
+        }
+    }
+    protected void Button2_Click(object sender, EventArgs e)
+    {
+        if (GridView1.Rows.Count > 0)
+        {
+            Response.ClearContent();
+            Response.Buffer = true;
+            Response.AddHeader("content-disposition", string.Format("attachment; filename={0}", "Doctor_Consultwise.xls"));
+            Response.ContentType = "application/ms-excel";
+            StringWriter sw = new StringWriter();
+            HtmlTextWriter htw = new HtmlTextWriter(sw);
+            GridView1.AllowPaging = false;
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            if (CheckBox1.Checked == true)
+            {
+                //String FromDate = Convert.ToDateTime(txtfrom.Text).ToString("yyyy-MM-dd") + " 01:00:00";
+                //String ToDate = Convert.ToDateTime(txtto.Text).ToString("yyyy-MM-dd") + " 23:59:00";
+                //SqlDataAdapter da = new SqlDataAdapter("select A.id,A.OPNo,CONVERT(VARCHAR(10),A.CDate,105) as DATE,A.fee,B.NAME,C.Sname,A.Followup from tblOPConsultancy A, PATIENT_REG_TABLE B,tblStaff C WHERE A.OPNo= B.ID and C.id=A.Staffid and c.Sname='" + dropdoctor.SelectedItem.Text + "' and a.CDate between '" + Convert.ToDateTime(txtfrom.Text).ToString("yyyy-MM-dd") + " 00:01:00' AND '" + Convert.ToDateTime(txtto.Text).ToString("yyyy-MM-dd") + " 23:59:00'", con);
+
+                try
+                {
+                    DBOPERATION = Session["DBOPERATION"].ToString();
+                    using (SqlCommand cm = new SqlCommand("SP_DOCTORWise_RPT", con))
+                    {
+                        cm.CommandType = CommandType.StoredProcedure;
+                        cm.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = DBOPERATION.ToString();
+                        cm.Parameters.Add("@Sname", SqlDbType.VarChar).Value = dropdoctor.SelectedItem.Text;
+                        cm.Parameters.Add("@FDATE", SqlDbType.DateTime).Value = txtfrom.Text;
+                        cm.Parameters.Add("@TDATE", SqlDbType.DateTime).Value = txtto.Text;
+                        SqlDataAdapter da = new SqlDataAdapter(cm);
+                        DataTable dt = new DataTable();
+                        da.Fill(dt);
+                        GridView1.DataSource = dt;
+                        GridView1.Columns[4].Visible = false;
+                        GridView1.DataBind();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("An error occurred: '{0}'", ex);
+                }
+            }
+            else
+            {
+                //  bind_data2();
+                if (txtfrom.Text == "")
+                {
+                    string message = "alert('* Fields are mandatory.')";
+                    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                    return;
+                }
+                else if (txtto.Text == "")
+                {
+                    string message = "alert('* Fields are mandatory.')";
+                    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                    return;
+                }
+                try
+                {
+                    //String FromDate = Convert.ToDateTime(txtfrom.Text).ToString("yyyy-MM-dd") + " 01:00:00";
+                    //String ToDate = Convert.ToDateTime(txtto.Text).ToString("yyyy-MM-dd") + " 23:59:00";
+                    // SqlDataAdapter da = new SqlDataAdapter("select A.id,A.OPNo,CONVERT(VARCHAR(10),A.CDate,105) as DATE,A.fee,B.NAME,C.Sname,A.Followup from tblOPConsultancy A, PATIENT_REG_TABLE B,tblStaff C WHERE A.OPNo= B.ID and C.id=A.Staffid and a.CDate between '" + Convert.ToDateTime(txtfrom.Text).ToString("yyyy-MM-dd") + " 00:01:00' AND '" + Convert.ToDateTime(txtto.Text).ToString("yyyy-MM-dd") + " 23:59:00'", con);
+                    DBOPERATION = Session["DBOPERATION"].ToString();
+                    using (SqlCommand cm = new SqlCommand("SP_DOCTORWise_RPT", con))
+                    {
+                        cm.CommandType = CommandType.StoredProcedure;
+                        cm.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = DBOPERATION.ToString();
+                        cm.Parameters.Add("@Sname", SqlDbType.VarChar).Value = "";
+                        cm.Parameters.Add("@FDATE", SqlDbType.DateTime).Value = txtfrom.Text;
+                        cm.Parameters.Add("@TDATE", SqlDbType.DateTime).Value = txtto.Text;
+                        SqlDataAdapter da = new SqlDataAdapter(cm);
+                        DataTable dt = new DataTable();
+                        da.Fill(dt);
+                        GridView1.DataSource = dt;
+                        // GridView1.Columns[4].Visible = false;
+                        //GridView1.PageIndex = e.NewPageIndex;
+                        GridView1.DataKeyNames = new string[] { "id" };
+                        GridView1.DataBind();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("An error occurred: '{0}'", ex);
+                }
+            }
+            
+
+            con.Close();
+
+            GridView1.HeaderRow.Style.Add("background-color", "#FFFFFF");
+            //Applying stlye to gridview header cells
+            for (int i = 0; i < GridView1.HeaderRow.Cells.Count; i++)
+            {
+                GridView1.HeaderRow.Cells[i].Style.Add("background-color", "#df5015");
+            }
+            GridView1.RenderControl(htw);
+            Response.Write(sw.ToString());
+            Response.End();
+        }
+
+    }
+
+    public override void VerifyRenderingInServerForm(Control control)
+    {
+        //base.VerifyRenderingInServerForm(control);
+    }
+
+    protected void GridView1_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+
+        //String FromDate = Convert.ToDateTime(txtfrom.Text).ToString("yyyy-MM-dd") + " 01:00:00";
+        //String ToDate = Convert.ToDateTime(txtto.Text).ToString("yyyy-MM-dd") + " 23:59:00";
+        try
+        {
+            DBOPERATION = Session["DBOPERATION"].ToString();
+            using (SqlCommand cm = new SqlCommand("SP_DOCTORWise_RPT", con))
+            {
+                cm.CommandType = CommandType.StoredProcedure;
+                cm.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = DBOPERATION.ToString();
+                cm.Parameters.Add("@Sname", SqlDbType.VarChar).Value = dropdoctor.SelectedItem.Text;
+                cm.Parameters.Add("@FDATE", SqlDbType.DateTime).Value = txtfrom.Text;
+                cm.Parameters.Add("@TDATE", SqlDbType.DateTime).Value = txtto.Text;
+                SqlDataAdapter da = new SqlDataAdapter(cm);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                GridView1.DataSource = dt;
+                GridView1.PageIndex = e.NewPageIndex;
+                GridView1.DataKeyNames = new string[] { "id" };
+                GridView1.DataBind();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        con.Close();
+    }
+}

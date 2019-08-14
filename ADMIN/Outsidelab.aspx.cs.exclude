@@ -1,0 +1,325 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Configuration;
+
+
+public partial class ADMIN_Outsidelab : System.Web.UI.Page
+{
+    string num1 = "PK000";
+    Object num;
+    string path = "";
+    SqlConnection con;
+    SqlDataAdapter da, da1;
+    DataSet ds = new DataSet();
+    SqlCommand com, cmd;
+    SqlDataReader dr, dr1, dr2;
+    DataTable dt;
+    DataRow dtr;
+    int i, no, no1, sl, F;
+    int flag = 0;
+    string id, id1, ph, val1, val2;
+    decimal a, b;
+    DateTime DT;
+    GridViewRow gr;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+
+            Response.Redirect("~/index.aspx");
+        }
+        // lbldate.Text = DateTime.Now.ToString("dd-MM-yyyy");
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+
+        if (!IsPostBack)
+        {
+            //  testype();
+            binddata();
+            //  auto();
+        }
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlDataAdapter Adp = new SqlDataAdapter("select ID,NAME,ADRESSS,PHONENO,CITY,STATE from TBL_OUTSIDELAB order by ID asc", con);
+        DataTable Dt = new DataTable();
+        Adp.Fill(Dt);
+        grvoutlab.DataSource = Dt;
+        grvoutlab.DataBind();
+        //----------------------
+        //DataTable dt = new DataTable();
+        //dt.Columns.AddRange(new DataColumn[3] { new DataColumn("ID"), new DataColumn("INV"), new DataColumn("PRICE") });
+        //ViewState["ITEM"] = dt;
+        //this.BindGrid();
+
+        try
+        {
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        con.Close();
+    }
+
+    protected void btncreate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtname.Text == "")
+            {
+                string message = "alert('* Name are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtadress.Text == "")
+            {
+                string message = "alert('*Address Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+
+            else if (txtphoneno.Text == "")
+            {
+                string message = "alert('*Phone No are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtstate.Text == "")
+            {
+                string message = "alert('*State Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            //else if (txtcity.Text == "")
+            //{
+            //    string message = "alert('*City Fields are mandatory.')";
+            //    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            //    return;
+            //}
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            using (SqlCommand cmd1 = new SqlCommand("USP_OUTSIDELAB_ADMN", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd1.Parameters.Add("@ID", SqlDbType.Int).Value = 1;
+                cmd1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = txtname.Text;
+                cmd1.Parameters.Add("@ADRESSS", SqlDbType.VarChar).Value = txtadress.Text;
+                cmd1.Parameters.Add("@PHONENO", SqlDbType.VarChar).Value = txtphoneno.Text;
+                cmd1.Parameters.Add("@CITY", SqlDbType.VarChar).Value = txtcity.Text;
+                cmd1.Parameters.Add("@STATE", SqlDbType.VarChar).Value = txtstate.Text;
+                cmd1.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+                cmd1.ExecuteNonQuery();
+            }
+
+            //SqlCommand cmd1 = new SqlCommand("insert into TBL_OUTSIDELAB (NAME ,ADRESSS ,PHONENO ,CITY ,STATE ,FYEAR)  values (@NAME ,@ADRESSS ,@PHONENO ,@CITY ,@STATE ,@FYEAR)", con);
+            //cmd1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = txtname.Text;
+            //cmd1.Parameters.Add("@ADRESSS", SqlDbType.VarChar).Value = txtadress.Text;
+            //cmd1.Parameters.Add("@PHONENO", SqlDbType.VarChar).Value = txtphoneno.Text;
+            //cmd1.Parameters.Add("@CITY", SqlDbType.VarChar).Value = txtcity.Text;
+            //cmd1.Parameters.Add("@STATE", SqlDbType.VarChar).Value = txtstate.Text;
+            //cmd1.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+
+            //cmd1.ExecuteNonQuery();
+            string message1 = "alert('Created Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+
+            resetCt();
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    public void resetCt()
+    {
+      txtname.Text= "";
+      txtadress.Text = "";
+      txtphoneno.Text = "";
+      txtcity.Text = "";
+      txtstate.Text = "";
+    }
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtname.Text == "")
+            {
+                string message = "alert('* Name are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtadress.Text == "")
+            {
+                string message = "alert('*Address Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+
+            else if (txtphoneno.Text == "")
+            {
+                string message = "alert('*Phone No are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtstate.Text == "")
+            {
+                string message = "alert('*State Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            using (SqlCommand cmd1 = new SqlCommand("USP_OUTSIDELAB_ADMN", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+                cmd1.Parameters.Add("@ID", SqlDbType.Int).Value = txtid.Text;
+                cmd1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = txtname.Text;
+                cmd1.Parameters.Add("@ADRESSS", SqlDbType.VarChar).Value = txtadress.Text;
+                cmd1.Parameters.Add("@PHONENO", SqlDbType.VarChar).Value = txtphoneno.Text;
+                cmd1.Parameters.Add("@CITY", SqlDbType.VarChar).Value = txtcity.Text;
+                cmd1.Parameters.Add("@STATE", SqlDbType.VarChar).Value = txtstate.Text;
+                cmd1.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+                cmd1.ExecuteNonQuery();
+            }
+
+            //SqlCommand cmd1 = new SqlCommand("update TBL_OUTSIDELAB set NAME=@NAME ,ADRESSS=@ADRESSS ,PHONENO=@PHONENO ,CITY=@CITY ,STATE=@STATE  where ID=@ID", con);
+            //cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+            //cmd1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = txtname.Text;
+            //cmd1.Parameters.Add("@ADRESSS", SqlDbType.VarChar).Value = txtadress.Text;
+            //cmd1.Parameters.Add("@PHONENO", SqlDbType.VarChar).Value = txtphoneno.Text;
+            //cmd1.Parameters.Add("@CITY", SqlDbType.VarChar).Value = txtcity.Text;
+            //cmd1.Parameters.Add("@STATE", SqlDbType.VarChar).Value = txtstate.Text;
+            //cmd1.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+            //cmd1.ExecuteNonQuery();
+
+            string message1 = "alert('Upadted Sucessfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+            resetCt();
+
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void btncancel_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/ADMIN/Outsidelab.aspx");
+    }
+    protected void grvoutlab_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+            var slno = grvoutlab.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand com = new SqlCommand("select * from TBL_OUTSIDELAB where ID='" + slno + "'", con);
+            dr = com.ExecuteReader();
+            if (dr.Read())
+            {
+                btncreate.Visible = false;
+                btnupdate.Visible = true;
+                txtid.Text = slno.ToString();
+
+                txtname.Text = dr["NAME"].ToString();
+                txtadress.Text = dr["ADRESSS"].ToString();
+                txtphoneno.Text = dr["PHONENO"].ToString();
+                txtcity.Text = dr["CITY"].ToString();
+                txtstate.Text = dr["STATE"].ToString();
+            }
+            dr.Close();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void grvoutlab_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            // reference the Delete LinkButton
+            LinkButton db = (LinkButton)e.Row.Cells[5].Controls[0];
+
+            db.OnClientClick = "return confirm('Are you sure want to delete this item ?');";
+        }
+    }
+    protected void grvoutlab_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            string slno = grvoutlab.DataKeys[e.RowIndex].Values["ID"].ToString();
+            SqlCommand cm = new SqlCommand("delete from TBL_OUTSIDELAB where ID='" + slno + "'", con);
+            cm.ExecuteNonQuery();
+
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void grvoutlab_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlDataAdapter Adp = new SqlDataAdapter("select ID,NAME,ADRESSS,PHONENO,CITY,STATE from TBL_OUTSIDELAB order by ID asc", con);
+            DataTable dt = new DataTable();
+            Adp.Fill(dt);
+            grvoutlab.DataSource = dt;
+            grvoutlab.PageIndex = e.NewPageIndex;
+            grvoutlab.DataKeyNames = new string[] { "id" };
+            grvoutlab.DataBind();
+            con.Close();
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+}

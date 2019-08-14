@@ -1,0 +1,333 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class NURSE_DoctorNote : System.Web.UI.Page
+{
+    SqlDataReader dr;
+    SqlConnection con;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }        
+        lblid.Text = Session["NAME"].ToString();
+        lbluid.Text = Session["UID"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+        txtdate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
+        if (!IsPostBack)
+        {
+            binddata();
+
+            SqlDataAdapter Adp = new SqlDataAdapter("select BEDNO AS ID from BED_TABLE", con);
+            DataTable Dt = new DataTable();
+            Adp.Fill(Dt);
+            dropPID.DataSource = Dt;            
+            dropPID.DataTextField = "ID";
+            dropPID.DataValueField = "ID";
+            dropPID.DataBind();
+            dropPID.Items.Insert(0, "Please Select");
+
+            SqlDataAdapter Adp1 = new SqlDataAdapter("select id,Sname from tblStaff", con);
+            DataTable Dt1 = new DataTable();
+            Adp1.Fill(Dt1);
+            dropdr.DataSource = Dt1;
+            dropdr.DataTextField = "Sname";
+            dropdr.DataValueField = "id";
+            dropdr.DataBind();
+            dropdr.Items.Insert(0, "Please Select");
+
+        }
+        con.Close();
+        
+    }
+
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        try
+        {
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+      
+       // SqlDataAdapter Adp = new SqlDataAdapter("SELECT a.id,a.Name,a.BedNo,b.Sname,a.Note,a.Ndate from tblDoctorNote a,tblStaff b where a.Sid= b.id order by a.id desc", con);
+        using (SqlCommand cmd = new SqlCommand("SP_DOCTOR_NOTE_SEL", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_ALL";
+            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            DataTable Dt = new DataTable();
+            da.Fill(Dt);
+            GridView1.DataSource = Dt;
+            GridView1.DataBind();
+        }
+        con.Close();
+    }
+
+    protected void gvDetails_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+
+        string slno = GridView1.DataKeys[e.RowIndex].Values["id"].ToString();
+        SqlCommand cm = new SqlCommand("delete from tblDoctorNote where id='" + slno + "'", con);
+        cm.ExecuteNonQuery();
+
+        binddata();
+        clearcontrol();
+        btnSubmit.Visible = true;
+        txtdate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
+        con.Close();
+    }
+    protected void GridView1_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            // reference the Delete LinkButton
+            LinkButton db = (LinkButton)e.Row.Cells[4].Controls[0];
+
+            db.OnClientClick = "return confirm('Are you sure want to delete this patient info ?');";
+        }
+    }
+
+    protected void GridView1_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+            var slno = GridView1.DataKeys[e.NewSelectedIndex].Values["id"].ToString();
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand com = new SqlCommand("SELECT id,PID,Name,BedNo,Sid,Note,Ndate from tblDoctorNote where id='" + slno + "'", con);
+            dr = com.ExecuteReader();
+            if (dr.Read())
+            {
+                btnSubmit.Visible = false;
+                btnupdate.Visible = true;
+                txtid.Text = dr["ID"].ToString();
+                lblbed.Text = dr["PID"].ToString();
+                lblname.Text = dr["Name"].ToString();
+                dropPID.Text = dr["BedNo"].ToString();
+                dropdr.Text = dr["Sid"].ToString();
+                txtnote.Text = dr["Note"].ToString();
+                txtdate.Text = dr["Ndate"].ToString();
+            }
+            dr.Close();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+
+    protected void GridView1_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        //SqlDataAdapter da = new SqlDataAdapter("SELECT tblDoctorNote.id,tblDoctorNote.Name,tblDoctorNote.BedNo,tblStaff.Sname,tblDoctorNote.Note, tblDoctorNote.Ndate FROM tblDoctorNote INNER JOIN tblStaff ON tblDoctorNote.Sid = tblStaff.id order by tblDoctorNote.id desc", con);
+        using (SqlCommand cmd = new SqlCommand("SP_DOCTOR_NOTE_SEL", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT";
+            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            GridView1.DataSource = dt;
+            GridView1.PageIndex = e.NewPageIndex;
+            GridView1.DataKeyNames = new string[] { "id" };
+            GridView1.DataBind();
+        }
+        con.Close();
+    }
+
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtnote.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            else if (dropPID.SelectedIndex == 0)
+            {
+                string message = "alert('* Please Select Bed No.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            else if (dropdr.SelectedIndex == 0)
+            {
+                string message = "alert('* Please Select Doctor Name.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            //SqlCommand cmd = new SqlCommand("insert into tblDoctorNote(FYEAR,ORGID,PID,Name,Bedno,Sid,Note,Ndate,UNAME,UID)values(@FYEAR,@ORGID,@PID,@Name,@Bedno,@Sid,@Note,@Ndate,@UNAME,@UID)", con);
+            using (SqlCommand cmd = new SqlCommand("SP_DOCTOR_NOTE", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+                cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                cmd.Parameters.Add("@Bedno", SqlDbType.VarChar).Value = dropPID.Text;
+                cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = lblname.Text;
+                cmd.Parameters.Add("@PID", SqlDbType.VarChar).Value = lblbed.Text;
+                cmd.Parameters.Add("@Sid", SqlDbType.VarChar).Value = dropdr.Text;
+                cmd.Parameters.Add("@Note", SqlDbType.VarChar).Value = txtnote.Text;
+                cmd.Parameters.Add("@Ndate", SqlDbType.DateTime).Value = txtdate.Text;
+                cmd.Parameters.Add("@UNAME", SqlDbType.VarChar).Value = lblid.Text;
+                cmd.Parameters.Add("@UID", SqlDbType.VarChar).Value = lbluid.Text;
+                cmd.Parameters.Add("@id", SqlDbType.Int).Value = 1;
+                cmd.ExecuteNonQuery();
+            }
+            binddata();
+            con.Close();
+
+
+            string message1 = "alert('Successfully Saved.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+            clearcontrol();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+       // Response.Redirect("~/NURSE/DoctorNote.aspx");
+    }
+
+    public void clearcontrol()
+    {        
+        lblname.Text = "";
+        lblbed.Text = "";        
+        txtnote.Text = "";
+        txtdate.Text = "";       
+    }
+    protected void Button2_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtnote.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            else if (dropPID.SelectedIndex == 0)
+            {
+                string message = "alert('* Please Select Bed No.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            else if (dropdr.SelectedIndex == 0)
+            {
+                string message = "alert('* Please Select Doctor Name.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            //SqlCommand cmd1 = new SqlCommand("UPDATE tblDoctorNote SET Bedno=@Bedno,Name=@Name,PID=@PID,Sid=@Sid,Note=@Note WHERE id=@id", con);
+            using (SqlCommand cmd1 = new SqlCommand("SP_DOCTOR_NOTE", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+
+                cmd1.Parameters.Add("@id", SqlDbType.VarChar).Value = txtid.Text;
+                cmd1.Parameters.Add("@FYEAR",SqlDbType.VarChar).Value = "";
+                cmd1.Parameters.Add("@ORGID",SqlDbType.VarChar).Value = "";
+                cmd1.Parameters.Add("@Bedno", SqlDbType.VarChar).Value = dropPID.Text;
+                cmd1.Parameters.Add("@Name", SqlDbType.VarChar).Value = lblname.Text;
+                cmd1.Parameters.Add("@PID", SqlDbType.VarChar).Value = lblbed.Text;
+                cmd1.Parameters.Add("@Sid", SqlDbType.VarChar).Value = dropdr.Text;
+                cmd1.Parameters.Add("@Note", SqlDbType.VarChar).Value = txtnote.Text;
+                cmd1.Parameters.Add("@Ndate", SqlDbType.DateTime).Value = DateTime.Now.ToString("dd-MM-yy");
+                cmd1.Parameters.Add("@UNAME",SqlDbType.VarChar).Value = "";
+                cmd1.Parameters.Add("@UID", SqlDbType.VarChar).Value = "";
+                cmd1.ExecuteNonQuery();
+            }
+ 
+             string message1 = "alert('Successfully Updated.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/NURSE/DoctorNote.aspx");
+    }
+    protected void Button3_Click(object sender, EventArgs e)
+    {
+        binddata();
+        Response.Redirect("~/NURSE/DoctorNote.aspx");
+    }
+   
+    protected void dropPID_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand COM = new SqlCommand("select PNAME,PID from BED_TABLE where BEDNO='" + dropPID.Text.ToString() + "'", con);
+            dr = COM.ExecuteReader();
+            if (dr.Read())
+            {
+                lblname.Text = dr["PNAME"].ToString();
+                lblbed.Text = dr["PID"].ToString();
+            }
+            dr.Close();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+       
+    }
+}

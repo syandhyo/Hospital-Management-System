@@ -1,0 +1,139 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/ADMIN/MasterPage.master" AutoEventWireup="true" CodeFile="Corporate_Emp.aspx.cs" Inherits="ADMIN_Corporate_Emp" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" Runat="Server">
+    <asp:Label ID="lblid" runat="server" Text="Label"></asp:Label>(<asp:Label ID="lblfyear" runat="server" Text="Label"></asp:Label>)
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <br /><br />
+   
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"> <asp:Label ID="lblorgid" runat="server" Text="Label" Visible="false"></asp:Label>
+
+    </td>
+</tr>
+</table>
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%; text-align: center;" align="right" class="auto-style1"><strong>Corporate Master&nbsp;</strong></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+         <asp:Label ID="Label1" runat="server" Text="Label" Visible="false"></asp:Label>
+    </td>
+</tr>
+</table><br />
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label2" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        Name :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:TextBox ID="txtname" runat="server" CssClass="form-control input-sm m-bot15" Enabled="true" pattern="^[a-zA-Z0-9_]*"></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        </td>
+    <td style="width:20%; text-align: left;" align="right">
+        
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+        <asp:TextBox ID="txtid" runat="server" Visible="False"></asp:TextBox>
+         </td>
+</tr>
+</table>
+   
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="right">Is Active :</td>
+    <td style="width:20%" align="left">
+        <asp:CheckBox ID="CheckBox1" runat="server" />
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left"></td>
+    <td style="width:20%; text-align: left;" align="right">
+         <asp:Button ID="btncreate" runat="server" Text="Create" CssClass="btn btn-primary btn-sm" OnClick="Button1_Click" />
+&nbsp;<asp:Button ID="btnupdate" runat="server" Text="Update" CssClass="btn btn-success btn-sm"  OnClick="Button2_Click" Visible="False" />
+        &nbsp;<asp:Button ID="btncancel" runat="server" CssClass="btn btn-danger btn-sm" OnClick="btncancel_Click" Text="Cancel" />
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+      <table width="100%">
+     <tr>
+    <td style="width:10%" align="right">
+        <asp:HiddenField ID="hdntype" runat="server" />
+    </td>
+    <td style="width:70%" align="center"> 
+   <asp:GridView ID="grvcorprte" runat="server" AutoGenerateColumns="False"  BackColor="White" DataKeyNames="ID" 
+        BorderColor="#336666" BorderStyle="Double" BorderWidth="3px" CellPadding="4" AllowPaging="True"  PageSize="10" 
+        GridLines="Horizontal" OnSelectedIndexChanging="grvcorprte_SelectedIndexChanging" OnRowDataBound="grvcorprte_RowDataBound" 
+       OnRowDeleting="grvcorprte_RowDeleting" OnPageIndexChanging="grvcorprte_PageIndexChanging">
+           <Columns>
+           
+                 <asp:TemplateField HeaderText="SL&nbsp;No" Visible="true" >
+            <ItemTemplate>
+              <%#Container.DisplayIndex+1 %>
+            </ItemTemplate>
+
+        </asp:TemplateField>
+         <asp:TemplateField HeaderText="CORPORATE" Visible="true" >
+            <ItemTemplate>
+                <asp:Label ID="lblname" runat="server" Text='<%#Eval("CNAME")%>'></asp:Label>
+            </ItemTemplate>
+        </asp:TemplateField>
+               <asp:TemplateField HeaderText="ISACTIVE" Visible="true" >
+            <ItemTemplate>
+                 <asp:Label ID="lblactive" runat="server" Text='<%#Eval("ISACTIVE")%>'></asp:Label>
+
+            </ItemTemplate>
+
+        </asp:TemplateField>
+      <%--  <asp:CommandField  ShowEditButton="False" ShowSelectButton="true" ShowDeleteButton="false" SelectText="&nbsp;&nbsp;&nbsp;Delete" 
+            HeaderText="ACTION" />--%>
+                   <asp:CommandField ShowDeleteButton="true" ShowEditButton="False" ShowSelectButton="true" SelectText="&nbsp;&nbsp;&nbsp; Edit"
+                     HeaderText="Action" HeaderStyle-CssClass="text-center"/>
+
+    </Columns>
+            <FooterStyle BackColor="White" ForeColor="#333333" />
+            <HeaderStyle BackColor="#336666" Font-Bold="True" ForeColor="White" />
+            <PagerStyle BackColor="#336666" ForeColor="White" HorizontalAlign="Center" />
+            <RowStyle BackColor="White" ForeColor="#333333" />
+            <SelectedRowStyle BackColor="#339966" Font-Bold="True" ForeColor="White" />
+            <SortedAscendingCellStyle BackColor="#F7F7F7" />
+            <SortedAscendingHeaderStyle BackColor="#487575" />
+            <SortedDescendingCellStyle BackColor="#E5E5E5" />
+            <SortedDescendingHeaderStyle BackColor="#275353" />
+        </asp:GridView>    
+    </td>
+
+    <td style="width:20%" align="right"></td>
+   
+</tr>
+</table>
+    
+</asp:Content>
+

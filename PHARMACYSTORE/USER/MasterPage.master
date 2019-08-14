@@ -1,0 +1,324 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="MasterPage.master.cs" Inherits="PHARMACYSTORE_USER_MasterPage" %>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Creative - Bootstrap 3 Responsive Admin Template">
+    <meta name="author" content="GeeksLabs">
+    <meta name="keyword" content="Creative, Dashboard, Admin, Template, Theme, Bootstrap, Responsive, Retina, Minimal">
+    <link rel="shortcut icon" href="img/favicon.png">
+
+    <title></title>
+
+    <!-- Bootstrap CSS -->    
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- bootstrap theme -->
+    <link href="css/bootstrap-theme.css" rel="stylesheet">
+    <!--external css-->
+    <!-- font icon -->
+    <link href="css/elegant-icons-style.css" rel="stylesheet" />
+    <link href="css/font-awesome.min.css" rel="stylesheet" />    
+    <!-- full calendar css-->
+    <link href="assets/fullcalendar/fullcalendar/bootstrap-fullcalendar.css" rel="stylesheet" />
+	<link href="assets/fullcalendar/fullcalendar/fullcalendar.css" rel="stylesheet" />
+    <!-- easy pie chart-->
+    <link href="assets/jquery-easy-pie-chart/jquery.easy-pie-chart.css" rel="stylesheet" type="text/css" media="screen"/>
+    <!-- owl carousel -->
+    <link rel="stylesheet" href="css/owl.carousel.css" type="text/css">
+	<link href="css/jquery-jvectormap-1.2.2.css" rel="stylesheet">
+    <!-- Custom styles -->
+	<link rel="stylesheet" href="css/fullcalendar.css">
+	<link href="css/widgets.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/style-responsive.css" rel="stylesheet" />
+	<link href="css/xcharts.min.css" rel=" stylesheet">	
+	<link href="css/jquery-ui-1.10.4.min.css" rel="stylesheet">
+    <!-- =======================================================
+        Theme Name: NiceAdmin
+        Theme URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
+        Author: BootstrapMade
+        Author URL: https://bootstrapmade.com
+    ======================================================= -->
+
+    <asp:ContentPlaceHolder id="head" runat="server">
+
+    </asp:ContentPlaceHolder>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="index_files/mbcsmbmcp.css" type="text/css" />
+<script type="text/javascript" src="index_files/mbjsmbmcp.js"></script>
+<script src='<%=ResolveUrl("~/crystalreportviewers13/js/crviewer/crv.js")%>' type="text/javascript"></script>
+
+</head>
+<body>
+    <form id="form1" runat="server">
+        
+  <!-- container section start -->
+  <section id="container" class="">
+     
+      
+      <header class="header dark-bg">
+            <div class="toggle-nav">
+                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"><i class="icon_menu"></i></div>
+            </div>
+
+            <a href="Default.aspx" class="logo">Pharmacy <span class="lite">User</span></a>
+            <!--logo end-->
+
+            
+
+            <div class="top-nav notification-row">                
+                <!-- notificatoin dropdown start-->
+                <ul class="nav pull-right top-menu">
+                    
+                    <!-- task notificatoin start -->
+                    <li id="task_notificatoin_bar" class="dropdown">
+                       
+                    </li>
+                    <!-- task notificatoin end -->
+                    <!-- inbox notificatoin start-->
+                    <li id="mail_notificatoin_bar" class="dropdown">
+                       
+                    </li>
+                    <!-- inbox notificatoin end -->
+                    <!-- alert notification start-->
+                    <li id="alert_notificatoin_bar" class="dropdown">
+                        <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+
+                          
+                        </a>
+                        
+                    </li>
+                    <!-- alert notification end-->
+                    <!-- user login dropdown start-->
+                    <li class="dropdown">
+                        <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                            <span class="profile-ava">
+                              <%-- <img alt="" src="img/avatar1_small.jpg"> --%>
+                            </span>
+                            <span class="username">Hello
+                                <asp:ContentPlaceHolder ID="ContentPlaceHolder2" runat="server"></asp:ContentPlaceHolder>
+                            </span>
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu extended logout">
+                            <div class="log-arrow-up"></div>
+                            <li class="eborder-top">
+                              
+                                <%--<a><i class="icon_key_alt"></i> Log Out</a>--%>
+                                <asp:LinkButton ID="LinkButton1" runat="server" OnClick="LinkButton1_Click" >Back To Home</asp:LinkButton>
+                            </li>
+                            <li>
+                                
+                            </li>
+                            <li>
+                               
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- user login dropdown end -->
+                </ul>
+                <!-- notificatoin dropdown end-->
+            </div>
+      </header>      
+      <!--header end-->
+
+      <!--sidebar start-->
+      <aside>
+          <div id="sidebar"  class="nav-collapse ">
+              <!-- sidebar menu start-->
+              <ul class="sidebar-menu">
+                    <li class="sub-menu" style="background-color:#009997; color:black" >
+                      <a href="../../home.aspx" class="">
+                          <i  class=""></i>
+                        <span >Back To Home</span>
+                          <span class="menu-arrow arrow_carrot-right"></span>
+                      </a>
+                   
+                  </li>                  
+                  <li class="sub-menu">
+                      <a href="javascript:;" class="">
+                          <i class="icon_cloud_alt"></i>
+                          <span>Pharmacy Master</span>
+                          <span class="menu-arrow arrow_carrot-right"></span>
+                      </a>
+                      <ul class="sub">
+                           <li><a class="" href="Store_Master.aspx">Store Master</a></li> 
+                          <li><a class="" href="Supplier_Master.aspx">Supplier Master</a></li>
+                          <li><a class="" href="Item_Category_master.aspx">Category Master</a></li>
+                           <li><a class="" href="Company_Master.aspx">Company Master</a></li>
+                           <li><a class="" href="Item_Entry.aspx">Item Master</a></li>    
+                      </ul>
+                  </li>
+				
+                  <li class="sub-menu">
+                      <a href="javascript:;" class="">
+                          <i class="icon_desktop"></i>
+                          <span>Transaction</span>
+                          <span class="menu-arrow arrow_carrot-right"></span>
+                      </a>
+                      <ul class="sub">
+                          <li><a class="" href="PatientSearch.aspx">Patient Search</a></li>
+                           <%--<li><a class="" href="IndentRequest.aspx">Indent Request</a></li>--%>
+                           <li><a class="" href="finditem.aspx">Find Item</a></li>
+                          <li><a class="" href="Purchase.aspx">Purchase</a></li>
+                            <li><a class="" href="Purchase_return_expiry.aspx">Purchase Return</a></li>
+                           <li><a class="" href="Sale.aspx">Sale</a></li>
+                            <li><a class="" href="Sale_return.aspx">Sale Return</a></li>     
+                        <%--  <li><a class="" href="Requisition.aspx">Requisition Pharmacy</a></li>  --%>                   
+                           <%--<li><a class="" href="IndSale_return.aspx">IP Sale Return</a></li>--%> 
+                          <li><a class="" href="ViewRecuition.aspx">Pharmacy Recuition</a></li>  
+                           
+                      </ul>
+                  </li>
+                  <li class="sub-menu">
+                      <a class="" >
+                          <i class="icon_genius"></i>
+                          <span>Reports</span>
+                           <span class="menu-arrow arrow_carrot-right"></span>
+                      </a>
+                        <ul class="sub">
+                             <li><a class="" href="Product_Expiry_report.aspx">Expiry Report</a></li>
+                              <li><a class="" href="Reorder_report.aspx">Reorder Report</a></li>
+                            <li><a class="" href="Bill.aspx">Sale Bill</a></li>
+                          <li><a class="" href="Stock_report.aspx">Stock</a></li>
+                              <li><a class="" href="stock_ledger_report.aspx">Stock ledger</a></li>
+                            <li><a class="" href="party_report.aspx">Party Report</a></li>
+                          <li><a class="" href="purchase_report.aspx">Purchase Report</a></li>
+                           <li><a class="" href="sale_report.aspx">Sale Report</a></li>
+                             <li><a class="" href="purchase_return_report.aspx">Purchase Ret Report</a></li>
+                            <li><a class="" href="sale_return_report.aspx">Sale Ret Report</a></li>
+                            <li><a class="" href="DebitCreditRport.aspx">Debit Credit Report</a></li>
+                            
+                      </ul>
+
+
+                  </li>
+                  <li>  
+                                         
+                  </li>
+                  
+                  <li class="sub-menu">
+                     
+                      <ul class="sub">                          
+                          <li><a class="" href="profile.html">Profile</a></li>
+                          <li><a class="" href="login.html"><span>Login Page</span></a></li>
+                          <li><a class="" href="blank.html">Blank Page</a></li>
+                          <li><a class="" href="404.html">404 Error</a></li>
+                      </ul>
+                  </li>
+                  
+              </ul>
+              <!-- sidebar menu end-->
+          </div>
+      </aside>
+      <!--sidebar end-->
+      
+      <!--main content start-->
+      <section id="main-content">
+          <section class="wrapper">            
+         <div>
+        <asp:ContentPlaceHolder id="ContentPlaceHolder1" runat="server">
+        
+        </asp:ContentPlaceHolder>
+    </div>
+
+          </section>
+          
+      </section>
+      <!--main content end-->
+  </section>
+  <!-- container section start -->
+
+    <!-- javascripts -->
+    <script src="js/jquery.js"></script>
+	<script src="js/jquery-ui-1.10.4.min.js"></script>
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.9.2.custom.min.js"></script>
+    <!-- bootstrap -->
+    <script src="js/bootstrap.min.js"></script>
+    <!-- nice scroll -->
+    <script src="js/jquery.scrollTo.min.js"></script>
+    <script src="js/jquery.nicescroll.js" type="text/javascript"></script>
+    <!-- charts scripts -->
+    <script src="assets/jquery-knob/js/jquery.knob.js"></script>
+    <script src="js/jquery.sparkline.js" type="text/javascript"></script>
+    <script src="assets/jquery-easy-pie-chart/jquery.easy-pie-chart.js"></script>
+    <script src="js/owl.carousel.js" ></script>
+    <!-- jQuery full calendar -->
+    <<script src="js/fullcalendar.min.js"></script> <!-- Full Google Calendar - Calendar -->
+	<script src="assets/fullcalendar/fullcalendar/fullcalendar.js"></script>
+    <!--script for this page only-->
+    <script src="js/calendar-custom.js"></script>
+	<script src="js/jquery.rateit.min.js"></script>
+    <!-- custom select -->
+    <script src="js/jquery.customSelect.min.js" ></script>
+	<script src="assets/chart-master/Chart.js"></script>
+   
+    <!--custome script for all page-->
+    <script src="js/scripts.js"></script>
+    <!-- custom script for this page-->
+    <script src="js/sparkline-chart.js"></script>
+    <script src="js/easy-pie-chart.js"></script>
+	<script src="js/jquery-jvectormap-1.2.2.min.js"></script>
+	<script src="js/jquery-jvectormap-world-mill-en.js"></script>
+	<script src="js/xcharts.min.js"></script>
+	<script src="js/jquery.autosize.min.js"></script>
+	<script src="js/jquery.placeholder.min.js"></script>
+	<script src="js/gdp-data.js"></script>	
+	<script src="js/morris.min.js"></script>
+	<script src="js/sparklines.js"></script>	
+	<script src="js/charts.js"></script>
+	<script src="js/jquery.slimscroll.min.js"></script>
+  <script>
+
+      //knob
+      $(function () {
+          $(".knob").knob({
+              'draw': function () {
+                  $(this.i).val(this.cv + '%')
+              }
+          })
+      });
+
+      //carousel
+      $(document).ready(function () {
+          $("#owl-slider").owlCarousel({
+              navigation: true,
+              slideSpeed: 300,
+              paginationSpeed: 400,
+              singleItem: true
+
+          });
+      });
+
+      //custom select box
+
+      $(function () {
+          $('select.styled').customSelect();
+      });
+
+      /* ---------- Map ---------- */
+      $(function () {
+          $('#map').vectorMap({
+              map: 'world_mill_en',
+              series: {
+                  regions: [{
+                      values: gdpData,
+                      scale: ['#000', '#000'],
+                      normalizeFunction: 'polynomial'
+                  }]
+              },
+              backgroundColor: '#eef3f7',
+              onLabelShow: function (e, el, code) {
+                  el.html(el.html() + ' (GDP - ' + gdpData[code] + ')');
+              }
+          });
+      });
+
+  </script>
+    </form>
+</body>
+</html>

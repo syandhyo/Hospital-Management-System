@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<newdatset>
+  <table>
+    <date>2018-05-15</date>
+    <PatientName>HATA KISHORE NAYAK</PatientName>
+    <RegnNo>VMI3999</RegnNo>
+    <CaseNo>VMI323</CaseNo>
+    <Remark>REFUND</Remark>
+    <BillInvoice>MRN03333</BillInvoice>
+    <BillAmnt>CARD</BillAmnt>
+    <DiscAmnt>HDFC</DiscAmnt>
+  
+   <ReceiptAmnt>14750.00</ReceiptAmnt>
+    <RefundAmnt> </RefundAmnt>
+    <Rcpt.No>MRNO4278</Rcpt.No>
+    <CollTypeB>CASH</CollTypeB>
+    <Bank> </Bank>
+  
+  </table>
+  
+</newdatset>

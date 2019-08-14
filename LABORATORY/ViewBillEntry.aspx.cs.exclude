@@ -1,0 +1,229 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Text;
+using System.Configuration;
+using System.Web.Services;
+
+public partial class LABORATORY_ViewBillEntry : System.Web.UI.Page
+{
+    string num1 = "SJ000";
+    SqlConnection con;
+    SqlDataAdapter da, da1, da2, da3, da4, da5, da6, da7;
+    DataSet ds = new DataSet();
+    SqlCommand com, cmd, cmd1;
+    SqlDataReader dr, dr1, dr2;
+    DataTable dt;
+    DataRow dtr;
+    GridViewRow gr;
+    string PAIDMAT;
+    decimal amount = 0;
+    [WebMethod]
+
+    public void auto()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        string qry1 = "select ID from LABRES_TABLE";
+
+        com = new SqlCommand(qry1, con);
+        dr = null;
+
+        dr = com.ExecuteReader();
+
+        while (dr.Read())
+        {
+            num1 = dr["ID"].ToString();
+        }
+        num1 = string.Format("LT{0}", (Convert.ToUInt32(num1.Substring(2)) + 1).ToString("D4"));
+        TXTID.Text = num1;
+        dr.Close();
+        con.Close();
+    }
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        lbluid.Text = Session["UID"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+        //txtinvdate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
+        if (!IsPostBack)
+        {
+            binddata();
+        }
+        con.Close();
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand COM = new SqlCommand("SELECT FYEAR FROM FYEAR1_TABLE WHERE  ORGID='" + lblorgid.Text + "'", con);
+        dr = COM.ExecuteReader();
+        if (dr.Read())
+        {
+            //Label1.Text = dr["FYEAR"].ToString();
+            lblfyear.Text = dr["FYEAR"].ToString();
+        }
+        dr.Close();
+
+        //DataTable dt = new DataTable();
+        //dt.Columns.AddRange(new DataColumn[3] { new DataColumn("ID"), new DataColumn("INV"), new DataColumn("PRICE") });
+        //ViewState["ITEM"] = dt;
+        //this.BindGrid();
+        //binddata();
+
+        //da1 = new SqlDataAdapter("select ID,NAME FROM TEST_CATEGORY_TABLE where ORGID='" + lblorgid.Text + "'", con);
+        //DataTable ds1 = new DataTable();
+        //da1.Fill(ds1);
+        //droptesttype.DataSource = ds1;
+        //droptesttype.DataTextField = "NAME";
+        //droptesttype.DataValueField = "ID";
+        //droptesttype.DataBind();
+        //droptesttype.Items.Insert(0, "-----Select-----");
+
+        //SqlDataAdapter da1 = new SqlDataAdapter("SELECT A.ID as ID,A.DATE AS DATE,A.PNAME AS PID FROM LABRES_TABLE A  WHERE  A.ORGID='" + lblorgid.Text + "' AND A.PTYPE='INPATIENT' ORDER BY A.ID DESC", con);
+        //DataTable dt1 = new DataTable();
+        //da1.Fill(dt1);
+        //GridView2.SelectedIndex = 0;
+        //GridView2.DataSource = dt1;
+        //GridView2.DataKeyNames = new string[] { "ID" };
+        //GridView2.DataBind();
+        //con.Close();
+    }
+    protected void btnview_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            if (txtlabno.Text == "")
+            {
+                string message = "alert('* Please Enter Bill No.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            SqlCommand com = new SqlCommand("select a.ID,a.OPDNO,a.NAME,a.CORPORATE,a.EMPID,b.INV,b.INVID,b.PRICE,c.NAME as NAME,c.REF as RANGE,c.UNIT from TBLRECLAB a,TBLRECLABITEM b,TEST_COMPONENT_TABLE c where a.ID=b.ID and c.slno=b.INVID  and  a.ID='" + txtlabno.Text + "'", con);
+            dr = com.ExecuteReader();
+            if (dr.Read())
+            {
+                txtopdNO.Text = dr["OPDNO"].ToString();
+                txtname.Text = dr["NAME"].ToString();
+                txtcorprate.Text = dr["CORPORATE"].ToString();
+                txtempid.Text = dr["EMPID"].ToString();
+                //droptesttype.Text = dr["SELECTYPE"].ToString();
+            }
+            dr.Close();
+            DataSet dtt = new DataSet();
+            SqlDataAdapter daa = new SqlDataAdapter(com);
+            daa.Fill(dtt);
+            GridView1.DataSource = dtt;
+            GridView1.DataKeyNames = new string[] { "ID" };
+            GridView1.DataBind();
+
+
+            divgrid.Visible = true;
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+
+    }
+  
+    protected void btncreate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            //  if (txtlabno.Text == "")
+            //{
+            //    string message = "alert('* Please Enter Bill No.')";
+            //    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+            //    return;
+            //}
+            auto();
+            datatable_po_item();
+            SqlCommand cmd = new SqlCommand("insert into LABRES_TABLE (ID,LINDID,PID,PNAME)VALUES(@ID,@LINDID,@PID,@PNAME)", con);
+            cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+            cmd.Parameters.Add("@LINDID", SqlDbType.VarChar).Value = txtlabno.Text;
+            cmd.Parameters.Add("@PID", SqlDbType.VarChar).Value = txtopdNO.Text;
+            cmd.Parameters.Add("@PNAME", SqlDbType.VarChar).Value = txtname.Text;
+
+
+            cmd.ExecuteNonQuery();
+            // Session["LABID"] = TXTID.Text;
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/LABORATORY/ViewBillEntry.aspx");
+    }
+    public void datatable_po_item()
+    {
+        //try
+        //{
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+
+        foreach (GridViewRow row in GridView1.Rows)
+        {
+            var name = row.FindControl("lblname") as Label;
+            var inv = row.FindControl("lblinv") as Label;
+            var price = row.FindControl("lblprice") as TextBox;
+            var renge = row.FindControl("txtref") as TextBox;
+            var unit = row.FindControl("txtunit") as TextBox;
+            var value = row.FindControl("txt_value") as TextBox;
+            
+
+           // amount = amount + Convert.ToDecimal(AMT.Text);
+           // var INV = Convert.ToInt32(GridView1.DataKeys[row.RowIndex].Values[0]);
+            SqlCommand stock_cmd = new SqlCommand("INSERT INTO LABRESULT_TABLE (ID,LINDID,INV,VALUE,REF,UNIT,PRICE) VALUES (@ID,@LINDID,@INV,@VALUE,@REF,@UNIT,@PRICE)", con);
+            stock_cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text; 
+            stock_cmd.Parameters.Add("@LINDID", SqlDbType.VarChar).Value = txtlabno.Text;
+            stock_cmd.Parameters.Add("@INV", SqlDbType.VarChar).Value = inv.Text.ToString();
+            stock_cmd.Parameters.Add("@PRICE", SqlDbType.VarChar).Value = price.Text.ToString();
+            stock_cmd.Parameters.Add("@REF", SqlDbType.VarChar).Value = renge.Text.ToString();
+            stock_cmd.Parameters.Add("@VALUE", SqlDbType.VarChar).Value = value.Text.ToString();
+           
+            stock_cmd.Parameters.Add("@UNIT", SqlDbType.VarChar).Value = unit.Text.ToString();
+          
+            stock_cmd.ExecuteNonQuery();
+
+        }
+        //}
+        //catch (Exception ex)
+        //{
+
+        //}
+        con.Close();
+    }
+    protected void btncancel_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/LABORATORY/ViewBillEntry.aspx");
+    }
+}

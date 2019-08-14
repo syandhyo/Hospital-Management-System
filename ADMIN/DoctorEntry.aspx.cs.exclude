@@ -1,0 +1,632 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.IO;
+using System.Collections;
+using System.Drawing.Drawing2D;
+
+public partial class ADMIN_DoctorEntry : System.Web.UI.Page
+{
+    string num1 = "PK000";
+    Object num;
+    string path = "";
+    SqlConnection con;
+    SqlDataAdapter da, da1;
+    DataSet ds = new DataSet();
+    SqlCommand com, cmd;
+    SqlDataReader dr, dr1, dr2;
+    DataTable dt;
+    DataRow dtr;
+    int i, no, no1, sl, F;
+    int flag = 0;
+    string id, id1, ph, val1, val2;
+    decimal a, b;
+    DateTime DT;
+    GridViewRow gr;
+
+    public void auto()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        string qry1 = "select ID as ID from TBL_DOCTORENTY";
+        com = new SqlCommand(qry1, con);
+        dr = null;
+
+        dr = com.ExecuteReader();
+
+        while (dr.Read())
+        {
+            num1 = dr["ID"].ToString();
+        }
+        num1 = string.Format("DE{0}", (Convert.ToUInt32(num1.Substring(2)) + 1).ToString("D4"));
+        lblAuto.Text = num1;
+
+        dr.Close();
+        con.Close();
+    }
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+
+            Response.Redirect("~/index.aspx");
+        }
+        // lbldate.Text = DateTime.Now.ToString("dd-MM-yyyy");
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+
+        if (!IsPostBack)
+        {
+            //  testype();
+            binddata();
+            //  auto();
+        }
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+       // SqlDataAdapter Adp = new SqlDataAdapter("select ID,DOCTORNAME,DOCTORTYPE,MOBILNO,QUALIFCN,SPLAREA,Follow_up_limit,FEES from TBL_DOCTORENTY ORDER BY ID DESC", con);
+
+        using (SqlCommand cmd = new SqlCommand("Admin_DoctorEntry_SLCT", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "DISPLAY";
+            DataTable Dt = new DataTable();
+            SqlDataAdapter Adp = new SqlDataAdapter(cmd);
+            Adp.Fill(Dt);
+            grvdoctor.DataSource = Dt;
+            grvdoctor.DataBind();
+        }
+        //----------------------
+        //DataTable dt = new DataTable();
+        //dt.Columns.AddRange(new DataColumn[3] { new DataColumn("ID"), new DataColumn("INV"), new DataColumn("PRICE") });
+        //ViewState["ITEM"] = dt;
+        //this.BindGrid();
+
+        try
+        {
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+
+        da = new SqlDataAdapter("select id,Sname from tblStaff where DesgId=(select id from tblDesignation where DesgName='Doctor')", con);
+        DataTable ds = new DataTable();
+        da.Fill(ds);
+        dropLinkDoct.DataSource = ds;
+        dropLinkDoct.DataTextField = "Sname";
+        dropLinkDoct.DataValueField = "id";
+        dropLinkDoct.DataBind();
+        dropLinkDoct.Items.Insert(0, "Please Select");
+        con.Close();
+    }
+    protected void btncreate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtdoctornm.Text == "")
+            {
+                string message = "alert('* Doctor Name are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (dropdtType.SelectedIndex == 0)
+            {
+                string message = "alert('* Doctor Types are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            //--------------------------------------  
+            else if (txtadressps.Text == "")
+            {
+                string message = "alert('* Address Field are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+
+            if (txtdistrict.Text == "")
+            {
+                string message = "alert('* District Field are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtadresspm.Text == "")
+            {
+                string message = "alert('*Address Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            if (txtpincode.Text == "")
+            {
+                string message = "alert('* Pin Code are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtmobilno.Text == "")
+            {
+                string message = "alert('* Mobile No are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            if (txtqualifc.Text == "")
+            {
+                string message = "alert('* Qualification are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtCategory.Text == "")
+            {
+                string message = "alert('*Category Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            if (txtspecArea.Text == "")
+            {
+                string message = "alert('* Area Field are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            if (txtfees.Text == "" || Convert.ToDouble(txtfees.Text) <= 0)
+            {
+                string message = "alert('* Area Field are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            if (txtfoloupdy.Text == "" || Convert.ToDouble(txtfees.Text) <= 0)
+            {
+                string message = "alert('* Area Field are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+
+            //------------------------------------
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            auto();
+            string s = "DoctPhoto/" + fluImgg.FileName;
+            #region Photo Upload Start.....
+            string filename = "";
+
+            if ((fluImgg.PostedFile != null) && (fluImgg.PostedFile.ContentLength > 0))
+            {
+                int hpf = fluImgg.PostedFile.ContentLength;
+                if ((hpf > 0) && (hpf < 2097152))
+                {
+                    string fileExt = System.IO.Path.GetExtension(fluImgg.FileName);
+                    string ContntType = fluImgg.PostedFile.ContentType;
+
+                    if ((fileExt == ".gif") || (fileExt == ".GIF") || (fileExt == ".jpeg") || (fileExt == ".JPEG") || (fileExt == ".jpg") || (fileExt == ".JPG") || (fileExt == ".png") || (fileExt == ".PNG"))
+                    {
+                        //Get the file name
+                        //filename = txtregistrationno.Text + "_" + Session.SessionID + "_" + Path.GetFileName(FileUpload1.FileName);
+
+
+                        filename = "DoctPhoto/" + fluImgg.FileName;
+                        //Save in to temp folder
+                        //FileUpload1.PostedFile.SaveAs(MapPath("../Upload_Gallary/EmployeePhoto/" + filename));
+                        string targetPath = Server.MapPath(filename);
+
+                        Stream FromStream = default(Stream);
+                        FromStream = fluImgg.PostedFile.InputStream;
+                        //Generate Thumnails
+                        GenerateThumbnails(0.5, FromStream, targetPath);
+                        //AdminBLL.Photo = Convert.ToString(filename);
+                        string s1 = Convert.ToString(filename);
+                        s1 = fluImgg.FileName.ToString();
+
+                    }
+                    else
+                    {
+                        string message = "alert('not valid file..')";
+                        ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                        //filename = "not valid file..";
+                        return;
+                    }
+                }
+                else
+                {
+                    string message = "alert('Size Is More Than 2MB..')";
+                    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                    //filename = "Size Is More Than 2MB..";
+                    return;
+
+                }
+            }
+            else
+            {
+                string message = "alert('Please!!Select The File..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                //filename = "Please!!Select The File..";
+                return;
+            }
+            #endregion Photo Upload End.........
+
+            using (SqlCommand cmd = new SqlCommand("USP_DOCTORENTY", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = lblAuto.Text;
+                cmd.Parameters.Add("@DOCTORNAME", SqlDbType.VarChar).Value = txtdoctornm.Text;
+                cmd.Parameters.Add("@DOCTORTYPE", SqlDbType.VarChar).Value = dropdtType.SelectedItem.Text;
+                cmd.Parameters.Add("@LINKTODOCTOR", SqlDbType.VarChar).Value = dropLinkDoct.SelectedItem.Text;
+                cmd.Parameters.Add("@ADRESSS", SqlDbType.VarChar).Value = txtadressps.Text;
+                cmd.Parameters.Add("@RESDADRESS", SqlDbType.VarChar).Value = txtadresspm.Text;
+                cmd.Parameters.Add("@AREA", SqlDbType.VarChar).Value = txtArea.Text;
+                cmd.Parameters.Add("@DISTRICT", SqlDbType.VarChar).Value = txtdistrict.Text;
+                cmd.Parameters.Add("@STATE", SqlDbType.VarChar).Value = txtstate.Text;
+                cmd.Parameters.Add("@PINCODE", SqlDbType.VarChar).Value = txtpincode.Text;
+                cmd.Parameters.Add("@MOBILNO", SqlDbType.VarChar).Value = txtmobilno.Text;
+                cmd.Parameters.Add("@EMAILID", SqlDbType.VarChar).Value = txtemailid.Text;
+                cmd.Parameters.Add("@QUALIFCN", SqlDbType.VarChar).Value = txtqualifc.Text;
+                cmd.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = txtCategory.Text;
+                cmd.Parameters.Add("@SPLAREA", SqlDbType.VarChar).Value = txtspecArea.Text;
+                cmd.Parameters.Add("@ACTIVE", SqlDbType.VarChar).Value = chkactive.Checked;
+                cmd.Parameters.Add("@PHOTO", SqlDbType.VarChar).Value = s.ToString();
+                cmd.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+                cmd.Parameters.Add("@Follow_up_limit", SqlDbType.VarChar).Value = txtfoloupdy.Text;
+                cmd.Parameters.Add("@FEES", SqlDbType.VarChar).Value = txtfees.Text;
+
+                cmd.ExecuteNonQuery();
+                fluImgg.SaveAs(Server.MapPath(s));
+
+                SqlCommand cmd1 = new SqlCommand("insert into Doctor_charges(ID,DOCTOR,FOLLOW_UP,CHARGES)values(@ID,@DOCTOR,@FOLLOW_UP,@CHARGES)", con);
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd1.Parameters.Add("@DOCTOR", SqlDbType.VarChar).Value = txtdoctornm.Text;
+                cmd1.Parameters.Add("@FOLLOW_UP", SqlDbType.VarChar).Value = txtfoloupdy.Text;
+                cmd1.Parameters.Add("@CHARGES", SqlDbType.VarChar).Value = txtfees.Text;
+                cmd1.ExecuteNonQuery();
+
+                string message = "alert('Doctor Entry Sucessfully.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                resetCt();
+
+            }
+
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/DoctorEntry.aspx");
+    }
+
+
+    private void GenerateThumbnails(double scaleFactor, Stream sourcePath, string targetPath)
+    {
+        using (var image = System.Drawing.Image.FromStream(sourcePath))
+        {
+            var newWidth = (int)(image.Width * scaleFactor);
+            var newHeight = (int)(image.Height * scaleFactor);
+            var thumbnailImg = new Bitmap(newWidth, newHeight);
+            var thumbGraph = Graphics.FromImage(thumbnailImg);
+            thumbGraph.CompositingQuality = CompositingQuality.HighQuality;
+            thumbGraph.SmoothingMode = SmoothingMode.HighQuality;
+            thumbGraph.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            var imageRectangle = new Rectangle(0, 0, newWidth, newHeight);
+            thumbGraph.DrawImage(image, imageRectangle);
+            thumbnailImg.Save(targetPath, image.RawFormat);
+        }
+    }
+    public void resetCt()
+    {
+        txtdoctornm.Text="";
+        dropdtType.SelectedIndex=0;
+        dropLinkDoct.SelectedIndex=0;
+        txtadressps.Text="";
+        txtadresspm.Text="";
+        txtArea.Text="";
+        txtdistrict.Text="";
+        txtstate.Text="";
+        txtpincode.Text="";
+        txtmobilno.Text="";
+        txtemailid.Text="";
+        txtqualifc.Text="";
+        txtCategory.Text="";
+        txtspecArea.Text="";
+        chkactive.Checked = false;
+        CheckBox1.Checked = false;
+    }
+    protected void btncancel_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/ADMIN/DoctorEntry.aspx");
+    }
+    protected void CheckBox1_CheckedChanged(object sender, EventArgs e)
+    {
+        if (CheckBox1.Checked == true)
+        {
+            txtadresspm.Text = txtadressps.Text;
+        }
+        else
+        {
+            txtadresspm.Text = "NA";
+        }
+    }
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            string s = "";
+            if (txtdoctornm.Text == "")
+            {
+                string message = "alert('* Doctor Name are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (dropdtType.SelectedIndex == 0)
+            {
+                string message = "alert('* Doctor Types are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            //--------------------------------------  
+            else if (txtadressps.Text == "")
+            {
+                string message = "alert('* Address Field are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+
+            if (txtdistrict.Text == "")
+            {
+                string message = "alert('* District Field are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtadresspm.Text == "")
+            {
+                string message = "alert('*Address Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            if (txtpincode.Text == "")
+            {
+                string message = "alert('* Pin Code are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtmobilno.Text == "")
+            {
+                string message = "alert('* Mobile No are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            if (txtqualifc.Text == "")
+            {
+                string message = "alert('* Qualification are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtCategory.Text == "")
+            {
+                string message = "alert('*Category Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            if (txtspecArea.Text == "")
+            {
+                string message = "alert('* Area Field are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            if (txtfees.Text == "" || Convert.ToDouble(txtfees.Text) <= 0)
+            {
+                string message = "alert('* Area Field are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            if (txtfoloupdy.Text == "" || Convert.ToDouble(txtfees.Text) <= 0)
+            {
+                string message = "alert('* Area Field are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            if (s != "")
+            {
+              //  s = "~/ADMIN/DoctPhoto/" + fluImgg.FileName;
+              s = "DoctPhoto/" + fluImgg.FileName;
+            }
+            else
+            {
+                SqlDataAdapter da = new SqlDataAdapter("SELECT PHOTO FROM TBL_DOCTORENTY", con);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                if (dt.Rows.Count > 0)
+                {
+                    s = dt.Rows[0]["PHOTO"].ToString();
+                }
+            }
+
+            using (SqlCommand cmd = new SqlCommand("USP_DOCTORENTY", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd.Parameters.Add("@DOCTORNAME", SqlDbType.VarChar).Value = txtdoctornm.Text;
+                cmd.Parameters.Add("@DOCTORTYPE", SqlDbType.VarChar).Value = dropdtType.SelectedItem.Text;
+                cmd.Parameters.Add("@LINKTODOCTOR", SqlDbType.VarChar).Value = dropLinkDoct.SelectedItem.Text;
+                cmd.Parameters.Add("@ADRESSS", SqlDbType.VarChar).Value = txtadressps.Text;
+                cmd.Parameters.Add("@RESDADRESS", SqlDbType.VarChar).Value = txtadresspm.Text;
+                cmd.Parameters.Add("@AREA", SqlDbType.VarChar).Value = txtArea.Text;
+                cmd.Parameters.Add("@DISTRICT", SqlDbType.VarChar).Value = txtdistrict.Text;
+                cmd.Parameters.Add("@STATE", SqlDbType.VarChar).Value = txtstate.Text;
+                cmd.Parameters.Add("@PINCODE", SqlDbType.VarChar).Value = txtpincode.Text;
+                cmd.Parameters.Add("@MOBILNO", SqlDbType.VarChar).Value = txtmobilno.Text;
+                cmd.Parameters.Add("@EMAILID", SqlDbType.VarChar).Value = txtemailid.Text;
+                cmd.Parameters.Add("@QUALIFCN", SqlDbType.VarChar).Value = txtqualifc.Text;
+                cmd.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = txtCategory.Text;
+                cmd.Parameters.Add("@SPLAREA", SqlDbType.VarChar).Value = txtspecArea.Text;
+                cmd.Parameters.Add("@ACTIVE", SqlDbType.VarChar).Value = chkactive.Checked;
+                cmd.Parameters.Add("@PHOTO", SqlDbType.VarChar).Value = s.ToString();
+                cmd.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+                cmd.Parameters.Add("@Follow_up_limit", SqlDbType.VarChar).Value = txtfoloupdy.Text;
+                cmd.Parameters.Add("@FEES", SqlDbType.VarChar).Value = txtfees.Text;
+
+                cmd.ExecuteNonQuery();
+                fluImgg.SaveAs(Server.MapPath(s));
+
+                SqlCommand cmd1 = new SqlCommand("update Doctor_charges set DOCTOR=@DOCTOR,FOLLOW_UP=@FOLLOW_UP,CHARGES=CHARGES where ID=@ID", con);
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd1.Parameters.Add("@DOCTOR", SqlDbType.VarChar).Value = txtdoctornm.Text;
+                cmd1.Parameters.Add("@FOLLOW_UP", SqlDbType.VarChar).Value = txtfoloupdy.Text;
+                cmd1.Parameters.Add("@CHARGES", SqlDbType.VarChar).Value = txtfees.Text;
+                cmd1.ExecuteNonQuery();
+
+                string message = "alert('Record Updated Sucessfully.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                resetCt();
+            }
+            resetCt();
+
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/DoctorEntry.aspx");
+    }
+
+    protected void grvdoctor_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+            var slno = grvdoctor.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand com = new SqlCommand("select * from TBL_DOCTORENTY where ID='" + slno + "'", con);
+            dr = com.ExecuteReader();
+            if (dr.Read())
+            {
+                btncreate.Visible = false;
+                btnupdate.Visible = true;
+                txtid.Text = slno.ToString();
+
+                txtdoctornm.Text = dr["DOCTORNAME"].ToString();
+                dropdtType.Text = dr["DOCTORTYPE"].ToString();
+                dropLinkDoct.SelectedItem.Text = dr["LINKTODOCTOR"].ToString();
+                txtadressps.Text = dr["ADRESSS"].ToString();
+                txtadresspm.Text = dr["RESDADRESS"].ToString();
+                txtArea.Text = dr["AREA"].ToString();
+                txtdistrict.Text = dr["DISTRICT"].ToString();
+                txtstate.Text = dr["STATE"].ToString();
+                txtpincode.Text = dr["PINCODE"].ToString();
+                txtmobilno.Text = dr["MOBILNO"].ToString();
+                txtemailid.Text = dr["EMAILID"].ToString();
+                txtqualifc.Text = dr["QUALIFCN"].ToString();
+                txtCategory.Text = dr["CATEGORY"].ToString();
+                txtspecArea.Text = dr["SPLAREA"].ToString();
+                txtfees.Text = dr["FEES"].ToString();
+                txtfoloupdy.Text = dr["Follow_up_limit"].ToString();
+                string chkactv = dr["ACTIVE"].ToString();
+                if (chkactv == "True")
+                {
+                    chkactive.Checked = true;
+                }
+                else
+                {
+                    chkactive.Checked = false;
+                }
+
+            }
+            dr.Close();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void grvdoctor_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            // reference the Delete LinkButton
+            LinkButton db = (LinkButton)e.Row.Cells[8].Controls[0];
+
+            db.OnClientClick = "return confirm('Are you sure want to delete this item ?');";
+        }
+    }
+    protected void grvdoctor_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            string slno = grvdoctor.DataKeys[e.RowIndex].Values["ID"].ToString();
+            SqlCommand cm = new SqlCommand("delete from TBL_DOCTORENTY where ID='" + slno + "'", con);
+            cm.ExecuteNonQuery();
+
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void grvdoctor_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            //SqlDataAdapter Adp = new SqlDataAdapter("select ID,DOCTORNAME,DOCTORTYPE,MOBILNO,QUALIFCN,SPLAREA,Follow_up_limit,FEES from TBL_DOCTORENTY ORDER BY ID DESC", con);
+
+            using (SqlCommand cmd = new SqlCommand("Admin_DoctorEntry_SLCT", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "DISPLAY";
+                DataTable dt = new DataTable();
+                SqlDataAdapter Adp = new SqlDataAdapter(cmd);
+                Adp.Fill(dt);
+                grvdoctor.DataSource = dt;
+                grvdoctor.PageIndex = e.NewPageIndex;
+                grvdoctor.DataKeyNames = new string[] { "id" };
+                grvdoctor.DataBind();
+            }
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+}

@@ -1,0 +1,345 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.IO;
+
+
+public partial class ADMIN_Charges : System.Web.UI.Page
+{
+    SqlDataReader dr;
+    SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        try
+        {
+            //SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+
+
+            if (Session["out"] == "INACTIVE")
+            {
+                Response.Redirect("~/index.aspx");
+            }
+            Response.Buffer = true;
+
+            Response.CacheControl = "no-cache";
+            if (Session["NAME"] == null)
+            {
+                Response.Redirect("~/index.aspx");
+            }
+            lblid.Text = Session["NAME"].ToString();
+            lblorgid.Text = Session["ORGID"].ToString();
+
+            if (IsPostBack != true)
+            {
+                //DataTable dt = new DataTable();
+                //dt.Columns.AddRange(new DataColumn[6] { new DataColumn("ID"), new DataColumn("NAME"), new DataColumn("INV"), new DataColumn("RANGE"), new DataColumn("UNIT"), new DataColumn("PRICE") });
+                //ViewState["ITEM"] = dt;
+                con.Open();
+                using (SqlCommand cmd = new SqlCommand("sp_Admin_Charge_DRP", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECTDROP";
+                    cmd.ExecuteNonQuery();
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable ds = new DataTable();
+                    da.Fill(ds);
+                    ddlcategory.DataSource = ds;
+                    ddlcategory.DataTextField = "CATEGORY";
+                    ddlcategory.DataValueField = "ID";
+                    ddlcategory.DataBind();
+                    ddlcategory.Items.Insert(0, "---Select---");
+                }
+                con.Close();
+
+            }
+            if (!IsPostBack)
+            {
+                binddata();
+            }
+
+        }
+        catch (Exception ex)
+        {
+            string message = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        }
+
+    }
+
+    public void binddata()
+    {
+        
+        con.Open();
+        using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+        {
+            COM.CommandType = CommandType.StoredProcedure;
+            COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+            SqlDataReader dr = COM.ExecuteReader();
+            if (dr.Read())
+            {
+                lblfyear.Text = dr["FYEAR"].ToString();
+            }
+            dr.Close();
+        }
+
+        using (SqlCommand cmd = new SqlCommand("ADMIN_Charges_Master", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECTALL";
+            cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+            cmd.Parameters.Add("@Charge", SqlDbType.VarChar).Value = txtcharge.Text.ToUpper();
+            cmd.Parameters.Add("@Price", SqlDbType.Decimal).Value = "0.00";
+            cmd.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = ddlcategory.SelectedItem.Text.ToUpper();
+            cmd.Parameters.Add("@ID", SqlDbType.Int).Value = 1;
+            cmd.ExecuteNonQuery();
+            SqlDataAdapter Adp = new SqlDataAdapter(cmd);
+            DataTable Dt = new DataTable();
+            Adp.Fill(Dt);
+            GridView1.SelectedIndex = 0;
+            GridView1.DataSource = Dt;
+            GridView1.DataKeyNames = new string[] { "SLNO" };
+            GridView1.DataBind();
+        }
+        con.Close();
+
+
+    }
+    protected void gvDetails_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+       try
+       {
+        con.Open();
+
+        string slno = GridView1.DataKeys[e.RowIndex].Values["SLNO"].ToString();
+        using (SqlCommand cmd = new SqlCommand("ADMIN_Charges_Master", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "DELETE";
+            cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+            cmd.Parameters.Add("@Charge", SqlDbType.VarChar).Value = txtcharge.Text.ToUpper();
+            cmd.Parameters.Add("@Price", SqlDbType.Decimal).Value = txtprice.Text;
+            cmd.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = ddlcategory.SelectedItem.Text.ToUpper();
+            cmd.Parameters.Add("@ID", SqlDbType.Int).Value = slno;
+            cmd.ExecuteNonQuery();
+        }
+        con.Close();
+        binddata();
+       }
+       catch (Exception ex)
+       {
+           con.Close();
+           string message = ex.ToString();
+           ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+       }
+     
+    }
+    protected void GridView1_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            // reference the Delete LinkButton
+            LinkButton db = (LinkButton)e.Row.Cells[3].Controls[0];
+
+            db.OnClientClick = "return confirm('Are you sure want to delete this info ?');";
+        }
+    }
+    protected void GridView1_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+       try
+       {
+        con.Open();
+        using (SqlCommand cmd = new SqlCommand("ADMIN_Charges_Master", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECTALL";
+            cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+            cmd.Parameters.Add("@Charge", SqlDbType.VarChar).Value = txtcharge.Text.ToUpper();
+            cmd.Parameters.Add("@Price", SqlDbType.Decimal).Value = txtprice.Text;
+            cmd.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = ddlcategory.SelectedItem.Text.ToUpper();
+            cmd.Parameters.Add("@ID", SqlDbType.Int).Value = 1;
+            cmd.ExecuteNonQuery();
+            SqlDataAdapter Adp = new SqlDataAdapter(cmd);
+            DataTable Dt = new DataTable();
+            Adp.Fill(Dt);
+          
+            GridView1.DataSource = Dt;
+            GridView1.PageIndex = e.NewPageIndex;
+            GridView1.DataKeyNames = new string[] { "SLNO" };
+            GridView1.DataBind();
+        }
+        con.Close();
+       }
+       catch (Exception ex)
+       {
+           con.Close();
+           string message = ex.ToString();
+           ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+       }
+    }
+
+    protected void GridView1_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+        var slno = GridView1.DataKeys[e.NewSelectedIndex].Values["SLNO"].ToString();
+       
+        con.Open();
+        using (SqlCommand cmd = new SqlCommand("ADMIN_Charges_Master", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT";
+            cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+            cmd.Parameters.Add("@Charge", SqlDbType.VarChar).Value = txtcharge.Text;
+            cmd.Parameters.Add("@Price", SqlDbType.Decimal).Value =txtprice.Text;
+            cmd.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = ddlcategory.Text;
+            cmd.Parameters.Add("@ID", SqlDbType.Int).Value = slno;
+            dr = cmd.ExecuteReader();
+            if (dr.Read())
+            {
+                btnSubmit.Visible = false;
+                btnupdate.Visible = true;
+                txtid.Text = dr["SLNO"].ToString();
+                txtcharge.Text = dr["Charge"].ToString();
+                txtprice.Text = dr["Price"].ToString();
+                ddlcategory.SelectedItem.Text = dr["catagory"].ToString();
+
+            }
+            dr.Close();
+        }
+       
+      
+        con.Close();
+        }
+        catch (Exception ex)
+        {
+            
+            string message = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        }
+    }
+
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+        if(ddlcategory.SelectedIndex == 0)
+        {
+            string message = "alert('* Please Select The Category..')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+        }
+        else if (txtcharge.Text == "")
+        {
+            string message = "alert('* Please Enter Charge Name..')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+        }
+        else if (txtprice.Text == "" || Convert.ToDecimal(txtprice.Text) <= 0)
+        {
+            string message = "alert('* Please Enter Price..')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+        }
+     
+        con.Open();
+        SqlCommand cmd1 = new SqlCommand("select Charge,catagory from tblChargeMaster where Charge='" + txtcharge.Text + "'and catagory='"+ddlcategory.SelectedItem.Text+"'", con);
+        object i = cmd1.ExecuteScalar();
+        if (i != null)
+        {
+            string message = "alert('* Charge Name " + txtcharge.Text + "under catagory "+ddlcategory.SelectedItem.Text+" Is Already Exist.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+        }
+        using (SqlCommand cmd = new SqlCommand("ADMIN_Charges_Master", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+            cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+            cmd.Parameters.Add("@Charge", SqlDbType.VarChar).Value = txtcharge.Text.ToUpper();
+            cmd.Parameters.Add("@Price", SqlDbType.Decimal).Value = txtprice.Text;
+            cmd.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = ddlcategory.SelectedItem.Text.ToUpper();
+            cmd.Parameters.Add("@ID", SqlDbType.Int).Value =1;
+            cmd.ExecuteNonQuery();
+        }
+        clearcontrol();
+        string message1 = "alert('Successfully Saved.')";
+        ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        con.Close();
+        binddata();
+        }
+        catch (Exception ex)
+        {
+            con.Close();
+            string message = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        }
+    }
+
+    public void clearcontrol()
+    {
+        ddlcategory.SelectedIndex = 0;
+        txtcharge.Text = "";
+        txtprice.Text = "";
+    }
+    protected void Button2_Click(object sender, EventArgs e)
+    {
+        try
+        {
+        if(ddlcategory.SelectedIndex == 0)
+        {
+            string message = "alert('* Please Select The Category..')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+        }
+        else if (txtcharge.Text == "")
+        {
+            string message = "alert('* Please Enter Charge Name..')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+        }
+        else if (txtprice.Text == "" || Convert.ToDecimal(txtprice.Text) <= 0)
+        {
+            string message = "alert('* Please Enter Price.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+        }
+    
+        con.Open();
+        using (SqlCommand cmd = new SqlCommand("ADMIN_Charges_Master", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+            cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+            cmd.Parameters.Add("@Charge", SqlDbType.VarChar).Value = txtcharge.Text.ToUpper();
+            cmd.Parameters.Add("@Price", SqlDbType.Decimal).Value = txtprice.Text;
+            cmd.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = ddlcategory.SelectedItem.Text.ToUpper();
+            cmd.Parameters.Add("@ID", SqlDbType.Int).Value = txtid.Text;
+            cmd.ExecuteNonQuery();
+        }
+     
+        con.Close();
+        clearcontrol();
+        binddata();
+       
+        string message1 = "alert('Updated Sucessfully.')";
+        ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+       }
+        catch (Exception ex)
+        {
+            con.Close();
+            string message = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        }
+       // Response.Redirect("~/ADMIN/Charges.aspx");
+    }
+    protected void Button3_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/ADMIN/Charges.aspx");
+    }
+}

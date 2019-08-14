@@ -1,0 +1,348 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Data;
+public partial class ADMIN_Corporate_Emp : System.Web.UI.Page
+{
+    string num1 = "SJ000";
+    SqlConnection con;
+    SqlCommand com, cmd;
+    SqlDataReader dr;
+    SqlDataAdapter da;
+    DataTable dt;
+    decimal total_amt = 0;
+    decimal total_vat_amt = 0;
+    int i, no, no1, sl;
+    GridViewRow gr;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+        if (!IsPostBack)
+        {
+            binddata();
+        }
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        using (SqlCommand cmd = new SqlCommand("ADMIN_DISC_EMPLOYEE", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_GRID_PAGE";
+            cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = "NULL";
+            cmd.Parameters.Add("@CARDNAME", SqlDbType.VarChar).Value = "NULL";
+            cmd.Parameters.Add("@ROOMRENT", SqlDbType.VarChar).Value = "SELECT_DEPT";
+            cmd.Parameters.Add("@PHARMACY", SqlDbType.VarChar).Value = "NULL";
+            cmd.Parameters.Add("@LAB", SqlDbType.VarChar).Value = "NULL";
+            cmd.Parameters.Add("@RADIOLOGY", SqlDbType.VarChar).Value = "SELECT_DEPT";
+            cmd.Parameters.Add("@OT", SqlDbType.VarChar).Value = "NULL";
+            SqlDataAdapter Adp = new SqlDataAdapter(cmd);
+            //SqlDataAdapter Adp = new SqlDataAdapter("select ID,CARDNAME,ROOMRENT,PHARMACY,LAB,RADIOLOGY,OT from STAFF_DISC_MASTER", con);
+            DataTable Dt = new DataTable();
+            Adp.Fill(Dt);
+            grvdoctor.DataSource = Dt;
+            grvdoctor.DataBind();
+        }
+        //----------------------
+        //DataTable dt = new DataTable();
+        //dt.Columns.AddRange(new DataColumn[3] { new DataColumn("ID"), new DataColumn("INV"), new DataColumn("PRICE") });
+        //ViewState["ITEM"] = dt;
+        //this.BindGrid();
+
+        try
+        {
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+        con.Close();
+    }
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            // Validation
+            if (txtcardname.Text == "")
+            {
+                string message = "alert('* Card Type are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtdiscpharmacy.Text == "" || txtdiscpharmacy.Text == "0")
+            {
+                txtdisclab.Text = "0.00";
+            }
+            else if (txtdisclab.Text == "" || txtdisclab.Text == "0")
+            {
+                txtdisclab.Text = "0.00";
+            }
+            else if (txtroomcharge.Text == "" || txtroomcharge.Text == "0")
+            {
+                txtdisclab.Text = "0.00";
+            }
+            else if (txtdiscradilogy.Text == "" || txtdiscradilogy.Text == "0")
+            {
+                txtdisclab.Text = "0.00";
+            }
+            else if (txtdiscot.Text == "" || txtdiscot.Text == "0")
+            {
+                txtdisclab.Text = "0.00";
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            using (SqlCommand cmd = new SqlCommand("ADMIN_DISC_EMPLOYEE", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_EVENT";
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd.Parameters.Add("@CARDNAME", SqlDbType.VarChar).Value = txtcardname.Text;
+                cmd.Parameters.Add("@ROOMRENT", SqlDbType.VarChar).Value = txtroomcharge.Text;
+                cmd.Parameters.Add("@PHARMACY", SqlDbType.VarChar).Value = txtdiscpharmacy.Text;
+                cmd.Parameters.Add("@LAB", SqlDbType.VarChar).Value = txtdisclab.Text;
+                cmd.Parameters.Add("@RADIOLOGY", SqlDbType.VarChar).Value = txtdiscradilogy.Text;
+                cmd.Parameters.Add("@OT", SqlDbType.VarChar).Value = txtdiscot.Text;
+                SqlDataReader dr1 = cmd.ExecuteReader();
+                if (dr1.Read() == true)
+                {
+                    string message = "alert('This Card Name Is Already Present For Discount..')";
+                    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                    return;
+                }
+                dr1.Close();
+            }
+            using (SqlCommand cmd = new SqlCommand("ADMIN_DISC_EMPLOYEE", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = "NULL";
+                cmd.Parameters.Add("@CARDNAME", SqlDbType.VarChar).Value = txtcardname.Text;
+                cmd.Parameters.Add("@ROOMRENT", SqlDbType.VarChar).Value = txtroomcharge.Text;
+                cmd.Parameters.Add("@PHARMACY", SqlDbType.VarChar).Value = txtdiscpharmacy.Text;
+                cmd.Parameters.Add("@LAB", SqlDbType.VarChar).Value = txtdisclab.Text;
+                cmd.Parameters.Add("@RADIOLOGY", SqlDbType.VarChar).Value = txtdiscradilogy.Text;
+                cmd.Parameters.Add("@OT", SqlDbType.VarChar).Value = txtdiscot.Text;
+                //SqlCommand cmd1 = new SqlCommand("insert into STAFF_DISC_MASTER (CARDNAME,ROOMRENT,PHARMACY,LAB,RADIOLOGY,OT) values (@CARDNAME,@ROOMRENT,@PHARMACY,@LAB,@RADIOLOGY,@OT)", con);
+                //cmd1.Parameters.Add("@CARDNAME", SqlDbType.VarChar).Value = txtcardname.Text;
+                //cmd1.Parameters.Add("@ROOMRENT", SqlDbType.VarChar).Value = txtroomcharge.Text;
+                //cmd1.Parameters.Add("@PHARMACY", SqlDbType.VarChar).Value = txtdiscpharmacy.Text;
+                //cmd1.Parameters.Add("@LAB", SqlDbType.VarChar).Value = txtdisclab.Text;
+                //cmd1.Parameters.Add("@RADIOLOGY", SqlDbType.VarChar).Value = txtdiscradilogy.Text;
+                //cmd1.Parameters.Add("@OT", SqlDbType.VarChar).Value = txtdiscot.Text;
+                cmd.ExecuteNonQuery();
+            }
+            string message1 = "alert('Created Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+            resetCt();
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+        
+    }
+    public void resetCt()
+    {
+       txtcardname.Text = "";
+       txtroomcharge.Text = "";
+       txtdiscpharmacy.Text = "";
+        txtdisclab.Text = "";
+        txtdiscradilogy.Text="";
+        txtdiscot.Text = "";
+    }
+    protected void Button2_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            // Validation
+            if (txtcardname.Text == "")
+            {
+                string message = "alert('* Card Type are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtdiscpharmacy.Text == "" || txtdiscpharmacy.Text == "0")
+            {
+                txtdisclab.Text = "0.00";
+            }
+            else if (txtdisclab.Text == "" || txtdisclab.Text == "0")
+            {
+                txtdisclab.Text = "0.00";
+            }
+            else if (txtroomcharge.Text == "" || txtroomcharge.Text == "0")
+            {
+                txtdisclab.Text = "0.00";
+            }
+            else if (txtdiscradilogy.Text == "" || txtdiscradilogy.Text == "0")
+            {
+                txtdisclab.Text = "0.00";
+            }
+            else if (txtdiscot.Text == "" || txtdiscot.Text == "0")
+            {
+                txtdisclab.Text = "0.00";
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            
+            using (SqlCommand cmd = new SqlCommand("ADMIN_DISC_EMPLOYEE", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd.Parameters.Add("@CARDNAME", SqlDbType.VarChar).Value = txtcardname.Text;
+                cmd.Parameters.Add("@ROOMRENT", SqlDbType.VarChar).Value = txtroomcharge.Text;
+                cmd.Parameters.Add("@PHARMACY", SqlDbType.VarChar).Value = txtdiscpharmacy.Text;
+                cmd.Parameters.Add("@LAB", SqlDbType.VarChar).Value = txtdisclab.Text;
+                cmd.Parameters.Add("@RADIOLOGY", SqlDbType.VarChar).Value = txtdiscradilogy.Text;
+                cmd.Parameters.Add("@OT", SqlDbType.VarChar).Value = txtdiscot.Text;
+                //SqlCommand cmd1 = new SqlCommand("update STAFF_DISC_MASTER set CARDNAME=@CARDNAME,ROOMRENT=@ROOMRENT,PHARMACY=@PHARMACY,LAB=@LAB,RADIOLOGY=@RADIOLOGY,OT=@OT where ID=@ID", con);
+                //cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                //cmd1.Parameters.Add("@CARDNAME", SqlDbType.VarChar).Value = txtcardname.Text;
+                //cmd1.Parameters.Add("@ROOMRENT", SqlDbType.VarChar).Value = txtroomcharge.Text;
+                //cmd1.Parameters.Add("@PHARMACY", SqlDbType.VarChar).Value = txtdiscpharmacy.Text;
+                //cmd1.Parameters.Add("@LAB", SqlDbType.VarChar).Value = txtdisclab.Text;
+                //cmd1.Parameters.Add("@RADIOLOGY", SqlDbType.VarChar).Value = txtdiscradilogy.Text;
+                //cmd1.Parameters.Add("@OT", SqlDbType.VarChar).Value = txtdiscot.Text;
+                cmd.ExecuteNonQuery();
+            }
+            string message1 = "alert('Updated Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+            resetCt();
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+        Response.Redirect("~/ADMIN/Disctoemployee.aspx");
+    }
+    protected void grvdoctor_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        var slno = grvdoctor.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        using (SqlCommand cmd = new SqlCommand("ADMIN_DISC_EMPLOYEE", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_EVENT";
+            cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = slno;
+            cmd.Parameters.Add("@CARDNAME", SqlDbType.VarChar).Value = txtcardname.Text;
+            cmd.Parameters.Add("@ROOMRENT", SqlDbType.VarChar).Value = txtroomcharge.Text;
+            cmd.Parameters.Add("@PHARMACY", SqlDbType.VarChar).Value = txtdiscpharmacy.Text;
+            cmd.Parameters.Add("@LAB", SqlDbType.VarChar).Value = txtdisclab.Text;
+            cmd.Parameters.Add("@RADIOLOGY", SqlDbType.VarChar).Value = txtdiscradilogy.Text;
+            cmd.Parameters.Add("@OT", SqlDbType.VarChar).Value = txtdiscot.Text;
+            //SqlCommand com = new SqlCommand("select * from STAFF_DISC_MASTER where ID='" + slno + "'", con);
+            dr = cmd.ExecuteReader();
+            if (dr.Read())
+            {
+                btncreate.Visible = false;
+                btnupdate.Visible = true;
+                txtid.Text = slno.ToString();
+                txtcardname.Text = dr["CARDNAME"].ToString();
+                txtroomcharge.Text = dr["ROOMRENT"].ToString();
+                txtdiscpharmacy.Text = dr["PHARMACY"].ToString();
+                txtdisclab.Text = dr["LAB"].ToString();
+                txtdiscradilogy.Text = dr["RADIOLOGY"].ToString();
+                txtdiscot.Text = dr["OT"].ToString();
+            }
+            dr.Close();
+        }
+        con.Close();
+    }
+    protected void grvdoctor_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            // reference the Delete LinkButton
+            LinkButton db = (LinkButton)e.Row.Cells[7].Controls[0];
+
+            db.OnClientClick = "return confirm('Are you sure want to delete this item ?');";
+        }
+    }
+    protected void grvdoctor_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+
+        string slno = grvdoctor.DataKeys[e.RowIndex].Values["ID"].ToString();
+        using (SqlCommand cmd = new SqlCommand("ADMIN_DISC_EMPLOYEE", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "DELETE";
+            cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = slno;
+            cmd.Parameters.Add("@CARDNAME", SqlDbType.VarChar).Value = txtcardname.Text;
+            cmd.Parameters.Add("@ROOMRENT", SqlDbType.VarChar).Value = txtroomcharge.Text;
+            cmd.Parameters.Add("@PHARMACY", SqlDbType.VarChar).Value = txtdiscpharmacy.Text;
+            cmd.Parameters.Add("@LAB", SqlDbType.VarChar).Value = txtdisclab.Text;
+            cmd.Parameters.Add("@RADIOLOGY", SqlDbType.VarChar).Value = txtdiscradilogy.Text;
+            cmd.Parameters.Add("@OT", SqlDbType.VarChar).Value = txtdiscot.Text;
+            //SqlCommand cm = new SqlCommand("delete from STAFF_DISC_MASTER where ID='" + slno + "'", con);
+            cmd.ExecuteNonQuery();
+        }
+        binddata();
+        con.Close();
+    }
+    protected void grvdoctor_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        using (SqlCommand cmd = new SqlCommand("ADMIN_DISC_EMPLOYEE", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_GRID_PAGE";
+            cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = "";
+            cmd.Parameters.Add("@CARDNAME", SqlDbType.VarChar).Value = txtcardname.Text;
+            cmd.Parameters.Add("@ROOMRENT", SqlDbType.VarChar).Value = txtroomcharge.Text;
+            cmd.Parameters.Add("@PHARMACY", SqlDbType.VarChar).Value = txtdiscpharmacy.Text;
+            cmd.Parameters.Add("@LAB", SqlDbType.VarChar).Value = txtdisclab.Text;
+            cmd.Parameters.Add("@RADIOLOGY", SqlDbType.VarChar).Value = txtdiscradilogy.Text;
+            cmd.Parameters.Add("@OT", SqlDbType.VarChar).Value = txtdiscot.Text;
+            SqlDataAdapter Adp = new SqlDataAdapter(cmd);
+            //SqlDataAdapter Adp = new SqlDataAdapter("select ID,CARDNAME,ROOMRENT,PHARMACY,LAB,RADIOLOGY,OT from STAFF_DISC_MASTER", con);
+            DataTable dt = new DataTable();
+            Adp.Fill(dt);
+            grvdoctor.DataSource = dt;
+            grvdoctor.PageIndex = e.NewPageIndex;
+            grvdoctor.DataKeyNames = new string[] { "id" };
+            grvdoctor.DataBind();
+        }
+        con.Close();
+    }
+}

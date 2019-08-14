@@ -1,0 +1,379 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class ADMIN_AmbulanceMaster : System.Web.UI.Page
+{
+    SqlDataReader dr;
+   
+    SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        try{
+        //SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+      
+       
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        //lbluid.Text = Session["UID"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+
+        binddata();
+    
+         }
+      
+        catch (Exception ex)
+        {
+            con.Close();
+            string message = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        }
+
+    }
+    protected void GridView1_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            // reference the Delete LinkButton
+            LinkButton db = (LinkButton)e.Row.Cells[3].Controls[0];
+
+            db.OnClientClick = "return confirm('Are you sure want to delete this patient info ?');";
+        }
+    }
+    public void binddata()
+    {
+       // SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        try
+        {
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+
+        using (SqlCommand cmd = new SqlCommand("ADMIN_Ambulance_entry", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECTALL";
+            cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+            cmd.Parameters.Add("@AmbulanceNo", SqlDbType.VarChar).Value = txtambulanceno.Text;
+            cmd.Parameters.Add("@VehicleName", SqlDbType.VarChar).Value = txtvehiclename.Text;
+            cmd.Parameters.Add("@VehicleRegNo", SqlDbType.VarChar).Value = txtvehicleregno.Text;
+            cmd.Parameters.Add("@id", SqlDbType.Int).Value = 1;
+            cmd.ExecuteNonQuery();
+            SqlDataAdapter Adp = new SqlDataAdapter(cmd);
+            DataTable Dt = new DataTable();
+            Adp.Fill(Dt);
+            GridView1.DataSource = Dt;
+            GridView1.DataBind();
+        }
+       
+        con.Close();
+
+    }
+
+    protected void gvDetails_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        try
+        {
+           
+            con.Open();
+
+            string slno = GridView1.DataKeys[e.RowIndex].Values["id"].ToString();
+            //SqlCommand cm = new SqlCommand("delete from tblAmbulanceEntry where id='" + slno + "'", con);
+            //cm.ExecuteNonQuery();
+
+            using (SqlCommand cmd = new SqlCommand("ADMIN_Ambulance_entry", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "DELETE";
+                cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                cmd.Parameters.Add("@AmbulanceNo", SqlDbType.VarChar).Value = txtambulanceno.Text;
+                cmd.Parameters.Add("@VehicleName", SqlDbType.VarChar).Value = txtvehiclename.Text;
+                cmd.Parameters.Add("@VehicleRegNo", SqlDbType.VarChar).Value = txtvehicleregno.Text;
+                cmd.Parameters.Add("@id", SqlDbType.Int).Value = slno;
+                cmd.ExecuteNonQuery();
+            }
+            con.Close();
+            binddata();
+        }
+      
+        catch (Exception ex)
+        {
+            con.Close();
+            string message = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        }
+     
+    }
+
+    protected void GridView1_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        
+        try
+        {
+        var slno = GridView1.DataKeys[e.NewSelectedIndex].Values["id"].ToString();
+        //SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        using (SqlCommand cmd = new SqlCommand("ADMIN_Ambulance_entry", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT";
+            cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+            cmd.Parameters.Add("@AmbulanceNo", SqlDbType.VarChar).Value = txtambulanceno.Text;
+            cmd.Parameters.Add("@VehicleName", SqlDbType.VarChar).Value = txtvehiclename.Text;
+            cmd.Parameters.Add("@VehicleRegNo", SqlDbType.VarChar).Value = txtvehicleregno.Text;
+            cmd.Parameters.Add("@id", SqlDbType.Int).Value = slno;
+            dr = cmd.ExecuteReader();
+            if (dr.Read())
+            {
+                btnSubmit.Visible = false;
+                btnupdate.Visible = true;
+                txtid.Text = dr["ID"].ToString();
+                txtambulanceno.Text = dr["AmbulanceNo"].ToString();
+                txtvehiclename.Text = dr["VehicleName"].ToString();
+                txtvehicleregno.Text = dr["VehicleRegNo"].ToString();
+            }
+            dr.Close();
+        }
+        con.Close();
+        }
+        catch (Exception ex)
+        {
+             string message = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        }
+
+        //SqlCommand com = new SqlCommand("SELECT id,AmbulanceNo,VehicleName,VehicleRegNo from tblAmbulanceEntry where id='" + slno + "'", con);
+        //dr = com.ExecuteReader();
+        //if (dr.Read())
+        //{
+        //    btnSubmit.Visible = false;
+        //    btnupdate.Visible = true;
+        //    txtid.Text = dr["ID"].ToString();
+        //    txtambulanceno.Text = dr["AmbulanceNo"].ToString();
+        //    txtvehiclename.Text = dr["VehicleName"].ToString();
+        //    txtvehicleregno.Text = dr["VehicleRegNo"].ToString();
+        //}
+        //dr.Close();
+     
+    }
+
+    protected void GridView1_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        //SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        try
+        {
+            using (SqlCommand cmd = new SqlCommand("ADMIN_Ambulance_entry", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECTALL";
+                cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                cmd.Parameters.Add("@AmbulanceNo", SqlDbType.VarChar).Value = txtambulanceno.Text;
+                cmd.Parameters.Add("@VehicleName", SqlDbType.VarChar).Value = txtvehiclename.Text;
+                cmd.Parameters.Add("@VehicleRegNo", SqlDbType.VarChar).Value = txtvehicleregno.Text;
+                cmd.Parameters.Add("@id", SqlDbType.Int).Value = 1;
+                cmd.ExecuteNonQuery();
+                SqlDataAdapter Adp = new SqlDataAdapter(cmd);
+                DataTable Dt = new DataTable();
+                Adp.Fill(Dt);
+                GridView1.DataSource = Dt;
+                GridView1.PageIndex = e.NewPageIndex;
+                GridView1.DataKeyNames = new string[] { "id" };
+                GridView1.DataBind();
+            }
+        }
+        
+        catch (Exception ex)
+        {
+            con.Close();
+            string message = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+        }
+      
+        con.Close();
+    }
+
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtambulanceno.Text == "")
+            {
+                string message = "alert('* Ambulance No. is mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            else if (txtvehiclename.Text == "")
+            {
+                string message = "alert('* Vehicle Name is mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            else if (txtvehicleregno.Text == "")
+            {
+                string message = "alert('* Vehicle Registration No is mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+           // SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand cmd1 = new SqlCommand("select AmbulanceNo,VehicleRegNo from tblAmbulanceEntry where VehicleRegNo='" + txtvehicleregno.Text + "' or AmbulanceNo='" + txtambulanceno.Text + "'", con);
+            object i = cmd1.ExecuteScalar();
+            if (i != null)
+            {
+                string message = "alert('* AmbulanceNo/VehicleRegNo or Both Already Exist.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (i != null)
+            {
+                string message = "alert('* VehicleRegNo" + txtvehicleregno.Text + " Already Exist.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+
+
+            using (SqlCommand cmd = new SqlCommand("ADMIN_Ambulance_entry", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                cmd.Parameters.Add("@AmbulanceNo", SqlDbType.VarChar).Value = txtambulanceno.Text;
+                cmd.Parameters.Add("@VehicleName", SqlDbType.VarChar).Value = txtvehiclename.Text;
+                cmd.Parameters.Add("@VehicleRegNo", SqlDbType.VarChar).Value = txtvehicleregno.Text;
+                cmd.Parameters.Add("@id", SqlDbType.Int).Value = 1;
+                cmd.ExecuteNonQuery();
+            }
+            clearcontrol();
+            string message1 = "alert('Successfully Saved.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+            con.Close();
+            binddata();
+           
+        }
+        catch (Exception ex)
+        {
+            con.Close();
+            string message = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        }
+        // Validation
+      
+    }
+    public void clearcontrol()
+    {
+        txtambulanceno.Text = "";
+        txtvehiclename.Text = "";
+        txtvehicleregno.Text = "";
+    }
+    protected void Button2_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtambulanceno.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            else if (txtvehiclename.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            else if (txtvehicleregno.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+
+            //else if (j != null)
+            //{
+            //    string message = "alert('* VehicleRegNo" + txtvehicleregno.Text + " Already Exist.')";
+            //    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            //    return;
+            //}
+            con.Open();
+
+            using (SqlCommand cmd = new SqlCommand("ADMIN_Ambulance_entry", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+                cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                cmd.Parameters.Add("@AmbulanceNo", SqlDbType.VarChar).Value = txtambulanceno.Text;
+                cmd.Parameters.Add("@VehicleName", SqlDbType.VarChar).Value = txtvehiclename.Text;
+                cmd.Parameters.Add("@VehicleRegNo", SqlDbType.VarChar).Value = txtvehicleregno.Text;
+                cmd.Parameters.Add("@id", SqlDbType.Int).Value = txtid.Text;
+                cmd.ExecuteNonQuery();
+            }
+            //SqlCommand cmd1 = new SqlCommand("UPDATE tblAmbulanceEntry SET AmbulanceNo=@AmbulanceNo,VehicleName=@VehicleName,VehicleRegNo=@VehicleRegNo WHERE id=@id", con);
+            //cmd1.Parameters.Add("@id", SqlDbType.VarChar).Value = txtid.Text;
+            //cmd1.Parameters.Add("@AmbulanceNo", SqlDbType.VarChar).Value = txtambulanceno.Text;
+            //cmd1.Parameters.Add("@VehicleName", SqlDbType.VarChar).Value = txtvehiclename.Text;
+            //cmd1.Parameters.Add("@VehicleRegNo", SqlDbType.VarChar).Value = txtvehicleregno.Text;
+            //cmd1.ExecuteNonQuery();
+
+            string message1 = "alert('Successfully Updated.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+          
+            con.Close();
+            clearcontrol();
+            binddata();
+          //  Response.Redirect("~/Admin/AmbulanceEntry.aspx");
+        }
+        catch (Exception ex)
+        {
+            string message = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        }
+                    
+        // Validation
+      
+    }
+    protected void Button3_Click(object sender, EventArgs e)
+    {
+        binddata();
+        Response.Redirect("~/Admin/AmbulanceEntry.aspx");
+    }
+}

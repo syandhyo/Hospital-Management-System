@@ -1,0 +1,94 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="AuthenticateUser.aspx.vb" Inherits="ADMIN_AuthenticateUser" %>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>Authenticate user</title>
+    <script src="js/jquery-1.8.3.min.js"></script>
+       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            showChooseBranch();
+        });
+        function showChooseBranch() {
+            //$('#myModal').modal('show');
+            if (getbranch_multi()) {
+                populatebranchddls();
+            }
+        }
+        function getbranch_multi() {
+            $.ajax({
+                url: "AuthenticateUser.aspx/getData",
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(qObj),
+                success: function (result) {
+                    if (result != null && result.d != null) {
+                        var data = result.d;
+                        data = $.parseJSON(data);
+                        if (data.CODE == "1") {
+
+                            if (data.ERRCODE != 11) {
+                                document.getElementById('<%= btncancel.ClientID %>').click();
+                            }
+                            alert(data.DEFAULTMSG);
+
+                        }
+                        else if (data.CODE == "2") {
+
+                            alert(data.DEFAULTMSG);
+                            if (data.ERRCODE != 12) {
+                                document.getElementById('<%= btncancel.ClientID %>').click();
+                            }
+                        }
+                        else {
+                            alert(data.DEFAULTMSG);
+                            document.getElementById('<%= btncancel.ClientID %>').click();
+                        }
+                }
+
+                    closeModalLoading();
+
+                },
+                error: function (err) {
+                    alert(err.statusText)
+                    closeModalLoading();
+                }
+            });
+        }
+
+        function populatebranchddls() {
+
+        }
+    </script>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+    <!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Choose Branch</h4>
+        </div>
+        <div class="modal-body">
+          branch
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+    </div>
+    </form>
+</body>
+</html>

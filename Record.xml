@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<newdataset>
+  <table>
+    <id>1</id>
+  <name>Aneesh</name>
+  <city>Cuttack</city>
+    <address>XYZ</address>
+  </table>
+<table>
+    <id>2</id>
+  <name>Lalit</name>
+  <city>Bhubaneswar</city>
+    <address>Bhubaneswar</address>
+  </table>
+<table>
+    <id>3</id>
+  <name>Pankaj</name>
+  <city>Baripada</city>
+    <address>XYZ</address>
+  </table>
+</newdataset>
+
+

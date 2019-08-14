@@ -1,0 +1,557 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class LABORATORY_Patho_rates_corporates : System.Web.UI.Page
+{
+    string num1 = "PR000";
+    SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+    SqlCommand com, cmd, cmd1, cmd2;
+    SqlDataReader dr;
+    SqlDataAdapter da, da1;
+    DataTable dt;
+    public void auto()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        string qry1 = " select ID from dbo.PATHO_CORPO_CATA";
+
+        com = new SqlCommand(qry1, con);
+        dr = null;
+
+        dr = com.ExecuteReader();
+
+        while (dr.Read())
+        {
+            num1 = dr["ID"].ToString();
+        }
+        num1 = string.Format("PC{0}", (Convert.ToUInt32(num1.Substring(2)) + 1).ToString("D4"));
+        TXTID.Text = num1;
+
+
+        dr.Close();
+        con.Close();
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        try
+        {
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+        con.Close();
+
+    }
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+        if (IsPostBack != true)
+        {
+            //DataTable dt = new DataTable();
+            //dt.Columns.AddRange(new DataColumn[6] { new DataColumn("ID"), new DataColumn("NAME"), new DataColumn("INV"), new DataColumn("RANGE"), new DataColumn("UNIT"), new DataColumn("PRICE") });
+            //ViewState["ITEM"] = dt;
+
+            using (SqlCommand cmd = new SqlCommand("LAB_CORPO_RATES_SELDEL", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_CORPO";
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = "";
+                cmd.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy/MM/dd"); ;
+                cmd.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = "";
+                cmd.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = "";
+                cmd.Parameters.Add("@NAME", SqlDbType.VarChar).Value = "";
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                //SqlDataAdapter da = new SqlDataAdapter("select * from [dbo].[Corporate_Table] where ISACTIVE='true'", con);
+                DataTable ds = new DataTable();
+                da.Fill(ds);
+                Ddlincrnce.DataSource = ds;
+                Ddlincrnce.DataTextField = "CNAME";
+                Ddlincrnce.DataValueField = "ID";
+                Ddlincrnce.DataBind();
+                Ddlincrnce.Items.Insert(0, "---Select---");
+            }
+            using (SqlCommand cmd1 = new SqlCommand("LAB_CORPO_RATES_SELDEL", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_TEST";
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = "";
+                cmd1.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy/MM/dd"); ;
+                cmd1.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = "";
+                cmd1.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = "";
+                cmd1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = "";
+                SqlDataAdapter da1 = new SqlDataAdapter(cmd1);
+                //SqlDataAdapter da1 = new SqlDataAdapter("select * from [dbo].[TEST_CATEGORY_TABLE]", con);
+                DataTable ds1 = new DataTable();
+                da1.Fill(ds1);
+                ddltesttype.DataSource = ds1;
+                ddltesttype.DataTextField = "NAME";
+                ddltesttype.DataValueField = "ID";
+                ddltesttype.DataBind();
+                ddltesttype.Items.Insert(0, "---Select---");
+            }
+        }
+        con.Close();
+        binddata();
+        bind();
+    }
+    public void bind()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        using (SqlCommand cmd1 = new SqlCommand("LAB_CORPO_RATES_SELDEL", con))
+        {
+            cmd1.CommandType = CommandType.StoredProcedure;
+            cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_BIND_PAGE";
+            cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = "";
+            cmd1.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy/MM/dd"); ;
+            cmd1.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = "";
+            cmd1.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = "";
+            cmd1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = "";
+            SqlDataAdapter Adp = new SqlDataAdapter(cmd1);
+            //SqlDataAdapter Adp = new SqlDataAdapter("select * from dbo.PATHO_CORPO_CATA order by SLNO desc", con);
+            DataTable Dt = new DataTable();
+            Adp.Fill(Dt);
+            GridView2.DataSource = Dt;
+            GridView2.DataBind();
+        }
+        con.Close();
+    }
+    protected void ddltesttype_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        if (ddltesttype.SelectedIndex != 0)
+        {
+            using (SqlCommand cmd1 = new SqlCommand("LAB_CORPO_RATES_SELDEL", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_DROP";
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = ddltesttype.SelectedValue.ToString();
+                cmd1.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy/MM/dd"); ;
+                cmd1.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = "";
+                cmd1.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = "";
+                cmd1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = "";
+                SqlDataAdapter da = new SqlDataAdapter(cmd1);
+                DataTable dt = new DataTable();
+                //SqlDataAdapter da = new SqlDataAdapter("select A.slno AS ID,A.ID AS slno ,A.NAME AS NAME,A.INV AS INV,A.PRICE AS PRICE,A.REF AS RANGE, A.UNIT AS UNIT from TEST_COMPONENT_TABLE A,TEST_CATEGORY_TABLE B,TEST_NAME_TABLE C WHERE A.ID=C.ID AND C.CATEGORY=B.ID AND B.ID='" + ddltesttype.SelectedValue.ToString() + "'", con);
+                da.Fill(dt);
+                GridView1.DataSource = null;
+                GridView1.DataBind();
+                GridView1.DataSource = dt;
+                //GridView1.SelectedIndex = 0;
+                GridView1.DataKeyNames = new string[] { "ID" };
+                GridView1.DataBind();
+            }
+        }
+        con.Close();
+        Txtdate.Enabled = true;
+    }
+    protected void btncreate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (Ddlincrnce.SelectedIndex == 0)
+            {
+                string message = "alert('Please Select The Corporate Name.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (ddltesttype.SelectedIndex == 0)
+            {
+                string message = "alert('Please Select Test Type.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (Txtdate.Text == "")
+            {
+                string message = "alert('Please Select The Apply Date..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else
+            {
+                SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+                con.Open();
+                if (Ddlincrnce.SelectedIndex != 0 && ddltesttype.SelectedIndex != 0 && Txtdate.Text != "")
+                {
+                    using (SqlCommand cmd2 = new SqlCommand("LAB_CORPO_RATES_SELDEL", con))
+                    {
+                        cmd2.CommandType = CommandType.StoredProcedure;
+                        cmd2.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_CREATE";
+                        cmd2.Parameters.Add("@ID", SqlDbType.VarChar).Value = "";
+                        cmd2.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value =Convert.ToDateTime(Txtdate.Text).ToString("dd-MM-yy");
+                        cmd2.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+                        cmd2.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = ddltesttype.SelectedItem.Text;
+                        cmd2.Parameters.Add("@NAME", SqlDbType.VarChar).Value = "";
+                        //SqlDataAdapter Adp = new SqlDataAdapter(cmd1);
+                        //SqlCommand cmd = new SqlCommand("SELECT * from dbo.PATHO_CORPO_CATA where CORPORATE='" + Ddlincrnce.SelectedItem.Text + "' and CATAGORY='" + ddltesttype.SelectedItem.Text + "' and APPLY_DATE='" + Txtdate.Text + "'", con);
+                        dr = cmd2.ExecuteReader();
+                        if (dr.Read() == true)
+                        {
+                            dr.Close();
+
+                            string message4 = "alert(' Please Change The Apply Date..')";
+                            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message4, true);
+                            return;
+                        }
+                    }
+                    dr.Close();
+                }
+                auto();
+
+                foreach (GridViewRow row in GridView1.Rows)
+                {
+                    var id = row.FindControl("lblid") as Label;
+                    var name = row.FindControl("lblname") as Label;
+                    var inv = row.FindControl("lblinv") as Label;
+                    var rnge = row.FindControl("lblrange") as Label;
+                    var unt = row.FindControl("Label1") as Label;
+                    var AMT = row.FindControl("txtprice") as TextBox;
+                    if (AMT.Text == "")
+                    {
+                        AMT.Text = "0";
+                    }
+                    {
+                        //var INV = Convert.ToInt32(GridView1.DataKeys[row.RowIndex].Values[0]);
+                        using (SqlCommand cmd = new SqlCommand("LAB_CORPO_INSRTUPD", con))
+                        {
+                            cmd.CommandType = CommandType.StoredProcedure;
+                            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                            //SqlCommand cmd = new SqlCommand("insert into TEST_COMPONENT_TABLE (ID,ORGID,INV,REF,UNIT,NAME,PRICE,C_ID,CID) values (@ID,@ORGID,@INV,@REF,@UNIT,@NAME,@PRICE,@C_ID,@CID)", con);
+                            cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = id.Text.ToString();
+                            cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                            cmd.Parameters.Add("@INV", SqlDbType.VarChar).Value = inv.Text.ToString();
+                            cmd.Parameters.Add("@REF", SqlDbType.VarChar).Value = rnge.Text.ToString();
+                            cmd.Parameters.Add("@UNIT", SqlDbType.VarChar).Value = unt.Text.ToString();
+                            cmd.Parameters.Add("@NAME", SqlDbType.VarChar).Value = name.Text.ToString();
+                            cmd.Parameters.Add("@PRICE", SqlDbType.Decimal).Value = Convert.ToDecimal(AMT.Text).ToString();
+                            cmd.Parameters.Add("@C_ID", SqlDbType.VarChar).Value = Ddlincrnce.SelectedValue;
+                            cmd.Parameters.Add("@CID", SqlDbType.VarChar).Value = TXTID.Text;
+                            cmd.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+                            cmd.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = ddltesttype.SelectedItem.Text;
+                            cmd.Parameters.Add("@DATE", SqlDbType.Date).Value = DateTime.Now.ToString("yyyy/MM/dd");
+                            cmd.Parameters.Add("@APPLY_DATE", SqlDbType.Date).Value = DateTime.Now.ToString("yyyy/MM/dd");
+                            cmd.ExecuteNonQuery();
+                        }
+
+                    }
+                }
+                using (SqlCommand cmd1 = new SqlCommand("LAB_CORPO_INSRTUPD", con))
+                {
+                    cmd1.CommandType = CommandType.StoredProcedure;
+                    cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT_UPDATE";
+                    //SqlCommand cmd = new SqlCommand("insert into TEST_COMPONENT_TABLE (ID,ORGID,INV,REF,UNIT,NAME,PRICE,C_ID,CID) values (@ID,@ORGID,@INV,@REF,@UNIT,@NAME,@PRICE,@C_ID,@CID)", con);
+                    //cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = id.Text.ToString();
+                    //cmd1.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                    cmd1.Parameters.Add("@INV", SqlDbType.VarChar).Value = "";
+                    cmd1.Parameters.Add("@REF", SqlDbType.VarChar).Value = "";
+                    cmd1.Parameters.Add("@UNIT", SqlDbType.VarChar).Value = "";
+                    cmd1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = "";
+                    cmd1.Parameters.Add("@PRICE", SqlDbType.Decimal).Value = Convert.ToDecimal(0).ToString();
+                    cmd1.Parameters.Add("@C_ID", SqlDbType.VarChar).Value = "";
+                    cmd1.Parameters.Add("@CID", SqlDbType.VarChar).Value = "";
+                    //cmd1.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+                    //cmd1.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = ddltesttype.SelectedItem.Text;
+                    //cmd1.Parameters.Add("@DATE", SqlDbType.Date).Value = DateTime.Now.ToString("yyyy/MM/dd");
+                    //cmd1.Parameters.Add("@APPLY_DATE", SqlDbType.Date).Value = DateTime.Now.ToString("yyyy/MM/dd");
+                    //SqlCommand cmd1 = new SqlCommand("insert into dbo.PATHO_CORPO_CATA (ID,ORGID,CORPORATE,CATAGORY,DATE,APPLY_DATE) values(@ID,@ORGID,@CORPORATE,@CATAGORY,@DATE,@APPLY_DATE)", con);
+                    cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+                    cmd1.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                    cmd1.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+                    cmd1.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = ddltesttype.SelectedItem.Text;
+                    cmd1.Parameters.Add("@DATE", SqlDbType.Date).Value = DateTime.Now.ToString("yyyy/MM/dd");
+                    cmd1.Parameters.Add("@APPLY_DATE", SqlDbType.Date).Value = Convert.ToDateTime(Txtdate.Text).ToString("dd-MM-yy");
+                    cmd1.ExecuteNonQuery();
+                }
+                dr.Close();
+                string message1 = "alert('Successfully Saved.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+                con.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+            
+        Response.Redirect("~/LABORATORY/Patho_rates_corporates.aspx");
+        
+
+    }
+
+
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (Txtdate.Text == "")
+            {
+                string message = "alert('Please Select The Apply Date..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            using (SqlCommand cm1 = new SqlCommand("LAB_CORPO_RATES_SELDEL", con))
+            {
+                cm1.CommandType = CommandType.StoredProcedure;
+                cm1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "DELETE_UPDATE";
+                cm1.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+                cm1.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = Txtdate.Text;
+                cm1.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+                cm1.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = ddltesttype.SelectedItem.Text;
+                cm1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = "";
+                //SqlCommand cm1 = new SqlCommand("delete from dbo.TEST_COMPONENT_TABLE where CID='" + TXTID.Text + "'", con);
+                cm1.ExecuteNonQuery();
+            }
+            foreach (GridViewRow row in GridView3.Rows)
+            {
+                var id = row.FindControl("lblid1") as Label;
+                var name = row.FindControl("lblname1") as Label;
+                var inv = row.FindControl("lblinv1") as Label;
+                var rnge = row.FindControl("lblrange1") as Label;
+                var unt = row.FindControl("Label2") as Label;
+                var AMT = row.FindControl("txtprice1") as TextBox;
+                if (AMT.Text == "")
+                {
+                    AMT.Text = "0";
+                }
+                //var INV = Convert.ToInt32(GridView1.DataKeys[row.RowIndex].Values[0]);
+
+                using (SqlCommand cmd = new SqlCommand("LAB_CORPO_INSRTUPD", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                    //SqlCommand cmd = new SqlCommand("insert into TEST_COMPONENT_TABLE (ID,ORGID,INV,REF,UNIT,NAME,PRICE,C_ID,CID) values (@ID,@ORGID,@INV,@REF,@UNIT,@NAME,@PRICE,@C_ID,@CID)", con);
+                    cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = id.Text.ToString();
+                    cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                    cmd.Parameters.Add("@INV", SqlDbType.VarChar).Value = inv.Text.ToString();
+                    cmd.Parameters.Add("@REF", SqlDbType.VarChar).Value = rnge.Text.ToString();
+                    cmd.Parameters.Add("@UNIT", SqlDbType.VarChar).Value = unt.Text.ToString();
+                    cmd.Parameters.Add("@NAME", SqlDbType.VarChar).Value = name.Text.ToString();
+                    cmd.Parameters.Add("@PRICE", SqlDbType.Decimal).Value = Convert.ToDecimal(AMT.Text).ToString();
+                    cmd.Parameters.Add("@C_ID", SqlDbType.VarChar).Value = Ddlincrnce.SelectedValue;
+                    cmd.Parameters.Add("@CID", SqlDbType.VarChar).Value = TXTID.Text;
+                    cmd.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+                    cmd.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = ddltesttype.SelectedItem.Text;
+                    cmd.Parameters.Add("@DATE", SqlDbType.Date).Value = DateTime.Now.ToString("yyyy/MM/dd");
+                    cmd.Parameters.Add("@APPLY_DATE", SqlDbType.Date).Value = Convert.ToDateTime(Txtdate.Text).ToString("dd-MM-yy");
+                    cmd.ExecuteNonQuery();
+                }
+
+            }
+            using (SqlCommand cmd2 = new SqlCommand("LAB_CORPO_INSRTUPD", con))
+            {
+                cmd2.CommandType = CommandType.StoredProcedure;
+                cmd2.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                //SqlCommand cmd = new SqlCommand("insert into TEST_COMPONENT_TABLE (ID,ORGID,INV,REF,UNIT,NAME,PRICE,C_ID,CID) values (@ID,@ORGID,@INV,@REF,@UNIT,@NAME,@PRICE,@C_ID,@CID)", con);
+                cmd2.Parameters.Add("@ID", SqlDbType.VarChar).Value = "";
+                cmd2.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = "";
+                cmd2.Parameters.Add("@INV", SqlDbType.VarChar).Value = "";
+                cmd2.Parameters.Add("@REF", SqlDbType.VarChar).Value = "";
+                cmd2.Parameters.Add("@UNIT", SqlDbType.VarChar).Value = "";
+                cmd2.Parameters.Add("@NAME", SqlDbType.VarChar).Value = "";
+                cmd2.Parameters.Add("@PRICE", SqlDbType.Decimal).Value = Convert.ToDecimal(0).ToString();
+                cmd2.Parameters.Add("@C_ID", SqlDbType.VarChar).Value = "";
+                cmd2.Parameters.Add("@CID", SqlDbType.VarChar).Value = "";
+                cmd2.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+                cmd2.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = ddltesttype.SelectedItem.Text;
+                cmd2.Parameters.Add("@DATE", SqlDbType.Date).Value = DateTime.Now.ToString("yyyy/MM/dd");
+                cmd2.Parameters.Add("@APPLY_DATE", SqlDbType.Date).Value = Convert.ToDateTime(Txtdate.Text).ToString("dd-MM-yy");
+                //SqlCommand cmd2 = new SqlCommand("update PATHO_CORPO_CATA set APPLY_DATE=@APPLY_DATE where ID='" + TXTID.Text + "'", con);
+                //cmd2.Parameters.Add("@APPLY_DATE", SqlDbType.Date).Value = Txtdate.Text;
+                cmd2.ExecuteNonQuery();
+            }
+            string message1 = "alert('Successfully Updated.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/LABORATORY/Patho_rates_corporates.aspx");
+    }
+    protected void btndelete_Click(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        using (SqlCommand cm1 = new SqlCommand("LAB_CORPO_RATES_SELDEL", con))
+        {
+            cm1.CommandType = CommandType.StoredProcedure;
+            cm1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "DELETE";
+            cm1.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+            cm1.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy/MM/dd");
+            cm1.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = "";
+            cm1.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = "";
+            cm1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = "";
+            //SqlCommand cm = new SqlCommand("delete from PATHO_CORPO_CATA where ID='" + TXTID.Text + "'", con);
+            cm1.ExecuteNonQuery();
+        }
+
+
+        //SqlCommand cm1 = new SqlCommand("delete from TEST_COMPONENT_TABLE where CID='" + TXTID.Text + "'", con);
+        //cm1.ExecuteNonQuery();
+        con.Close();
+
+        Response.Redirect("~/LABORATORY/Patho_rates_corporates.aspx");
+        bind();
+    }
+    protected void btncancel_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/LABORATORY/Patho_rates_corporates.aspx");
+    }
+    protected void GridView2_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        using (SqlCommand cm1 = new SqlCommand("LAB_CORPO_RATES_SELDEL", con))
+        {
+            cm1.CommandType = CommandType.StoredProcedure;
+            cm1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_BIND_PAGE";
+            cm1.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+            cm1.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy/MM/dd");
+            cm1.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = "";
+            cm1.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = "";
+            cm1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = "";
+            SqlDataAdapter Adp = new SqlDataAdapter(cm1);
+            //SqlDataAdapter Adp = new SqlDataAdapter("select * from dbo.PATHO_CORPO_CATA order by SLNO desc", con);
+            DataTable Dt = new DataTable();
+            Adp.Fill(Dt);
+            GridView2.DataSource = Dt;
+            GridView2.PageIndex = e.NewPageIndex;
+            GridView2.DataKeyNames = new string[] { "ID" };
+            GridView2.DataBind();
+        }
+        con.Close();
+    }
+    protected void GridView2_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+            var slno = GridView2.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            using (SqlCommand cm1 = new SqlCommand("LAB_CORPO_RATES_SELDEL", con))
+            {
+                cm1.CommandType = CommandType.StoredProcedure;
+                cm1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_EVENT";
+                cm1.Parameters.Add("@ID", SqlDbType.VarChar).Value = slno;
+                cm1.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy/MM/dd");
+                cm1.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = "";
+                cm1.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = "";
+                cm1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = "";
+                SqlDataAdapter da = new SqlDataAdapter(cm1);
+                //SqlDataAdapter da = new SqlDataAdapter("  select * from TEST_COMPONENT_TABLE where CID='" + slno + "'", con);
+                DataSet ds = new DataSet();
+                da.Fill(ds);
+                btncreate.Visible = false;
+                btndelete.Visible = true;
+                btnupdate.Visible = true;
+                TXTID.Text = ds.Tables[0].Rows[0]["CID"].ToString();
+                GridView3.DataSource = ds;
+                GridView3.DataBind();
+            }
+            GridView1.Visible = false;
+            using (SqlCommand cm = new SqlCommand("LAB_CORPO_RATES_SELDEL", con))
+            {
+                cm.CommandType = CommandType.StoredProcedure;
+                cm.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_EVENT1";
+                cm.Parameters.Add("@ID", SqlDbType.VarChar).Value = slno;
+                cm.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy/MM/dd");
+                cm.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = "";
+                cm.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = "";
+                cm.Parameters.Add("@NAME", SqlDbType.VarChar).Value = "";
+                //SqlDataAdapter Adp = new SqlDataAdapter(cm);
+                //SqlCommand Cm = new SqlCommand("select * from PATHO_CORPO_CATA where ID='" + slno + "'", con);
+                dr = cm.ExecuteReader();
+                if (dr.Read() == true)
+                {
+                    Ddlincrnce.SelectedItem.Text = dr["CORPORATE"].ToString();
+                    ddltesttype.SelectedItem.Text = dr["CATAGORY"].ToString();
+                    Txtdate.Text = dr["APPLY_DATE"].ToString();
+                }
+            }
+            dr.Close();
+
+            Txtdate.Enabled = true;
+            using (SqlCommand Cm = new SqlCommand("LAB_CORPO_RATES_SELDEL", con))
+            {
+                Cm.CommandType = CommandType.StoredProcedure;
+                Cm.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_EVENT2";
+                Cm.Parameters.Add("@ID", SqlDbType.VarChar).Value = slno;
+                Cm.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy/MM/dd");
+                Cm.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = "";
+                Cm.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = "";
+                Cm.Parameters.Add("@NAME", SqlDbType.VarChar).Value = ddltesttype.SelectedItem.Text;
+                SqlDataAdapter da1 = new SqlDataAdapter(Cm);
+                //SqlDataAdapter da1 = new SqlDataAdapter("select * from [dbo].[TEST_CATEGORY_TABLE] where NAME='" + ddltesttype.SelectedItem.Text + "'", con);
+                DataTable ds1 = new DataTable();
+                da1.Fill(ds1);
+                ddltesttype.DataSource = ds1;
+                ddltesttype.DataTextField = "NAME";
+                ddltesttype.DataValueField = "ID";
+                ddltesttype.DataBind();
+            }
+            using (SqlCommand Cm1 = new SqlCommand("LAB_CORPO_RATES_SELDEL", con))
+            {
+                Cm1.CommandType = CommandType.StoredProcedure;
+                Cm1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_EVENT3";
+                Cm1.Parameters.Add("@ID", SqlDbType.VarChar).Value = slno;
+                Cm1.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy/MM/dd");
+                Cm1.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = "";
+                Cm1.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = "";
+                Cm1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+                SqlDataAdapter da2 = new SqlDataAdapter(Cm1);
+                //SqlDataAdapter da2 = new SqlDataAdapter("select * from [dbo].[Corporate_Table] where CNAME='" + Ddlincrnce.SelectedItem.Text + "'", con);
+                DataTable ds2 = new DataTable();
+                da2.Fill(ds2);
+                Ddlincrnce.DataSource = ds2;
+                Ddlincrnce.DataTextField = "CNAME";
+                Ddlincrnce.DataValueField = "ID";
+                Ddlincrnce.DataBind();
+            }
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+}

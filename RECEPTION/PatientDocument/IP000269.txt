@@ -1,0 +1,79 @@
+<table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+
+network password-Wi3KE8e6RU
+Hex={00,5B,B7}
+(EndDate - StartDate).TotalDays
+https://drive.google.com/uc?id=0ByZOIPKLnAeFYWM4alppakNZRTA&export=download
+ghadeibishnuprasad@gmail.com
+
+9556950213-CHANDI
+511010110007588
+https://translate.google.com/manager/website/
+CONVERT(VARCHAR(10),date,101)
+
+
+http://wedesignthemes.com/html/appmojo/demo/
+
+string sample= "sample";
+string lastThree = sample.Substring(sample.Length - 3);
+
+string result = txtps.Text.Substring(0, 1);
+****************************SOURCE OF DATE WHILE RETRIVING DATE FORM DATABASE**********************************
+<%# Convert.ToDateTime(Eval("DateOfBirth")).ToString("yyyy/MM/dd")%> 
+select CONVERT(VARCHAR(10),dateOfBirth,101) FROM EmpTBL  WHERE <>
+
+**************************MESSAGE BOX IN ASP.NET****************************************
+ Response.Write("<script LANGUAGE='JavaScript' >alert('First Save Apartment Details...Then Try Agin.')</script>");
+
+
+**************************SOURCE OF IMAGE CONTROL IN GRIDVIEW******************************************
+ <asp:TemplateField HeaderText="PHOTO">
+<ItemTemplate>
+<asp:Image ID="Image2" runat="server" Height="100PX" Width="100PX" ImageUrl='<%#Eval("PHOTO")%>'/></ItemTemplate>
+</asp:TemplateField>
+
+<button id="Button3" type="submit" class="btn" OnServerClick="btn_SCHOOL_TextChanged" runat="server">Industry</button>
+**************************SIGN OUT ******************************************
+         Session.Clear();
+         Session.RemoveAll();
+         Session.Abandon();
+
+         System.Web.Security.FormsAuthentication.SignOut();
+         Response.Redirect("Default.aspx");
+
+
+**************************RETRIVE DATA IN LABLE USING DATA ADAPTER******************************************
+SqlCommand CM = new SqlCommand("select QTY from STOCK where ITEMTYPE='" + cmbitemtype.Text + "' and ITEMNAME='" + cmbitemname.Text + "' and CATEGORY='" + cmbcategory.Text + "' and DESIGN='" + cmbdesign.Text + "' and TYPE='" + cmbtype.Text + "' and LENGTH='" + cmblength.Text + "' and WIDTH='" + cmbwidth.Text + "' and THICKNESS='" + cmbthickness.Text + "' and COLOUR='" + cmbcolour.Text + "'", con);
+
+                da = new SqlDataAdapter(CM);
+                DataSet DS1 = new DataSet();
+                da.Fill(DS1);
+                SqlDataReader dr = CM.ExecuteReader();
+                lblstock.Text = "0";
+                lblstock.Text = DS.Tables[0].Rows[0]["QTY"].ToString();
+               
+*****************************CROSS JOIN WITH 3 TABLE***************************************
+SELECT EMP.id,EMP.name,EMP.address,EMP.phone,COMPANY.company,COMPANY.designation,COMPANY.salary,VECHILE.joindate,VECHILE.vechile,VECHILE.vno FROM EMP,COMPANY,VECHILE WHERE EMP.id=COMPANY.ID AND COMPANY.company=VECHILE.ID
+
+SELECT EMP.id,EMP.name,EMP.address,EMP.phone,COMPANY.company,COMPANY.designation,COMPANY.salary FROM EMP,COMPANY WHERE EMP.id=COMPANY.id
+********************************INNER JOIN 2 TABLES************************************
+
+SELECT EMP.id,EMP.name,EMP.address,EMP.phone,COMPANY.company,COMPANY.designation,COMPANY.salary,VECHILE.joindate,VECHILE.vechile,VECHILE.vno FROM EMP,COMPANY INNER JOIN VECHILE ON VECHILE.id=COMPANY.id 
+********************************************************************
+        SqlDataAdapter d1a = new SqlDataAdapter("GRN_REPORT", con);
+        da.SelectCommand.CommandType = CommandType.StoredProcedure;
+        da.SelectCommand.Parameters.Add("@GRN_NO", SqlDbType.VarChar).Value = lblgrnno.Text;
+        DataTable dt = new DataTable();
+        da.Fill(dt);
+        GridView1.DataSource = dt;
+        GridView1.DataBind();
+********************************************************
+rakeshnayak203

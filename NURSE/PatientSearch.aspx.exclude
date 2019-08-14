@@ -1,0 +1,180 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/NURSE/MasterPage.master" AutoEventWireup="true" CodeFile="PatientSearch.aspx.cs" Inherits="NURSE_PatientSearch" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" Runat="Server">
+    <asp:Label ID="lblid" runat="server" Text="Label"></asp:Label>(<asp:Label ID="lblfyear" runat="server" Text="Label"></asp:Label>)
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
+ <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+          <ContentTemplate>
+    <div>
+        <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%; text-align: center;" align="right" class="auto-style1"><strong>Patient Search</strong></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+     <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+        <asp:Label ID="lblorgid" runat="server" Text="Label" Visible="false"> </asp:Label>
+            <asp:Label ID="lbluid" runat="server" Text="Label" Visible="false"> </asp:Label>
+       
+    </td>
+</tr>
+</table>
+        <div id="div1" runat="server" style="border: thin solid #000000">
+            <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%; text-align: center;" align="right">OPD Search</td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+            <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label1" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        Search By OPD NO.:</td>
+    <td style="width:30%; text-align: left;" align="right">
+        <asp:TextBox ID="txtspid" runat="server" BackColor="#CCFFFF" ></asp:TextBox>
+         &nbsp;<asp:Button ID="btnshow" runat="server" BackColor="#66CCFF" Text="Show" Width="70px" OnClick="btnshow_Click" />
+         </td>
+    <td style="width:10%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+            <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label6" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        Search By Phone Number:</td>
+    <td style="width:30%; text-align: left;" align="right">
+        <asp:TextBox ID="txtsmobile" runat="server" BackColor="#CCFFFF" MaxLength="10"  pattern="[789][0-9]{9}" ></asp:TextBox>
+         &nbsp;<asp:Button ID="btnshowph" runat="server" BackColor="#66CCFF" Text="Show" Width="70px" OnClick="btnshowph_Click" />
+         </td>
+    <td style="width:10%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+            <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="text-align: center;" align="left">
+          <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="ID"  AllowPaging="True" AllowSorting="True"  CssClass="table table-bordered">
+            <Columns>
+                 <asp:BoundField DataField="ID" HeaderText="OPNO" HeaderStyle-CssClass="text-center"/>
+                <asp:BoundField DataField="PNAME" HeaderText="NAME" HeaderStyle-CssClass="text-center"/>
+                <asp:BoundField DataField="TELPHNO" HeaderText="PHONE" HeaderStyle-CssClass="text-center"/>                
+                <asp:BoundField DataField="MOBNO" HeaderText="ECONTACT" HeaderStyle-CssClass="text-center"/>
+                <%--<asp:BoundField DataField="DISEASE" HeaderText="DISEASE" />--%>
+                <asp:BoundField DataField="DATETIME" HeaderText="DATE" DataFormatString="{0:dd/MM/yyyy}" HeaderStyle-CssClass="text-center"/>
+                <%--<asp:CommandField ShowDeleteButton="False" ShowEditButton="False" ShowSelectButton="False" />--%>
+            </Columns>
+        </asp:GridView>
+         </td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+        </div>
+
+
+         <div id="div2" runat="server" style="border: thin solid #000000">
+
+             <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%; text-align: center;" align="right">IPD Search</td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+
+              <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label2" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        Search By IPD NO.:</td>
+    <td style="width:30%; text-align: left;" align="right">
+        <asp:TextBox ID="txtip" runat="server" BackColor="#CCFFFF" pattern="[a-zA-Z0-9]+"></asp:TextBox>
+         &nbsp;<asp:Button ID="btnshowip" runat="server" BackColor="#66CCFF" Text="Show" Width="70px" OnClick="btnshowip_Click" />
+         </td>
+    <td style="width:10%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+            <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label3" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        Search By Bed Number:</td>
+    <td style="width:30%; text-align: left;" align="right">
+         &nbsp;<asp:DropDownList ID="DropDownList1" runat="server" style="width:130px">
+        </asp:DropDownList>
+        <asp:Button ID="btnshowbed" runat="server" BackColor="#66CCFF" Text="Show" Width="70px" OnClick="btnshowbed_Click" />
+         </td>
+    <td style="width:10%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+             <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="text-align: center;" align="left">
+          <asp:GridView ID="GridView2" runat="server" AutoGenerateColumns="False" DataKeyNames="VN"   AllowPaging="True" AllowSorting="True" OnPageIndexChanging="GridView2_PageIndexChanging" OnSelectedIndexChanging="GridView2_SelectedIndexChanging"  CssClass="table table-bordered">
+            <Columns>                               
+                <asp:BoundField DataField="VN" HeaderText="IPNO" />
+                <asp:BoundField DataField="BEDNO" HeaderText="BEDNO" />
+                <asp:BoundField DataField="PNAME" HeaderText="NAME" />
+                <asp:BoundField DataField="PHONE" HeaderText="PHONE" />
+                <asp:BoundField DataField="ECONTACT" HeaderText="ECONTACT" />
+                <asp:BoundField DataField="DISEASE" HeaderText="DISEASE" />
+                <asp:BoundField DataField="DATE" HeaderText="ADMISSION DATE" DataFormatString="{0:dd/MM/yyyy}"/>
+                 <asp:CommandField  ShowSelectButton="true" ShowDeleteButton="false" HeaderText="ACTION"/>
+                <%--<asp:CommandField ShowDeleteButton="False" ShowEditButton="False" ShowSelectButton="False" />--%>
+            </Columns>
+        </asp:GridView>
+         </td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+        </div>
+       
+        </div>
+              </ContentTemplate>
+
+ </asp:UpdatePanel>
+</asp:Content>
+

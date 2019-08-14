@@ -1,0 +1,257 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class ADMIN_DutyRates : System.Web.UI.Page
+{
+    SqlDataReader dr;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        try
+        {
+            if (Session["out"] == "INACTIVE")
+            {
+                Response.Redirect("~/index.aspx");
+            }
+            Response.Buffer = true;
+
+            Response.CacheControl = "no-cache";
+            if (Session["NAME"] == null)
+            {
+                Response.Redirect("~/index.aspx");
+            }
+            lblid.Text = Session["NAME"].ToString();
+            lbluid.Text = Session["UID"].ToString();
+            lblorgid.Text = Session["ORGID"].ToString();
+            if (!IsPostBack)
+            {
+                binddata();
+
+                SqlDataAdapter Adp1 = new SqlDataAdapter("select * from tblStaff where DesgId=(select id from tblDesignation where DesgName='Doctor')", con);
+                DataTable Dt1 = new DataTable();
+                Adp1.Fill(Dt1);
+                dropdoctor.DataSource = Dt1;
+                dropdoctor.DataTextField = "Sname";
+                dropdoctor.DataValueField = "id";
+                dropdoctor.DataBind();
+                dropdoctor.Items.Insert(0, "Please Select");
+            }
+
+            con.Close();
+            txtdate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        try
+        {
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+
+        SqlDataAdapter Adp = new SqlDataAdapter("select * from DUTY_RATES_TABLE", con);
+        DataTable Dt = new DataTable();
+        Adp.Fill(Dt);
+        GridView1.DataSource = Dt;
+        GridView1.DataBind();
+        con.Close();
+    }
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            // Validation
+            if (dropdoctor.SelectedIndex == 0)
+            {
+                string message = "alert('* Please Select Doctor Name.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtfees.Text == "" || txtfees.Text == "0")
+            {
+                string message = "alert('* Please Enter Doctor Fees.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            using (SqlCommand cmd = new SqlCommand("USP_DUTY_RATES", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd.Parameters.Add("@DATE", SqlDbType.Date).Value = Convert.ToDateTime(txtdate.Text).ToString("yyyy-MM-dd");
+                cmd.Parameters.Add("@NAME", SqlDbType.VarChar).Value = dropdoctor.SelectedItem.Text;
+                cmd.Parameters.Add("@FEES", SqlDbType.Decimal).Value = txtfees.Text;
+                cmd.ExecuteNonQuery();
+            }
+            binddata();
+            con.Close();
+            clearcontrol();
+            string message1 = "alert('Successfully Saved.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    public void clearcontrol()
+    {        
+        dropdoctor.SelectedIndex=0;
+        txtfees.Text = "";       
+    }
+    protected void Button2_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            // Validation        
+            if (dropdoctor.SelectedItem.Text == "")
+            {
+                string message = "alert('* Please Select Doctor Name.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtfees.Text == "")
+            {
+                string message = "alert('* Please Enter Doctor Fees.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            using (SqlCommand cmd = new SqlCommand("USP_DUTY_RATES", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd.Parameters.Add("@DATE", SqlDbType.Date).Value = Convert.ToDateTime(txtdate.Text).ToString("yyyy-MM-dd");
+                cmd.Parameters.Add("@NAME", SqlDbType.VarChar).Value = dropdoctor.SelectedItem.Text;
+                cmd.Parameters.Add("@FEES", SqlDbType.Decimal).Value = txtfees.Text;
+                cmd.ExecuteNonQuery();
+            }
+            binddata();
+            con.Close();
+            clearcontrol();
+            string message1 = "alert('Successfully Updated.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+
+        Response.Redirect("~/ADMIN/DutyRates.aspx");
+    }
+    protected void Button3_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/ADMIN/DutyRates.aspx");
+    }
+    protected void GridView1_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            // reference the Delete LinkButton
+            LinkButton db = (LinkButton)e.Row.Cells[3].Controls[0];
+
+            db.OnClientClick = "return confirm('Are you sure want to delete this item ?');";
+        }
+    }
+    protected void GridView1_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            string slno = GridView1.DataKeys[e.RowIndex].Values["id"].ToString();
+            SqlCommand cm = new SqlCommand("delete from DUTY_RATES_TABLE where ID='" + slno + "'", con);
+            cm.ExecuteNonQuery();
+
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void GridView1_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+            var slno = GridView1.DataKeys[e.NewSelectedIndex].Values["id"].ToString();
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand com = new SqlCommand("SELECT * from DUTY_RATES_TABLE where id='" + slno + "'", con);
+            dr = com.ExecuteReader();
+            if (dr.Read())
+            {
+                btnSubmit.Visible = false;
+                btnupdate.Visible = true;
+                txtid.Text = dr["ID"].ToString();
+                txtdate.Text = dr["DATE"].ToString();
+                dropdoctor.SelectedItem.Text = dr["NAME"].ToString();
+                txtfees.Text = dr["FEES"].ToString();
+            }
+            dr.Close();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void GridView1_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlDataAdapter da = new SqlDataAdapter("SELECT * from DUTY_RATES_TABLE", con);
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            GridView1.DataSource = dt;
+            GridView1.PageIndex = e.NewPageIndex;
+            GridView1.DataKeyNames = new string[] { "id" };
+            GridView1.DataBind();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+}

@@ -1,0 +1,152 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class ADMIN_TestRate : System.Web.UI.Page
+{
+    SqlDataReader dr;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        lbluid.Text = Session["UID"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+
+        if (!IsPostBack)
+        {
+            binddata();
+        }
+
+        con.Close();
+        txtwef.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand COM = new SqlCommand("SELECT FYEAR FROM FYEAR1_TABLE WHERE  ORGID='" + lblorgid.Text + "'", con);
+        dr = COM.ExecuteReader();
+        if (dr.Read())
+        {
+            lblfyear.Text = dr["FYEAR"].ToString();
+        }
+        dr.Close();
+
+        //SqlDataAdapter Adp = new SqlDataAdapter("select * from ", con);
+        //DataTable Dt = new DataTable();
+        //Adp.Fill(Dt);
+        //GridView1.DataSource = Dt;
+        //GridView1.DataBind();
+
+        con.Close();
+    }
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            // Validation
+            if (txttest.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (droplab.SelectedValue == "0")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            using (SqlCommand cmd = new SqlCommand("USP_TEST_RATES", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd.Parameters.Add("@WEF", SqlDbType.Date).Value = Convert.ToDateTime(txtwef.Text).ToString("yyyy-MM-dd");
+                cmd.Parameters.Add("@LAB", SqlDbType.VarChar).Value = droplab.SelectedValue;
+                cmd.Parameters.Add("@TEST", SqlDbType.Decimal).Value = txttest.Text;
+                cmd.Parameters.Add("@BILLING_DESC", SqlDbType.Decimal).Value = txtbilling.Text;
+                cmd.ExecuteNonQuery();
+            }
+            binddata();
+            con.Close();
+            //clearcontrol();
+            string message1 = "alert('Successfully Saved.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/TestRate.aspx");
+    }
+    protected void Button2_Click(object sender, EventArgs e)
+    {
+        // Validation
+        try
+        {
+            if (txttest.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (droplab.SelectedValue == "0")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            using (SqlCommand cmd = new SqlCommand("USP_TEST_RATES", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd.Parameters.Add("@WEF", SqlDbType.Date).Value = Convert.ToDateTime(txtwef.Text).ToString("yyyy-MM-dd");
+                cmd.Parameters.Add("@LAB", SqlDbType.VarChar).Value = droplab.SelectedValue;
+                cmd.Parameters.Add("@TEST", SqlDbType.Decimal).Value = txttest.Text;
+                cmd.Parameters.Add("@BILLING_DESC", SqlDbType.Decimal).Value = txtbilling.Text;
+                cmd.ExecuteNonQuery();
+            }
+            binddata();
+            con.Close();
+            //clearcontrol();
+            string message1 = "alert('Successfully Updated.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/TestRate.aspx");
+    }
+    protected void Button3_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/ADMIN/TestRate.aspx");
+    }
+}

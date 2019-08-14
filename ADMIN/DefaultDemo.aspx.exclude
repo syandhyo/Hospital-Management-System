@@ -1,0 +1,14 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/ADMIN/AdminMaster.master" AutoEventWireup="true" CodeFile="DefaultDemo.aspx.cs" Inherits="ADMIN_DefaultDemo" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+      <div class="layout-main-content">               
+                    <input type="hidden" name="j_idt79" value="j_idt79" />
+                    <img src="../bootstraptemplate/images/admin-background.jpg" width="100%" height="auto">
+                    <div class="ui-fluid">
+                    </div>
+                    <input type="hidden" name="javax.faces.ViewState" id="j_id1:javax.faces.ViewState:130" value="-6706802491831525269:5066372470393129965" autocomplete="off" />              
+            </div>
+</asp:Content>
+

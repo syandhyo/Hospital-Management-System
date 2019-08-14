@@ -1,0 +1,823 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+
+
+public partial class RADIOLOGY_radiology_rates_for_corporate : System.Web.UI.Page
+{
+    string num1 = "000";
+    SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+    SqlCommand com, cmd, cmd1;
+    SqlDataReader dr;
+    SqlDataAdapter da, da1;
+    DataTable dt;
+    DataMathods OBJ_METHOD = new DataMathods();
+
+    public void auto()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        string qry1 = " select * from dbo.[CORPO_CATA]";
+
+        com = new SqlCommand(qry1, con);
+        dr = null;
+
+        dr = com.ExecuteReader();
+
+        while (dr.Read())
+        {
+            num1 = dr["SLNO"].ToString();
+        }
+
+        TXTID.Text = "RRC" + num1;
+
+        dr.Close();
+    }
+    public void binddata()
+    {
+        try
+        {
+            SqlParameter[] SQL_PARAMS = new SqlParameter[1];
+
+            SQL_PARAMS[0] = OBJ_METHOD.createParams("@ORGID", SqlDbType.VarChar, 500, lblorgid.Text);
+
+            DataSet DS = OBJ_METHOD.Get_DataSet("FINANCIAL_YEAR", false, true, SQL_PARAMS);
+            if (DS.Tables[0].Rows.Count > 0)
+            {
+                lblfyear.Text = DS.Tables[0].Rows[0]["FYEAR"].ToString();
+            }
+
+            SQL_PARAMS = new SqlParameter[2];
+
+            SQL_PARAMS[0] = OBJ_METHOD.createParams("@DBOpration", SqlDbType.VarChar, 500, "SELECT_GRIDPAGE");
+            SQL_PARAMS[1] = OBJ_METHOD.createParams("@Branch_ID", SqlDbType.Int, 0, Session["Branch"]);
+
+            DataSet Ds = OBJ_METHOD.Get_DataSet("RADIO_COPRO_RATES", false, true, SQL_PARAMS);
+            if (Ds.Tables[0].Rows.Count > 0)
+            {
+                GridView2.DataSource = Ds;
+                GridView2.DataKeyNames = new string[] { "ID" };
+                GridView2.DataBind();
+            }
+            SQL_PARAMS = new SqlParameter[2];
+
+            SQL_PARAMS[0] = OBJ_METHOD.createParams("@DBOpration", SqlDbType.VarChar, 500, "SELECT_CORPO_DROP1");
+            SQL_PARAMS[1] = OBJ_METHOD.createParams("@Branch_ID", SqlDbType.Int, 0, Session["Branch"]);
+
+            DataSet Ds1 = OBJ_METHOD.Get_DataSet("RADIO_COPRO_RATES", false, true, SQL_PARAMS);
+            if (Ds1.Tables[0].Rows.Count > 0)
+            {
+                Ddlincrnce.DataSource = Ds1;
+                Ddlincrnce.DataTextField = "CNAME";
+                Ddlincrnce.DataValueField = "ID";
+                Ddlincrnce.DataBind();
+                Ddlincrnce.Items.Insert(0, new ListItem("Please select", "0"));
+            }
+
+            SQL_PARAMS = new SqlParameter[2];
+
+            SQL_PARAMS[0] = OBJ_METHOD.createParams("@DBOpration", SqlDbType.VarChar, 500, "SELECT_CATA_DROP1");
+            SQL_PARAMS[1] = OBJ_METHOD.createParams("@Branch_ID", SqlDbType.Int, 0, Session["Branch"]);
+
+            DataSet Ds2 = OBJ_METHOD.Get_DataSet("RADIO_COPRO_RATES", false, true, SQL_PARAMS);
+            if (Ds2.Tables[0].Rows.Count > 0)
+            {
+                Ddlcata.DataSource = Ds2;
+                Ddlcata.DataTextField = "NAME";
+                Ddlcata.DataValueField = "ID";
+                Ddlcata.DataBind();
+                Ddlcata.Items.Insert(0, new ListItem("Please select", "0"));
+            }
+            #region oldcode
+            //using (SqlCommand cmd = new SqlCommand("RADIO_COPRO_RATES", con))
+            //{
+            //    cmd.CommandType = CommandType.StoredProcedure;
+            //    cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_GRIDPAGE";
+            //    cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = "NULL";
+            //    cmd.Parameters.Add("@NAME", SqlDbType.VarChar).Value = lblorgid.Text;
+            //    SqlDataAdapter Adp = new SqlDataAdapter(cmd);
+            //    //SqlDataAdapter Adp = new SqlDataAdapter("select * from CORPO_CATA Order by SLNO Desc", con);
+            //    DataTable Dt = new DataTable();
+            //    Adp.Fill(Dt);
+            //    GridView2.DataSource = Dt;
+            //    GridView2.DataBind();
+            //}
+            //using (SqlCommand cmd1 = new SqlCommand("RADIO_COPRO_RATES", con))
+            //{
+            //    cmd1.CommandType = CommandType.StoredProcedure;
+            //    cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_CORPO_DROP1";
+            //    cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = "NULL";
+            //    cmd1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = lblorgid.Text;
+            //    SqlDataAdapter da = new SqlDataAdapter(cmd1);
+            //    //SqlDataAdapter da = new SqlDataAdapter("select * from [dbo].[Corporate_Table] where ISACTIVE='true'", con);
+            //    DataTable ds = new DataTable();
+            //    da.Fill(ds);
+            //    Ddlincrnce.DataSource = ds;
+            //    Ddlincrnce.DataTextField = "CNAME";
+            //    Ddlincrnce.DataValueField = "ID";
+            //    Ddlincrnce.DataBind();
+            //    Ddlincrnce.Items.Insert(0, new ListItem("Please select", "0"));
+            //}
+            //using (SqlCommand cmd2 = new SqlCommand("RADIO_COPRO_RATES", con))
+            //{
+            //    cmd2.CommandType = CommandType.StoredProcedure;
+            //    cmd2.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_CATA_DROP1";
+            //    cmd2.Parameters.Add("@ID", SqlDbType.VarChar).Value = "NULL";
+            //    cmd2.Parameters.Add("@NAME", SqlDbType.VarChar).Value = lblorgid.Text;
+            //    SqlDataAdapter da1 = new SqlDataAdapter(cmd2);
+            //    //SqlDataAdapter da1 = new SqlDataAdapter("select * from [RADIOLOGY_CATEGORY_TABLE]", con);
+            //    DataTable ds1 = new DataTable();
+            //    da1.Fill(ds1);
+            //    Ddlcata.DataSource = ds1;
+            //    Ddlcata.DataTextField = "NAME";
+            //    Ddlcata.DataValueField = "ID";
+            //    Ddlcata.DataBind();
+            //    Ddlcata.Items.Insert(0, new ListItem("Please select", "0"));
+            //}
+            #endregion
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+
+    }
+    public void clearfield()
+    {
+        Txtdate.Text = "";
+        Ddlcata.SelectedIndex = 0;
+        Ddlincrnce.SelectedIndex = 0;
+        GridView1.DataSource = null;
+        GridView1.DataBind();
+        GridView3.DataSource = null;
+        GridView3.DataBind();
+        btndelete.Visible = false;
+        btnsubmit.Visible = true;
+        btnupdate.Visible = false;
+        Txtdate.Enabled = false;
+    }
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+        if (IsPostBack != true)
+        {
+            binddata();
+        }
+    }
+
+    protected void Ddlcata_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlParameter[] SQL_PARAMS = new SqlParameter[3];
+
+            SQL_PARAMS[0] = OBJ_METHOD.createParams("@DBOpration", SqlDbType.VarChar, 500, "DROP_EVENT");
+            SQL_PARAMS[1] = OBJ_METHOD.createParams("@Branch_ID", SqlDbType.Int, 0, Session["Branch"]);
+            SQL_PARAMS[2] = OBJ_METHOD.createParams("@ID", SqlDbType.VarChar, 0, Ddlcata.SelectedValue);
+
+            DataSet Ds = OBJ_METHOD.Get_DataSet("RADIO_COPRO_RATES", false, true, SQL_PARAMS);
+            if (Ds.Tables[0].Rows.Count > 0)
+            {
+                GridView1.DataSource = null;
+                GridView1.DataBind();
+                GridView1.DataSource = Ds;
+                GridView1.DataKeyNames = new string[] { "ID" };
+                GridView1.DataBind();
+            }
+            Txtdate.Enabled = true;
+            #region oldcode
+            //SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            //con.Open();
+            //if (Ddlcata.SelectedIndex != 0)
+            //{
+            //    using (SqlCommand cmd2 = new SqlCommand("RADIO_COPRO_RATES", con))
+            //    {
+            //        cmd2.CommandType = CommandType.StoredProcedure;
+            //        cmd2.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "DROP_EVENT";
+            //        cmd2.Parameters.Add("@ID", SqlDbType.VarChar).Value = Ddlcata.SelectedValue;
+            //        cmd2.Parameters.Add("@NAME", SqlDbType.VarChar).Value = "";
+            //        SqlDataAdapter da = new SqlDataAdapter(cmd2);
+            //        DataTable dt = new DataTable();
+            //        //SqlDataAdapter da = new SqlDataAdapter("select * from [RADIOLOGY_COMPONENT_TABLE] where ID='" + Ddlcata.SelectedValue + "' and CID is null", con);
+            //        da.Fill(dt);
+            //        GridView1.DataSource = null;
+            //        GridView1.DataBind();
+            //        GridView1.DataSource = dt;
+            //        //GridView1.SelectedIndex = 0;
+            //        GridView1.DataKeyNames = new string[] { "ID" };
+            //        GridView1.DataBind();
+            //    }
+
+            //}
+            #endregion
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+    }
+    protected void btnsubmit_Click(object sender, EventArgs e)
+    {
+        string message1 = string.Empty;
+        try
+        {
+            if (Ddlincrnce.SelectedIndex == 0)
+            {
+                string message = "alert('Please!! Select The Corporate..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (Ddlcata.SelectedIndex == 0)
+            {
+                string message = "alert('Please Select The Category..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (Txtdate.Text == "")
+            {
+                string message = "alert('Please Select The Apply Date..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            int chkedcounter = 0;
+            int correctinput = 0;
+            auto();
+            SqlParameter[] SQL_PARAMS = new SqlParameter[9];
+
+            SQL_PARAMS[0] = OBJ_METHOD.createParams("@DBOpration", SqlDbType.VarChar, 500, "INSERT");
+            SQL_PARAMS[1] = OBJ_METHOD.createParams("@ID", SqlDbType.VarChar, 500, TXTID.Text);
+            SQL_PARAMS[2] = OBJ_METHOD.createParams("@DATE", SqlDbType.DateTime, 0, DateTime.Now.ToString("yyyy-MM-dd"));
+            SQL_PARAMS[3] = OBJ_METHOD.createParams("@CORPORATE", SqlDbType.VarChar, 500, Ddlincrnce.SelectedItem.Text);
+            SQL_PARAMS[4] = OBJ_METHOD.createParams("@CATAGORY", SqlDbType.VarChar, 500, Ddlcata.SelectedItem.Text);
+
+            SQL_PARAMS[5] = OBJ_METHOD.createParams("@FYEAR", SqlDbType.VarChar, 500, lblfyear.Text);
+            SQL_PARAMS[6] = OBJ_METHOD.createParams("@APPLY_DATE", SqlDbType.DateTime, 0, Convert.ToDateTime(Txtdate.Text).ToString("yyyy-MM-dd"));
+            SQL_PARAMS[7] = OBJ_METHOD.createParams("@Branch_FY", SqlDbType.Int, 0, Convert.ToInt32(Session["BRANCH_FYR"]));
+            SQL_PARAMS[8] = OBJ_METHOD.createParams("@Branch_ID", SqlDbType.Int, 0, Convert.ToInt32(Session["Branch"]));
+
+            OBJ_METHOD.ExecuteProceedure("RADIO_COPRO_INSUPD", "", "@msg", SqlDbType.VarChar, SQL_PARAMS);
+
+            if (OBJ_METHOD._RESULT > 0)
+            {
+                foreach (GridViewRow row in GridView1.Rows)
+                {
+                    var inv = row.FindControl("lblname") as Label;
+                    var AMT = row.FindControl("txtprice") as TextBox;
+                    if (AMT.Text == "")
+                    {
+                        AMT.Text = "0";
+                    }
+                    chkedcounter++;
+                    SQL_PARAMS = new SqlParameter[9];
+
+                    SQL_PARAMS[0] = OBJ_METHOD.createParams("@DBOpration", SqlDbType.VarChar, 500, "INSERTGRID");
+                    SQL_PARAMS[1] = OBJ_METHOD.createParams("@ID", SqlDbType.VarChar, 500, Ddlcata.SelectedValue);
+                    SQL_PARAMS[2] = OBJ_METHOD.createParams("@ORGID", SqlDbType.VarChar, 500, lblorgid.Text);
+                    SQL_PARAMS[3] = OBJ_METHOD.createParams("@CorpoID", SqlDbType.VarChar, 500, Ddlincrnce.SelectedValue);
+                    SQL_PARAMS[4] = OBJ_METHOD.createParams("@INV", SqlDbType.VarChar, 500, inv.Text.ToString());
+
+                    SQL_PARAMS[5] = OBJ_METHOD.createParams("@PRICE", SqlDbType.VarChar, 500, AMT.Text.ToString());
+                    SQL_PARAMS[6] = OBJ_METHOD.createParams("@CID", SqlDbType.VarChar, 500, TXTID.Text);
+                    SQL_PARAMS[7] = OBJ_METHOD.createParams("@Branch_FY", SqlDbType.Int, 0, Convert.ToInt32(Session["BRANCH_FYR"]));
+                    SQL_PARAMS[8] = OBJ_METHOD.createParams("@Branch_ID", SqlDbType.Int, 0, Convert.ToInt32(Session["Branch"]));
+
+                    OBJ_METHOD.ExecuteProceedure("RADIO_COPRO_INSUPDTGRD", "", "@msg", SqlDbType.VarChar, SQL_PARAMS);
+
+                    if (OBJ_METHOD._RESULT > 0)
+                    {
+                        correctinput++;
+                    }
+
+                }
+                if (chkedcounter == correctinput && chkedcounter > 0)
+                {
+
+                    OBJ_METHOD.commitOrRollbackTran("commit");
+                    binddata();
+                    clearfield();
+
+                }
+                else
+                {
+                    OBJ_METHOD.commitOrRollbackTran("rollback");
+                    message1 = "alert('Error occurred while processing data... Rolling back...')";
+                }
+            }
+            message1 = "alert('" + OBJ_METHOD._objOut + "')";
+        }
+        catch (Exception ex)
+        {
+            OBJ_METHOD.commitOrRollbackTran("rollback");
+            message1 = "alert('Due to some issues, Data not saved.')";
+        }
+        finally
+        {
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        }
+        #region old code
+        //else
+        //{
+        //    if (Ddlincrnce.SelectedIndex != 0 && Ddlcata.SelectedIndex != 0 && Txtdate.Text != "")
+        //    {
+        //        SqlConnection con2 = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        //        con2.Open();
+        //        using (SqlCommand cmd2 = new SqlCommand("RADIO_COPRO_INSUPD", con2))
+        //        {
+        //            cmd2.CommandType = CommandType.StoredProcedure;
+        //            cmd2.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_INSERT";
+        //            cmd2.Parameters.Add("@ID", SqlDbType.VarChar).Value ="";
+        //            cmd2.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = "";
+        //            cmd2.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+        //            cmd2.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = Ddlcata.SelectedItem.Text;
+        //            cmd2.Parameters.Add("@INV", SqlDbType.VarChar).Value = "";
+        //            cmd2.Parameters.Add("@PRICE", SqlDbType.VarChar).Value = "";
+        //            cmd2.Parameters.Add("@CorpoID", SqlDbType.VarChar).Value = "";
+        //            cmd2.Parameters.Add("@CID", SqlDbType.VarChar).Value = "";
+        //            cmd2.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = "";
+        //            cmd2.Parameters.Add("@DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("dd-MM-yy");
+        //            cmd2.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = Txtdate.Text;
+        //            //SqlCommand cmd = new SqlCommand("SELECT * from CORPO_CATA where CORPORATE='" + Ddlincrnce.SelectedItem.Text + "' and CATAGORY='" + Ddlcata.SelectedItem.Text + "' and APPLY_DATE='" + Txtdate.Text + "'", con2);
+        //            dr = cmd2.ExecuteReader();
+        //            if (dr.Read() == true)
+        //            {
+        //                dr.Close();
+        //                con2.Close();
+        //                string message4 = "alert('Please Change The Apply Date..')";
+        //                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message4, true);
+        //                return;
+        //            }
+        //        }
+        //    }
+
+        //  auto();
+
+        //  foreach (GridViewRow row in GridView1.Rows)
+        //  {
+        //      var inv = row.FindControl("lblname") as Label;
+        //      var AMT = row.FindControl("txtprice") as TextBox;
+        //      if (AMT.Text == "")
+        //      {
+        //          AMT.Text = "0";
+        //      }
+        //      using (SqlCommand cmd = new SqlCommand("RADIO_COPRO_INSUPD", con))
+        //      {
+        //          cmd.CommandType = CommandType.StoredProcedure;
+        //          cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT_UPDATE";
+        //          cmd.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = "";
+        //          cmd.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = "";
+        //          cmd.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = "";
+        //          cmd.Parameters.Add("@DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("dd-MM-yy");
+        //          cmd.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = Txtdate.Text;
+        //          cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = Ddlcata.SelectedValue;
+        //          cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+        //          cmd.Parameters.Add("@INV", SqlDbType.VarChar).Value = inv.Text.ToString();
+        //          cmd.Parameters.Add("@PRICE", SqlDbType.VarChar).Value = AMT.Text.ToString();
+        //          cmd.Parameters.Add("@CorpoID", SqlDbType.VarChar).Value = Ddlincrnce.SelectedValue;
+        //          cmd.Parameters.Add("@CID", SqlDbType.VarChar).Value = TXTID.Text;
+        //          cmd.ExecuteNonQuery();
+        //      }
+        //  }
+        //  con.Close();
+
+        //  con.Open();
+        //  using (SqlCommand cmd1 = new SqlCommand("RADIO_COPRO_INSUPD", con))
+        //  {
+        //      cmd1.CommandType = CommandType.StoredProcedure;
+        //      cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT2";
+        //      cmd1.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = "";
+        //      cmd1.Parameters.Add("@INV", SqlDbType.VarChar).Value = "";
+        //      cmd1.Parameters.Add("@PRICE", SqlDbType.VarChar).Value = "";
+        //      cmd1.Parameters.Add("@CorpoID", SqlDbType.VarChar).Value = "";
+        //      cmd1.Parameters.Add("@CID", SqlDbType.VarChar).Value = "";
+        //      cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+        //      cmd1.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+        //      cmd1.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = Ddlcata.SelectedItem.Text;
+        //      cmd1.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+        //      cmd1.Parameters.Add("@DATE", SqlDbType.Date).Value = DateTime.Now.ToString("dd-MM-yyyy");
+        //      cmd1.Parameters.Add("@APPLY_DATE", SqlDbType.Date).Value = Txtdate.Text; ;
+        //      cmd1.ExecuteNonQuery();
+        //  }
+        //  dr.Close();
+        //  con.Close();
+
+        //  }
+        //catch(Exception ex)
+        //  {
+        //       Console.WriteLine("An error occurred: '{0}'", ex);
+        //  }
+        //      Response.Redirect("~/RADIOLOGY/Radiology_rate_corporate.aspx");
+        #endregion
+    }
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        string message1 = string.Empty;
+        try
+        {
+            if (Txtdate.Text == "")
+            {
+                string message = "alert('Please Select The Apply Date..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            int chkedcounter = 0;
+            int correctinput = 0;
+           
+            SqlParameter[] SQL_PARAMS = new SqlParameter[6];
+
+            SQL_PARAMS[0] = OBJ_METHOD.createParams("@DBOpration", SqlDbType.VarChar, 500, "UPDATE");
+            SQL_PARAMS[1] = OBJ_METHOD.createParams("@ID", SqlDbType.VarChar, 500, TXTID.Text);
+            SQL_PARAMS[2] = OBJ_METHOD.createParams("@CORPORATE", SqlDbType.VarChar, 500, Ddlincrnce.SelectedItem.Text);
+            SQL_PARAMS[3] = OBJ_METHOD.createParams("@CATAGORY", SqlDbType.VarChar, 500, Ddlcata.SelectedItem.Text);
+            SQL_PARAMS[4] = OBJ_METHOD.createParams("@APPLY_DATE", SqlDbType.DateTime, 0, Convert.ToDateTime(Txtdate.Text).ToString("yyyy-MM-dd"));
+            SQL_PARAMS[5] = OBJ_METHOD.createParams("@Branch_ID", SqlDbType.Int, 0, Convert.ToInt32(Session["Branch"]));
+
+            OBJ_METHOD.ExecuteProceedure("RADIO_COPRO_INSUPD", "", "@msg", SqlDbType.VarChar, SQL_PARAMS);
+
+            if (OBJ_METHOD._RESULT > 0)
+            {
+                SQL_PARAMS = new SqlParameter[2];
+
+                SQL_PARAMS[0] = OBJ_METHOD.createParams("@DBOpration", SqlDbType.VarChar, 500, "DELETE");
+                SQL_PARAMS[1] = OBJ_METHOD.createParams("@ID", SqlDbType.VarChar, 500, TXTID.Text);
+
+                OBJ_METHOD.ExecuteProceedure("RADIO_COPRO_RATES", "", "", SqlDbType.VarChar, SQL_PARAMS);
+
+                if (OBJ_METHOD._RESULT > 0)
+                {
+                    foreach (GridViewRow row in GridView3.Rows)
+                    {
+                        var inv = row.FindControl("lblnam") as Label;
+                        var AMT = row.FindControl("txtpric") as TextBox;
+                        if (AMT.Text == "")
+                        {
+                            AMT.Text = "0";
+                        }
+                        chkedcounter++;
+                        SQL_PARAMS = new SqlParameter[9];
+
+                        SQL_PARAMS[0] = OBJ_METHOD.createParams("@DBOpration", SqlDbType.VarChar, 500, "UPDATEGRID");
+                        SQL_PARAMS[1] = OBJ_METHOD.createParams("@ID", SqlDbType.VarChar, 500, Ddlcata.SelectedValue);
+                        SQL_PARAMS[2] = OBJ_METHOD.createParams("@ORGID", SqlDbType.VarChar, 500, lblorgid.Text);
+                        SQL_PARAMS[3] = OBJ_METHOD.createParams("@CorpoID", SqlDbType.VarChar, 500, Ddlincrnce.SelectedValue);
+                        SQL_PARAMS[4] = OBJ_METHOD.createParams("@INV", SqlDbType.VarChar, 500, inv.Text.ToString());
+
+                        SQL_PARAMS[5] = OBJ_METHOD.createParams("@PRICE", SqlDbType.VarChar, 500, AMT.Text.ToString());
+                        SQL_PARAMS[6] = OBJ_METHOD.createParams("@CID", SqlDbType.VarChar, 500, TXTID.Text);
+                        SQL_PARAMS[7] = OBJ_METHOD.createParams("@Branch_FY", SqlDbType.Int, 0, Convert.ToInt32(Session["BRANCH_FYR"]));
+                        SQL_PARAMS[8] = OBJ_METHOD.createParams("@Branch_ID", SqlDbType.Int, 0, Convert.ToInt32(Session["Branch"]));
+
+                        OBJ_METHOD.ExecuteProceedure("RADIO_COPRO_INSUPDTGRD", "", "@msg", SqlDbType.VarChar, SQL_PARAMS);
+
+                        if (OBJ_METHOD._RESULT > 0)
+                        {
+                            correctinput++;
+                        }
+                    }
+
+                }
+                if (chkedcounter == correctinput && chkedcounter > 0)
+                {
+
+                    OBJ_METHOD.commitOrRollbackTran("commit");
+                    binddata();
+                    clearfield();
+
+                }
+                else
+                {
+                    OBJ_METHOD.commitOrRollbackTran("rollback");
+                    message1 = "alert('Error occurred while processing data... Rolling back...')";
+                }
+            }
+            message1 = "alert('" + OBJ_METHOD._objOut + "')";
+        }
+        catch (Exception ex)
+        {
+            OBJ_METHOD.commitOrRollbackTran("rollback");
+            message1 = "alert('Due to some issues, Data not updated.')";
+        }
+        finally
+        {
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        }
+        #region oldcode
+        //SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        //con.Open();
+        //using (SqlCommand cmd = new SqlCommand("RADIO_COPRO_INSUPD", con))
+        //{
+        //    cmd.CommandType = CommandType.StoredProcedure;
+        //    cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "DELETE_UPDATE";
+        //    cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+        //    cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = "";
+        //    cmd.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+        //    cmd.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = Ddlcata.SelectedItem.Text;
+        //    cmd.Parameters.Add("@INV", SqlDbType.VarChar).Value = "";
+        //    cmd.Parameters.Add("@PRICE", SqlDbType.VarChar).Value = "";
+        //    cmd.Parameters.Add("@CorpoID", SqlDbType.VarChar).Value = "";
+        //    cmd.Parameters.Add("@CID", SqlDbType.VarChar).Value = TXTID.Text;
+        //    cmd.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = "";
+        //    cmd.Parameters.Add("@DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("dd-MM-yy");
+        //    cmd.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = Txtdate.Text;
+        //    //SqlCommand cmd = new SqlCommand("delete from RADIOLOGY_COMPONENT_TABLE where CID='" + TXTID.Text + "'", con);
+        //    cmd.ExecuteNonQuery();
+        //    foreach (GridViewRow row in GridView3.Rows)
+        //    {
+        //        var inv = row.FindControl("lblnam") as Label;
+        //        var AMT = row.FindControl("txtpric") as TextBox;
+        //        if (AMT.Text == "")
+        //        {
+        //            AMT.Text = "0";
+        //        }
+        //        //var INV = Convert.ToInt32(GridView1.DataKeys[row.RowIndex].Values[0]);
+        //        using (SqlCommand cmd1 = new SqlCommand("RADIO_COPRO_INSUPD", con))
+        //        {
+        //            cmd1.CommandType = CommandType.StoredProcedure;
+        //            cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT_UPDATE";
+        //            cmd1.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+        //            cmd1.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = Ddlcata.SelectedItem.Text;
+        //            cmd1.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = "";
+        //            cmd1.Parameters.Add("@DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("dd-MM-yy");
+        //            cmd1.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = Txtdate.Text;
+        //            cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = Ddlcata.SelectedValue;
+        //            cmd1.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+        //            cmd1.Parameters.Add("@INV", SqlDbType.VarChar).Value = inv.Text.ToString();
+        //            cmd1.Parameters.Add("@PRICE", SqlDbType.VarChar).Value = AMT.Text.ToString();
+        //            cmd1.Parameters.Add("@CorpoID", SqlDbType.VarChar).Value = Ddlincrnce.SelectedValue;
+        //            cmd1.Parameters.Add("@CID", SqlDbType.VarChar).Value = TXTID.Text;
+        //            cmd1.ExecuteNonQuery();
+        //        }
+        //    }
+        //    using (SqlCommand cmd2 = new SqlCommand("RADIO_COPRO_INSUPD", con))
+        //    {
+        //        cmd2.CommandType = CommandType.StoredProcedure;
+        //        cmd2.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+        //        cmd2.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+        //        cmd2.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = "";
+        //        cmd2.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+        //        cmd2.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = Ddlcata.SelectedItem.Text;
+        //        cmd2.Parameters.Add("@INV", SqlDbType.VarChar).Value = "";
+        //        cmd2.Parameters.Add("@PRICE", SqlDbType.VarChar).Value = "";
+        //        cmd2.Parameters.Add("@CorpoID", SqlDbType.VarChar).Value = "";
+        //        cmd2.Parameters.Add("@CID", SqlDbType.VarChar).Value = TXTID.Text;
+        //        cmd2.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = "";
+        //        cmd2.Parameters.Add("@DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("dd-MM-yy");
+        //        cmd2.Parameters.Add("@APPLY_DATE", SqlDbType.Date).Value = Txtdate.Text;
+        //        cmd2.ExecuteNonQuery();
+        //    }
+        //}
+        //con.Close();
+        //binddata();
+        //}
+        //catch (Exception ex)
+        //{
+        //    Console.WriteLine("An error occurred: '{0}'", ex);
+        //}
+        //Response.Redirect("~/RADIOLOGY/Radiology_rate_corporate.aspx");
+        #endregion
+    }
+    protected void btncancel_Click(object sender, EventArgs e)
+    {
+        binddata();
+        clearfield();
+    }
+    protected void btndelete_Click(object sender, EventArgs e)
+    {
+        string message1 = string.Empty;
+        try
+        {
+            SqlParameter[] SQL_PARAMS = new SqlParameter[2];
+
+            SQL_PARAMS[0] = OBJ_METHOD.createParams("@DBOpration", SqlDbType.VarChar, 500, "DELETE");
+            SQL_PARAMS[1] = OBJ_METHOD.createParams("@ID", SqlDbType.VarChar, 500, TXTID.Text);
+
+            OBJ_METHOD.ExecuteProceedure("RADIO_COPRO_INSUPD", "", "@msg", SqlDbType.VarChar, SQL_PARAMS);
+
+            if (OBJ_METHOD._RESULT > 0)
+            {
+                OBJ_METHOD.commitOrRollbackTran("commit");
+                binddata();
+                clearfield();
+            }
+            message1 = "alert('" + OBJ_METHOD._objOut + "')";
+            #region oldcode
+            //SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            //con.Open();
+            //using (SqlCommand cmd2 = new SqlCommand("RADIO_COPRO_RATES", con))
+            //{
+            //    cmd2.CommandType = CommandType.StoredProcedure;
+            //    cmd2.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "DELETE";
+            //    cmd2.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+            //    cmd2.Parameters.Add("@NAME", SqlDbType.VarChar).Value = "";
+            //    cmd2.ExecuteNonQuery();
+            //}
+            //con.Close();
+            #endregion
+        }
+        catch (Exception ex)
+        {
+            OBJ_METHOD.commitOrRollbackTran("rollback");
+            message1 = "alert('Due to some issues, Data not deleted.')";
+        }
+        finally
+        {
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        }
+    }
+    protected void GridView2_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+            var slno = GridView2.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+            SqlParameter[] SQL_PARAMS = new SqlParameter[2];
+
+            SQL_PARAMS[0] = OBJ_METHOD.createParams("@DBOpration", SqlDbType.VarChar, 500, "SELECT_EVENT1");
+            SQL_PARAMS[1] = OBJ_METHOD.createParams("@ID", SqlDbType.VarChar, 500, slno);
+
+            DataSet Ds = OBJ_METHOD.Get_DataSet("RADIO_COPRO_RATES", false, true, SQL_PARAMS);
+            if (Ds.Tables[0].Rows.Count > 0)
+            {
+                btnsubmit.Visible = false;
+                btndelete.Visible = true;
+                btnupdate.Visible = true;
+                TXTID.Text = Ds.Tables[0].Rows[0]["CID"].ToString();
+                GridView3.DataSource = Ds;
+                GridView3.DataBind();
+            }
+            SQL_PARAMS = new SqlParameter[2];
+
+            SQL_PARAMS[0] = OBJ_METHOD.createParams("@DBOpration", SqlDbType.VarChar, 500, "SELECT_EVENT2");
+            SQL_PARAMS[1] = OBJ_METHOD.createParams("@ID", SqlDbType.VarChar, 500, slno);
+
+            DataSet Ds1 = OBJ_METHOD.Get_DataSet("RADIO_COPRO_RATES", false, true, SQL_PARAMS);
+            if (Ds1.Tables[0].Rows.Count > 0)
+            {
+                Ddlincrnce.SelectedItem.Text = Ds1.Tables[0].Rows[0]["CORPORATE"].ToString();
+                Ddlcata.SelectedItem.Text = Ds1.Tables[0].Rows[0]["CATAGORY"].ToString();
+                Txtdate.Text = Convert.ToDateTime(Ds1.Tables[0].Rows[0]["APPLY_DATE"]).ToString("dd-MM-yyyy");
+            }
+            SQL_PARAMS = new SqlParameter[3];
+
+            SQL_PARAMS[0] = OBJ_METHOD.createParams("@DBOpration", SqlDbType.VarChar, 500, "SELECT_EVENT3");
+            SQL_PARAMS[1] = OBJ_METHOD.createParams("@NAME", SqlDbType.VarChar, 500, Ddlcata.SelectedItem.Text);
+            SQL_PARAMS[2] = OBJ_METHOD.createParams("@Branch_ID", SqlDbType.Int, 0, Session["Branch"]);
+
+            DataSet Ds2 = OBJ_METHOD.Get_DataSet("RADIO_COPRO_RATES", false, true, SQL_PARAMS);
+            if (Ds2.Tables[0].Rows.Count > 0)
+            {
+                Ddlcata.DataSource = Ds2;
+                Ddlcata.DataTextField = "NAME";
+                Ddlcata.DataValueField = "ID";
+                Ddlcata.DataBind();
+            }
+            SQL_PARAMS = new SqlParameter[3];
+
+            SQL_PARAMS[0] = OBJ_METHOD.createParams("@DBOpration", SqlDbType.VarChar, 500, "SELECT_EVENT4");
+            SQL_PARAMS[1] = OBJ_METHOD.createParams("@NAME", SqlDbType.VarChar, 500, Ddlincrnce.SelectedItem.Text);
+            SQL_PARAMS[2] = OBJ_METHOD.createParams("@Branch_ID", SqlDbType.Int, 0, Session["Branch"]);
+
+            DataSet Ds3 = OBJ_METHOD.Get_DataSet("RADIO_COPRO_RATES", false, true, SQL_PARAMS);
+            if (Ds3.Tables[0].Rows.Count > 0)
+            {
+                Ddlincrnce.DataSource = Ds3;
+                Ddlincrnce.DataTextField = "CNAME";
+                Ddlincrnce.DataValueField = "ID";
+                Ddlincrnce.DataBind();
+            }
+            #region old code
+            //using (SqlCommand cmd2 = new SqlCommand("RADIO_COPRO_RATES", con))
+            //{
+            //    cmd2.CommandType = CommandType.StoredProcedure;
+            //    cmd2.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_EVENT1";
+            //    cmd2.Parameters.Add("@ID", SqlDbType.VarChar).Value = slno;
+            //    cmd2.Parameters.Add("@NAME", SqlDbType.VarChar).Value = "";
+            //    SqlDataAdapter da = new SqlDataAdapter(cmd2);
+            //    //SqlDataAdapter da = new SqlDataAdapter("select * from RADIOLOGY_COMPONENT_TABLE where CID='" + slno + "'", con);
+            //    DataSet ds = new DataSet();
+            //    da.Fill(ds);
+            //    btnsubmit.Visible = false;
+            //    btndelete.Visible = true;
+            //    btnupdate.Visible = true;
+            //    TXTID.Text = ds.Tables[0].Rows[0]["CID"].ToString();
+            //    GridView3.DataSource = ds;
+            //    GridView3.DataBind();
+            //}
+
+            //using (SqlCommand cmd = new SqlCommand("RADIO_COPRO_RATES", con))
+            //{
+            //    cmd.CommandType = CommandType.StoredProcedure;
+            //    cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_EVENT2";
+            //    cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+            //    cmd.Parameters.Add("@NAME", SqlDbType.VarChar).Value = "";
+            //    //qlDataAdapter da = new SqlDataAdapter(cmd2);
+            //    //SqlCommand C = new SqlCommand("select * from CORPO_CATA where ID='" + TXTID.Text + "'", con);
+            //    dr = cmd.ExecuteReader();
+            //    if (dr.Read())
+            //    {
+            //        Ddlincrnce.SelectedItem.Text = dr["CORPORATE"].ToString();
+            //        Ddlcata.SelectedItem.Text = dr["CATAGORY"].ToString();
+            //        Txtdate.Text = dr["APPLY_DATE"].ToString();
+            //    }
+            //}
+            //dr.Close();
+            //con.Close();
+            //Txtdate.Enabled = true;
+            //using (SqlCommand cmd1 = new SqlCommand("RADIO_COPRO_RATES", con))
+            //{
+            //    cmd1.CommandType = CommandType.StoredProcedure;
+            //    cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_EVENT3";
+            //    cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+            //    cmd1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = Ddlcata.SelectedItem.Text;
+            //    SqlDataAdapter da1 = new SqlDataAdapter(cmd1);
+            //    //SqlDataAdapter da1 = new SqlDataAdapter("select * from [RADIOLOGY_CATEGORY_TABLE] where NAME='" + Ddlcata.SelectedItem.Text + "' ", con);
+            //    DataTable ds1 = new DataTable();
+            //    da1.Fill(ds1);
+            //    Ddlcata.DataSource = ds1;
+            //    Ddlcata.DataTextField = "NAME";
+            //    Ddlcata.DataValueField = "ID";
+            //    Ddlcata.DataBind();
+            //}
+            //using (SqlCommand cm = new SqlCommand("RADIO_COPRO_RATES", con))
+            //{
+            //    cm.CommandType = CommandType.StoredProcedure;
+            //    cm.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_EVENT4";
+            //    cm.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+            //    cm.Parameters.Add("@NAME", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+            //    SqlDataAdapter da2 = new SqlDataAdapter(cm);
+            //    //SqlDataAdapter da2 = new SqlDataAdapter("select * from [Corporate_Table] where CNAME='" + Ddlincrnce.SelectedItem.Text + "'", con);
+            //    DataTable ds2 = new DataTable();
+            //    da2.Fill(ds2);
+            //    Ddlincrnce.DataSource = ds2;
+            //    Ddlincrnce.DataTextField = "CNAME";
+            //    Ddlincrnce.DataValueField = "ID";
+            //    Ddlincrnce.DataBind();
+            //}
+            #endregion
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void GridView2_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        try
+        {
+            SqlParameter[] SQL_PARAMS = new SqlParameter[2];
+
+            SQL_PARAMS[0] = OBJ_METHOD.createParams("@DBOpration", SqlDbType.VarChar, 500, "SELECT_GRIDPAGE");
+            SQL_PARAMS[1] = OBJ_METHOD.createParams("@Branch_ID", SqlDbType.Int, 0, Session["Branch"]);
+
+            DataSet Ds = OBJ_METHOD.Get_DataSet("RADIO_COPRO_RATES", false, true, SQL_PARAMS);
+            if (Ds.Tables[0].Rows.Count > 0)
+            {
+                GridView2.DataSource = Ds;
+                GridView2.PageIndex = e.NewPageIndex;
+                GridView2.DataKeyNames = new string[] { "ID" };
+                GridView2.DataBind();
+            }
+            //SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            //con.Open();
+            //using (SqlCommand cmd = new SqlCommand("RADIO_COPRO_RATES", con))
+            //{
+            //    cmd.CommandType = CommandType.StoredProcedure;
+            //    cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_GRIDPAGE";
+            //    cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = "NULL";
+            //    cmd.Parameters.Add("@NAME", SqlDbType.VarChar).Value = lblorgid.Text;
+            //    SqlDataAdapter da = new SqlDataAdapter(cmd);
+            //    //SqlDataAdapter da = new SqlDataAdapter("select * from CORPO_CATA Order by ID Desc", con);
+            //    DataTable dt = new DataTable();
+            //    da.Fill(dt);
+            //    GridView2.SelectedIndex = 0;
+            //    GridView2.DataSource = dt;
+            //    GridView2.PageIndex = e.NewPageIndex;
+            //    GridView2.DataKeyNames = new string[] { "ID" };
+            //    GridView2.DataBind();
+            //}
+            //con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+}

@@ -1,0 +1,266 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Data;
+
+public partial class ADMIN_Category_master : System.Web.UI.Page
+{
+    string num1 = "SJ000";
+ 
+    SqlCommand com, cmd;
+    SqlDataReader dr;
+    SqlDataAdapter da;
+    DataTable dt;
+    decimal total_amt = 0;
+    decimal total_vat_amt = 0;
+    int i, no, no1, sl;
+    GridViewRow gr;
+    SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        try
+        {
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+        if (!IsPostBack)
+        {
+            binddata();
+        }
+        }
+        catch (Exception ex)
+        {
+          
+            string message = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        }
+
+    }
+    public void binddata()
+    {
+        con.Open();
+        SqlDataAdapter Adp = new SqlDataAdapter("select * from dbo.CATEGORY_MASTER order by ID desc", con);
+        DataTable Dt = new DataTable();
+        Adp.Fill(Dt);
+        grvcorprte.DataSource = Dt;
+        grvcorprte.DataBind();
+
+        using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+        {
+            COM.CommandType = CommandType.StoredProcedure;
+            COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+            SqlDataReader dr = COM.ExecuteReader();
+            if (dr.Read())
+            {
+                lblfyear.Text = dr["FYEAR"].ToString();
+            }
+            dr.Close();
+        }
+        con.Close();
+    }
+    protected void btncreate_Click(object sender, EventArgs e)
+    {
+        try
+         {
+        // Validation
+        if (txtname.Text == "")
+        {
+            string message = "alert('* Name Is Mandatory.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+            return;
+        }       
+
+       
+        con.Open();
+
+        SqlCommand cmd = new SqlCommand("select CATEGORY from CATEGORY_MASTER where CATEGORY='" + txtname.Text + "'", con);
+        object i = cmd.ExecuteScalar();
+        if (i != null)
+        {
+            string message = "alert('*" + txtname.Text + " Already Exist.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+        }
+        using (SqlCommand cmd11 = new SqlCommand("ADMIN_Category_Master", con))
+        {
+            cmd11.CommandType = CommandType.StoredProcedure;
+            cmd11.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+            cmd11.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = txtname.Text.ToUpper();
+            cmd11.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+            cmd11.ExecuteNonQuery();
+        }
+       
+        string message1 = "alert('Created Successfully.')";
+        ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        resetCt();
+        con.Close();
+        binddata();
+        }
+        catch (Exception ex)
+        {
+            con.Close();
+            string message = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        }
+        
+    }
+    public void resetCt()
+    {
+        txtname.Text = "";
+    }
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        try 
+	    {	        
+	     if (txtname.Text == "")
+          {
+            string message = "alert('* Fields Are Mandatory.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+            return;
+          }
+     
+        con.Open();
+        using (SqlCommand cmd11 = new SqlCommand("ADMIN_Category_Master", con))
+        {
+            cmd11.CommandType = CommandType.StoredProcedure;
+            cmd11.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+            cmd11.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = txtname.Text.ToUpper();
+            cmd11.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+            cmd11.ExecuteNonQuery();
+        }
+        string message1 = "alert('Updated Successfully.')";
+        ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        resetCt();
+        con.Close();
+        binddata();
+       }
+        catch (Exception ex)
+        {
+            con.Close();
+            string message = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        }
+    }
+    protected void btncancel_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/ADMIN/Category_master.aspx");
+    }
+    protected void grvcorprte_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+        var slno = grvcorprte.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+     
+        con.Open();
+        using (SqlCommand cmd11 = new SqlCommand("ADMIN_Category_Master", con))
+        {
+            cmd11.CommandType = CommandType.StoredProcedure;
+            cmd11.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT";
+            cmd11.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = txtname.Text.ToUpper();
+            cmd11.Parameters.Add("@ID", SqlDbType.VarChar).Value = slno;
+            dr = cmd11.ExecuteReader();
+            if (dr.Read())
+            {
+                btncreate.Visible = false;
+                btnupdate.Visible = true;
+                txtid.Text = slno.ToString();
+                txtname.Text = dr["CATEGORY"].ToString();
+
+            }
+            dr.Close();
+        }
+        con.Close();
+        }
+        catch (Exception ex)
+        {
+            con.Close();
+            string message = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        }
+    }
+    protected void grvcorprte_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            // reference the Delete LinkButton
+            LinkButton db = (LinkButton)e.Row.Cells[2].Controls[0];
+
+            db.OnClientClick = "return confirm('Are you sure want to delete this item ?');";
+        }
+    }
+    protected void grvcorprte_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+       try 
+	    {	        
+		  con.Open();
+        string slno = grvcorprte.DataKeys[e.RowIndex].Values["ID"].ToString();
+        using (SqlCommand cmd11 = new SqlCommand("ADMIN_Category_Master", con))
+        {
+            cmd11.CommandType = CommandType.StoredProcedure;
+            cmd11.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "DELETE";
+            cmd11.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = txtname.Text.ToUpper();
+            cmd11.Parameters.Add("@ID", SqlDbType.VarChar).Value = slno;
+            cmd11.ExecuteNonQuery();
+        }
+      
+        con.Close();
+        binddata();
+          }
+        catch (Exception ex)
+        {
+            con.Close();
+            string message = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        }
+    }
+    protected void grvcorprte_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        try
+        {
+            con.Open();
+            using (SqlCommand cmd11 = new SqlCommand("ADMIN_Category_Master", con))
+            {
+                cmd11.CommandType = CommandType.StoredProcedure;
+                cmd11.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECTALL";
+                cmd11.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = txtname.Text.ToUpper();
+                cmd11.Parameters.Add("@ID", SqlDbType.VarChar).Value = 1;
+                cmd11.ExecuteNonQuery();
+                SqlDataAdapter Adp = new SqlDataAdapter(cmd11);
+                DataTable dt = new DataTable();
+                Adp.Fill(dt);
+                grvcorprte.DataSource = dt;
+                grvcorprte.PageIndex = e.NewPageIndex;
+                grvcorprte.DataKeyNames = new string[] { "ID" };
+                grvcorprte.DataBind();
+                con.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            con.Close();
+            string message = ex.ToString();
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        }
+       
+        
+    }
+}

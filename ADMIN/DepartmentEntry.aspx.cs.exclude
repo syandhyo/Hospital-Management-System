@@ -1,0 +1,243 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class ADMIN_DepartmentEntry : System.Web.UI.Page
+{      
+     
+    SqlDataReader dr;
+    SqlConnection con;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+
+        binddata();       
+
+        con.Close();
+    }
+    
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+
+        using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+        {
+            COM.CommandType = CommandType.StoredProcedure;
+            COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+            SqlDataReader dr = COM.ExecuteReader();
+            if (dr.Read())
+            {
+                lblfyear.Text = dr["FYEAR"].ToString();
+            }
+            dr.Close();
+        }
+        con.Close();
+
+        SqlDataAdapter Adp = new SqlDataAdapter("select id,DeptName from tblDepartment order by id desc", con);
+        DataTable Dt = new DataTable();
+        Adp.Fill(Dt);
+        GridView1.DataSource = Dt;
+        GridView1.DataBind();
+        
+    }
+    protected void GridView1_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            // reference the Delete LinkButton
+            LinkButton db = (LinkButton)e.Row.Cells[1].Controls[0];
+
+            db.OnClientClick = "return confirm('Are you sure want to delete this info ?');";
+        }
+    }
+    protected void gvDetails_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            string slno = GridView1.DataKeys[e.RowIndex].Values["id"].ToString();
+            SqlCommand cm = new SqlCommand("delete from tblDepartment where id='" + slno + "'", con);
+            cm.ExecuteNonQuery();
+
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void GridView1_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlDataAdapter da = new SqlDataAdapter("select id,DeptName from tblDepartment", con);
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            GridView1.DataSource = dt;
+            GridView1.PageIndex = e.NewPageIndex;
+            GridView1.DataKeyNames = new string[] { "id" };
+            GridView1.DataBind();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+
+    protected void GridView1_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+            var slno = GridView1.DataKeys[e.NewSelectedIndex].Values["id"].ToString();
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand com = new SqlCommand("select * from tblDepartment where id='" + slno + "'", con);
+            dr = com.ExecuteReader();
+            if (dr.Read())
+            {
+                btncreate.Visible = false;
+                btnupdate.Visible = true;
+                txtid.Text = dr["ID"].ToString();
+                txtdept.Text = dr["DeptName"].ToString();
+
+            }
+            dr.Close();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtdept.Text == "")
+            {
+                string message = "alert('* Please Enter Department.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand cmd1 = new SqlCommand("select DeptName from tblDepartment where DeptName='" + txtdept.Text + "'", con);
+            object i = cmd1.ExecuteScalar();
+            if (i != null)
+            {
+                string message = "alert('* Department Name " + txtdept.Text + " Already Exist.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+
+            //SqlCommand cmd = new SqlCommand("insert into tblDepartment(ORGID,DeptName,DateStamp)values(@ORGID,@DeptName,@DateStamp)", con);
+            using (SqlCommand cmd = new SqlCommand("SP_DEPT_master", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                cmd.Parameters.Add("@DeptName", SqlDbType.VarChar).Value = txtdept.Text;
+                cmd.Parameters.Add("@DateStamp", SqlDbType.DateTime).Value = DateTime.Now.ToString();
+                cmd.Parameters.Add("@ID", SqlDbType.Int).Value = 1;
+                cmd.ExecuteNonQuery();
+            }
+
+            clearcontrol();
+            string message1 = "alert('Successfully Saved.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/DepartmentEntry.aspx");
+    }
+
+    public void clearcontrol()
+    {
+        txtdept.Text = "";
+    }
+    protected void Button2_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtdept.Text == "")
+            {
+                string message = "alert('* Please Enter Department.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand cmd2 = new SqlCommand("select DeptName from tblDepartment where DeptName='" + txtdept.Text + "'", con);
+            object i = cmd2.ExecuteScalar();
+            if (i != null)
+            {
+                string message = "alert('* Department Name " + txtdept.Text + " Already Exist.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            //SqlCommand cmd1 = new SqlCommand("UPDATE tblDepartment SET DeptName=@DeptName WHERE id=@id", con);
+
+            using (SqlCommand cmd = new SqlCommand("SP_DEPT_master", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+                cmd.Parameters.Add("@id", SqlDbType.VarChar).Value = txtid.Text;
+                cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = "";
+                cmd.Parameters.Add("@DeptName", SqlDbType.VarChar).Value = txtdept.Text;
+                cmd.Parameters.Add("@DateStamp", SqlDbType.DateTime).Value = DateTime.Now.ToString();
+                cmd.ExecuteNonQuery();
+            }
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/DepartmentEntry.aspx");
+    }
+    protected void Button3_Click(object sender, EventArgs e)
+    {
+        binddata();
+        Response.Redirect("~/ADMIN/DepartmentEntry.aspx");
+    }
+}

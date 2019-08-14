@@ -1,0 +1,265 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Configuration;
+
+
+public partial class ADMIN_Default2 : System.Web.UI.Page
+{
+    string num1 = "SJ000";
+    SqlConnection con;
+    SqlCommand com, cmd;
+    SqlDataReader dr;
+    SqlDataAdapter da;
+    DataTable dt;
+    decimal total_amt = 0;
+    decimal total_vat_amt = 0;
+    int i, no, no1, sl;
+    GridViewRow gr;
+    public void auto()
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            string qry1 = "select ID from ORG_TABLE";
+
+            com = new SqlCommand(qry1, con);
+            dr = null;
+
+            dr = com.ExecuteReader();
+
+            while (dr.Read())
+            {
+                num1 = dr["ID"].ToString();
+            }
+            num1 = string.Format("OR{0}", (Convert.ToUInt32(num1.Substring(2)) + 1).ToString("D4"));
+            txtid.Text = num1;
+
+            dr.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        try
+        {
+            if (Session["out"] == "INACTIVE")
+            {
+                Response.Redirect("~/index.aspx");
+            }
+            Response.Buffer = true;
+
+            Response.CacheControl = "no-cache";
+            if (Session["NAME"] == null)
+            {
+                Response.Redirect("~/index.aspx");
+            }
+
+            lblid.Text = Session["NAME"].ToString();
+            lblorgid.Text = Session["ORGID"].ToString();
+            if (!IsPostBack)
+            {
+                binddata();
+            }
+            if (txtname.Text == "")
+            {
+                btncreate.Visible = true;
+                btnupdate.Visible = false;
+            }
+            else
+            {
+                btncreate.Visible = false;
+                btnupdate.Visible = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    public void binddata()
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+           // SqlDataAdapter da = new SqlDataAdapter("SELECT ID as ID,NAME,PHONE,GSTNO,STATECODE,ADDRESS FROM ORG_TABLE WHERE  ID='" + lblorgid.Text + "' ORDER BY ID DESC", con);
+            using (SqlCommand cmd = new SqlCommand("Sp_Org_master_SElect", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value ="select";
+                cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataSet ds = new DataSet();
+                da.Fill(ds);
+                txtid.Text = ds.Tables[0].Rows[0]["ID"].ToString();
+                txtname.Text = ds.Tables[0].Rows[0]["NAME"].ToString();
+                txtphone.Text = ds.Tables[0].Rows[0]["PHONE"].ToString();
+                txtstatecode.Text = ds.Tables[0].Rows[0]["STATECODE"].ToString();
+                txtgst.Text = ds.Tables[0].Rows[0]["GSTNO"].ToString();
+                txtaddress.Text = ds.Tables[0].Rows[0]["ADDRESS"].ToString();
+
+                using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+                {
+                    COM.CommandType = CommandType.StoredProcedure;
+                    COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                    SqlDataReader dr = COM.ExecuteReader();
+                    if (dr.Read())
+                    {
+                        lblfyear.Text = dr["FYEAR"].ToString();
+                    }
+                    dr.Close();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtname.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                txtname.Focus();
+                return;
+            }
+            else if (txtphone.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                txtphone.Focus();
+                return;
+            }
+            else if (txtgst.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                txtgst.Focus();
+                return;
+            }
+            else if (txtstatecode.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                txtstatecode.Focus();
+                return;
+            }
+           
+            else if (txtaddress.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                txtaddress.Focus();
+                return;
+            }
+
+           
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            auto();
+           // SqlCommand cmd1 = new SqlCommand("insert into ORG_TABLE (ID,NAME,PHONE,GSTNO,STATECODE,ADDRESS) values (@ID,@NAME,@PHONE,@GSTNO,@STATECODE,@ADDRESS)", con);
+            using (SqlCommand cmd1 = new SqlCommand("SP_ORG_MASTER", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = txtname.Text.ToUpper();
+                cmd1.Parameters.Add("@PHONE", SqlDbType.VarChar).Value = txtphone.Text;
+                cmd1.Parameters.Add("@GSTNO", SqlDbType.VarChar).Value = txtgst.Text;
+                cmd1.Parameters.Add("@STATECODE", SqlDbType.VarChar).Value = txtstatecode.Text;
+                cmd1.Parameters.Add("@ADDRESS", SqlDbType.VarChar).Value = txtaddress.Text;
+
+                cmd1.ExecuteNonQuery();
+            }
+            string message1 = "alert('Created Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void Button2_Click(object sender, EventArgs e)
+    {
+        try
+        
+        {
+            if (txtname.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                txtname.Focus();
+                return;
+            }
+            else if (txtphone.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                txtphone.Focus();
+                return;
+            }
+            else if (txtgst.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                txtgst.Focus();
+                return;
+            }
+            else if (txtstatecode.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                txtstatecode.Focus();
+                return;
+            }
+
+            else if (txtaddress.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                txtaddress.Focus();
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            //SqlCommand cmd1 = new SqlCommand("update ORG_TABLE set NAME=@NAME,PHONE=@PHONE,GSTNO=@GSTNO,STATECODE=@STATECODE,ADDRESS=@ADDRESS where ID=@ID ", con);
+
+            using (SqlCommand cmd1 = new SqlCommand("SP_ORG_MASTER", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = txtname.Text.ToUpper();
+                cmd1.Parameters.Add("@PHONE", SqlDbType.VarChar).Value = txtphone.Text;
+                cmd1.Parameters.Add("@GSTNO", SqlDbType.VarChar).Value = txtgst.Text;
+                cmd1.Parameters.Add("@STATECODE", SqlDbType.VarChar).Value = txtstatecode.Text;
+                cmd1.Parameters.Add("@ADDRESS", SqlDbType.VarChar).Value = txtaddress.Text;
+
+                cmd1.ExecuteNonQuery();
+            }
+            string message1 = "alert('UPDATED Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        }
+          catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+       
+    }
+}

@@ -1,0 +1,350 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class RADIOLOGY_Radiology_rate_insurance : System.Web.UI.Page
+{
+    string num1 = "000";
+    SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+    SqlCommand com, cmd, cmd1;
+    SqlDataReader dr;
+    SqlDataAdapter da, da1;
+    DataTable dt;
+    string message = "alert('Inserted Successfully..')";
+    string message1 = "alert('Updated Successfully..')";
+    public void auto()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        string qry1 = " select * from dbo.[INSURANCE_CATA]";
+
+        com = new SqlCommand(qry1, con);
+        dr = null;
+
+        dr = com.ExecuteReader();
+
+        while (dr.Read())
+        {
+            num1 = dr["SLNO"].ToString();
+        }
+
+        TXTID.Text = "IRI" + num1;
+
+        dr.Close();
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand COM = new SqlCommand("SELECT FYEAR FROM FYEAR1_TABLE WHERE  ORGID='" + lblorgid.Text + "'", con);
+        dr = COM.ExecuteReader();
+        if (dr.Read())
+        {
+
+            lblfyear.Text = dr["FYEAR"].ToString();
+        }
+        dr.Close();
+
+        SqlDataAdapter Adp = new SqlDataAdapter("select * from INSURANCE_CATA Order by SLNO Desc", con);
+        DataTable Dt = new DataTable();
+        Adp.Fill(Dt);
+        GridView2.DataSource = Dt;
+        GridView2.DataBind();
+
+        SqlDataAdapter da = new SqlDataAdapter("select * from [INSURANCE_TBL]", con);
+        DataTable ds = new DataTable();
+        da.Fill(ds);
+        Ddlincrnce.DataSource = ds;
+        Ddlincrnce.DataTextField = "COMNYNAME";
+        Ddlincrnce.DataValueField = "ID";
+        Ddlincrnce.DataBind();
+        Ddlincrnce.Items.Insert(0, "---Select---");
+
+        SqlDataAdapter da1 = new SqlDataAdapter("select * from [RADIOLOGY_CATEGORY_TABLE]", con);
+        DataTable ds1 = new DataTable();
+        da1.Fill(ds1);
+        Ddlcata.DataSource = ds1;
+        Ddlcata.DataTextField = "NAME";
+        Ddlcata.DataValueField = "ID";
+        Ddlcata.DataBind();
+        Ddlcata.Items.Insert(0, "---Select---");
+
+        con.Close();
+    }
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+        if (IsPostBack != true)
+        {
+            //DataTable dt = new DataTable();
+            //dt.Columns.AddRange(new DataColumn[2] { new DataColumn("slno"), new DataColumn("INV") });
+            //ViewState["ITEM"] = dt;
+            //this.BindGrid();
+            bind();
+            binddata();
+        }
+        con.Close();
+        
+       
+    }
+    public void bind()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open(); 
+
+        
+
+        con.Close();
+    }
+   
+    protected void Ddlcata_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        if (Ddlcata.SelectedIndex != 0)
+        {
+            DataTable dt = new DataTable();
+            SqlDataAdapter da = new SqlDataAdapter("select * from [RADIOLOGY_COMPONENT_TABLE] where ID='" + Ddlcata.SelectedValue + "'", con);
+            da.Fill(dt);
+            GridView1.DataSource = null;
+            GridView1.DataBind();
+            GridView1.DataSource = dt;
+            //GridView1.SelectedIndex = 0;
+            GridView1.DataKeyNames = new string[] { "ID" };
+            GridView1.DataBind();
+
+        }
+        con.Close();
+        Txtdate.Enabled = true;
+
+    }
+    protected void btncancel_Click(object sender, EventArgs e)
+    {
+        Ddlcata.SelectedIndex = Ddlincrnce.SelectedIndex = 0;
+        Txtdate.Text = "";
+        Response.Redirect("Radiology_rate_insurance.aspx");
+    }
+    protected void btnsubmit_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (Ddlincrnce.SelectedIndex == 0)
+            {
+                string message = "alert('Please!! Select The Corporate..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (Ddlcata.SelectedIndex == 0)
+            {
+                string message = "alert('Please!! Select The Catagory..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (Txtdate.Text == "")
+            {
+                string message = "alert('Please Select The Apply Date..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else
+            {
+                if (Ddlincrnce.SelectedIndex != 0 && Ddlcata.SelectedIndex != 0 && Txtdate.Text != "")
+                {
+                    SqlConnection con2 = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+                    con2.Open();
+                    SqlCommand cmd = new SqlCommand("SELECT * from INSURANCE_CATA where INSURANCE='" + Ddlincrnce.SelectedItem.Text + "' and CATAGORY='" + Ddlcata.SelectedItem.Text + "' and APPLY_DATE='" + Txtdate.Text + "'", con2);
+                    dr = cmd.ExecuteReader();
+                    if (dr.Read() == true)
+                    {
+                        dr.Close();
+                        con2.Close();
+                        string message4 = "alert('Please Change The Apply Date..')";
+                        ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message4, true);
+                        return;
+                    }
+                }
+                auto();
+                SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+                con.Open();
+                foreach (GridViewRow row in GridView1.Rows)
+                {
+                    var inv = row.FindControl("lblname") as Label;
+                    var AMT = row.FindControl("txtprice") as TextBox;
+                    if (AMT.Text == "")
+                    {
+                        AMT.Text = "0";
+                    }
+                    //var INV = Convert.ToInt32(GridView1.DataKeys[row.RowIndex].Values[0]);
+                    SqlCommand cmd = new SqlCommand("Insert Into Insurance_rate (ORGID,component,price,cataID,insuranceID,ID) values(@ORGID,@component,@price,@cataID,@insuranceID,@ID)", con);
+                    cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                    cmd.Parameters.Add("@component", SqlDbType.VarChar).Value = inv.Text.ToString();
+                    cmd.Parameters.Add("@price", SqlDbType.VarChar).Value = AMT.Text.ToString();
+                    cmd.Parameters.Add("@cataID", SqlDbType.VarChar).Value = Ddlcata.SelectedValue;
+                    cmd.Parameters.Add("@insuranceID", SqlDbType.VarChar).Value = Ddlincrnce.SelectedValue; ;
+                    cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+                    cmd.ExecuteNonQuery();
+                }
+                con.Close();
+
+                con.Open();
+                SqlCommand cmd1 = new SqlCommand("insert into INSURANCE_CATA (ID,INSURANCE,CATAGORY,FYEAR,DATE,APPLY_DATE) values(@ID,@INSURANCE,@CATAGORY,@FYEAR,@DATE,@APPLY_DATE)", con);
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+                cmd1.Parameters.Add("@INSURANCE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+                cmd1.Parameters.Add("@CATAGORY", SqlDbType.VarChar).Value = Ddlcata.SelectedItem.Text;
+                cmd1.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+                cmd1.Parameters.Add("@DATE", SqlDbType.Date).Value = DateTime.Now.ToString("dd-MM-yyyy");
+                cmd1.Parameters.Add("@APPLY_DATE", SqlDbType.Date).Value = Txtdate.Text; ;
+                cmd1.ExecuteNonQuery();
+                dr.Close();
+                con.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+
+            Response.Redirect("Radiology_rate_insurance.aspx");
+            bind();
+        
+
+    }
+    protected void GridView2_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        var slno = GridView2.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlDataAdapter da = new SqlDataAdapter("select * from Insurance_rate where ID='" + slno + "'", con);
+        DataSet ds = new DataSet();
+        da.Fill(ds);
+        btnsubmit.Visible = false;
+        btndelete.Visible = true;
+        btnupdate.Visible = true;
+        TXTID.Text = ds.Tables[0].Rows[0]["ID"].ToString();
+        GridView3.DataSource = ds;
+        GridView3.DataBind();
+        GridView1.Visible = false;
+        SqlCommand C = new SqlCommand("select * from INSURANCE_CATA where ID='" + TXTID.Text + "'", con);
+        dr = C.ExecuteReader();
+        if (dr.Read())
+        {
+            Ddlincrnce.SelectedItem.Text = dr["INSURANCE"].ToString();
+            Ddlcata.SelectedItem.Text = dr["CATAGORY"].ToString();
+            Txtdate.Text = dr["APPLY_DATE"].ToString();
+        }
+        dr.Close();
+        con.Close();
+        Txtdate.Enabled = true;
+
+        SqlDataAdapter da1 = new SqlDataAdapter("select * from [RADIOLOGY_CATEGORY_TABLE] where NAME='" + Ddlcata.SelectedItem.Text + "' ", con);
+        DataTable ds1 = new DataTable();
+        da1.Fill(ds1);
+        Ddlcata.DataSource = ds1;
+        Ddlcata.DataTextField = "NAME";
+        Ddlcata.DataValueField = "ID";
+        Ddlcata.DataBind();
+
+        SqlDataAdapter da2 = new SqlDataAdapter("select * from [INSURANCE_TBL] where COMNYNAME='"+Ddlincrnce.SelectedItem.Text+"'", con);
+        DataTable ds2 = new DataTable();
+        da2.Fill(ds2);
+        Ddlincrnce.DataSource = ds2;
+        Ddlincrnce.DataTextField = "COMNYNAME";
+        Ddlincrnce.DataValueField = "ID";
+        Ddlincrnce.DataBind();
+       
+    }
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (Txtdate.Text == "")
+            {
+                string message = "alert('Please Select The Apply Date..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand cmd = new SqlCommand("delete from Insurance_rate where ID='" + TXTID.Text + "'", con);
+            cmd.ExecuteNonQuery();
+            foreach (GridViewRow row in GridView3.Rows)
+            {
+                var inv = row.FindControl("lblnam") as Label;
+                var AMT = row.FindControl("txtpric") as TextBox;
+                if (AMT.Text == "")
+                {
+                    AMT.Text = "0";
+                }
+                //var INV = Convert.ToInt32(GridView1.DataKeys[row.RowIndex].Values[0]);
+                SqlCommand cmd1 = new SqlCommand("Insert Into Insurance_rate (ORGID,component,price,cataID,insuranceID,ID) values(@ORGID,@component,@price,@cataID,@insuranceID,@ID)", con);
+                cmd1.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                cmd1.Parameters.Add("@component", SqlDbType.VarChar).Value = inv.Text.ToString();
+                cmd1.Parameters.Add("@price", SqlDbType.VarChar).Value = AMT.Text.ToString();
+                cmd1.Parameters.Add("@cataID", SqlDbType.VarChar).Value = Ddlcata.SelectedValue;
+                cmd1.Parameters.Add("@insuranceID", SqlDbType.VarChar).Value = Ddlincrnce.SelectedValue; ;
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+                cmd1.ExecuteNonQuery();
+            }
+            SqlCommand cmd2 = new SqlCommand("update INSURANCE_CATA set INSURANCE=@INSURANCE,APPLY_DATE=@APPLY_DATE where ID='" + TXTID.Text + "'", con);
+            cmd2.Parameters.Add("@INSURANCE", SqlDbType.VarChar).Value = Ddlincrnce.SelectedItem.Text;
+            cmd2.Parameters.Add("@APPLY_DATE", SqlDbType.Date).Value = Txtdate.Text;
+            cmd2.ExecuteNonQuery();
+            con.Close();
+            binddata();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("Radiology_rate_insurance.aspx");
+    }
+    protected void btndelete_Click(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand cm = new SqlCommand("delete from INSURANCE_CATA where ID='" + TXTID.Text + "'", con);
+        cm.ExecuteNonQuery();
+        
+        SqlCommand cmd = new SqlCommand("delete from Insurance_rate where ID='" + TXTID.Text + "'", con);
+        cmd.ExecuteNonQuery();
+        con.Close();
+
+        Response.Redirect("Radiology_rate_insurance.aspx");
+        bind();
+    }
+    protected void GridView2_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlDataAdapter da = new SqlDataAdapter("select * from INSURANCE_CATA Order by ID Desc", con);
+        DataTable dt = new DataTable();
+        da.Fill(dt);
+        GridView2.SelectedIndex = 0;
+        GridView2.DataSource = dt;
+        GridView2.PageIndex = e.NewPageIndex;
+        GridView2.DataKeyNames = new string[] { "ID" };
+        GridView2.DataBind();
+        con.Close();
+    }
+   
+}

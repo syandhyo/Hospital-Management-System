@@ -1,0 +1,133 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Text;
+using System.Configuration;
+using System.Web.Services;
+
+public partial class LABORATORY_ViewRequisition : System.Web.UI.Page
+{
+    string num1 = "0";
+    SqlConnection con;
+    SqlDataAdapter da, da1, da2, da3, da4, da5, da6, da7;
+    DataSet ds = new DataSet();
+    SqlCommand com, cmd, cmd1;
+    SqlDataReader dr, dr1, dr2;
+    DataTable dt;
+    DataRow dtr;
+    int i, no, no1, sl, F;
+    int flag = 0, stock = 0, stock_tran = 0, trans = 0, stock1 = 0, S, CLOSEING, slno, CLOSE;
+    string id, id1, ph, val1, val2, p, q, des1, name, k, PIN;
+    public string id_hist;
+    public double amt = 0, qty = 0, amt1 = 0, t_amt = 0, qt = 0, c_rs = 0, avg = 0;
+    decimal a, b;
+    decimal amount = 0;
+    decimal amount1 = 0;
+    decimal gstamount = 0;
+    DateTime DT;
+    double totalamt1, totamt, totalgstamt, dis, dism;
+    GridViewRow gr;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+
+        if (!IsPostBack)
+        {
+            FillRequisn();
+            binddata();
+        }
+        con.Close();
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        try
+        {
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+        con.Close();
+    }
+    public void FillRequisn()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        using (SqlCommand COM = new SqlCommand("LAB_VIEW_REQUISATION", con))
+        {
+            COM.CommandType = CommandType.StoredProcedure;
+            COM.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT";
+            //SqlCommand COM = new SqlCommand("select ID,OPDNO,NAME from  TBLRECLAB  order by ID asc", con);        
+            SqlDataAdapter da = new SqlDataAdapter(COM);
+            DataTable dt1 = new DataTable();
+            da.Fill(dt1);
+            Session["labid"] = dt1.Rows[0]["ID"].ToString();
+            grvrequsion.DataSource = dt1;
+            grvrequsion.DataBind();
+            dr = COM.ExecuteReader();
+            if (dr.Read())
+            {
+                //txtpono.Text = dr["PONO"].ToString();
+                //txtpodate.Text = dr["PODATE"].ToString();         
+            }
+            dr.Close();
+        }
+        con.Close();
+    }
+    protected void grvrequsion_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        var slno = grvrequsion.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+       
+        string dtop = grvrequsion.Rows[e.NewSelectedIndex].Cells[2].Text;
+
+        string Opid = dtop;
+        Opid = Opid.Substring(0, 2);
+        if (Opid == "OP")
+        {
+            Session["mode"] = "true";
+            Session["labid"] = slno;
+            Response.Redirect("~/LABORATORY/Optestresult.aspx");
+        }
+        else if (Opid == "IP")
+        {
+            Session["mode"] = "false";
+            Session["labid"] = slno;
+            Response.Redirect("~/LABORATORY/Optestresult.aspx");
+        }
+    }
+    
+}

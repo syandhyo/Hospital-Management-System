@@ -1,0 +1,144 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Data;
+using System.Configuration;
+using System.Drawing;
+using System.IO;
+using System.Collections;
+using System.Drawing.Drawing2D;
+using System.Web.Services;
+using System.Web.Script.Services;
+using Newtonsoft.Json;
+Partial Class ADMIN_AuthenticateUser
+    Inherits System.Web.UI.Page
+    [System.Web.Services.WebMethod, ScriptMethod(ResponseFormat = ResponseFormat.Json, UseHttpGet = false)]
+    public static string SaveData( string orgcode, string submitsts, string empname, string doj, string dept, string desg, string spl, string qualifications, string filenameupdated, string emailid, string mobileno, string presentaddr, string gender, string availtime,string actsts)
+    {
+        string ERRMSG = string.Empty;
+        int ERRCODE = -1;
+        Employee_Entry obj = new Employee_Entry();
+        string rtn = "0";
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        try
+        {
+            if (filenameupdated == "")
+            {
+                filenameupdated = "profile.png";
+
+
+            }
+            if (submitsts == "Submit")
+            {
+
+                #region insert
+
+                con.Open();
+               // obj.autoDRid();
+
+                //string s = "Photo/" + FileUpload1.FileName;
+
+
+
+                using (SqlCommand cm = new SqlCommand("SP_DOC_MASTER", con))
+                {
+                    cm.CommandType = CommandType.StoredProcedure;
+                    cm.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                    //cm.Parameters.Add("@EMP_CODE", SqlDbType.Int).Value = orgcode;
+                    cm.Parameters.Add("@EMP_NAME", SqlDbType.VarChar).Value = empname;// A_Valid_txtempname.Text;
+                    cm.Parameters.Add("@EMP_GENDER", SqlDbType.Char).Value = gender;// Valid_drpgender.SelectedItem.Text;
+                    cm.Parameters.Add("@EMP_JOI", SqlDbType.VarChar).Value = doj;// Dt_Valid_txtdoj.Text;
+                    cm.Parameters.Add("@EMP_ADRS", SqlDbType.VarChar).Value = presentaddr;// Valid_txtpresentaddrss.Text;
+                    cm.Parameters.Add("@EMP_MOBILE", SqlDbType.VarChar).Value = mobileno;// Num_Valid_txtmobileno.Text;
+                    cm.Parameters.Add("@EMP_SPECIALISATION", SqlDbType.VarChar).Value = spl;// A_txtspl.Text;
+                    cm.Parameters.Add("@EMP_QUALIFICATION", SqlDbType.VarChar).Value = qualifications;// A_txtqualifiaction.Text;
+                    cm.Parameters.Add("@EMP_EMAIL", SqlDbType.VarChar).Value = emailid;// Email_txtmailid.Text;
+                    cm.Parameters.Add("@DEPT_CODE", SqlDbType.Int).Value = dept;// Valid_drpdept.SelectedValue;
+                    cm.Parameters.Add("@EMP_PHOTO", SqlDbType.VarChar).Value = filenameupdated;// filename.ToString();
+                    cm.Parameters.Add("@EMP_AVAIL_TIME", SqlDbType.VarChar).Value = availtime;// txtavailtime.Text;
+                    cm.Parameters.Add("@EMP_STATUS", SqlDbType.VarChar).Value = actsts;// drpacstatus.SelectedItem.Text;
+                    cm.Parameters.Add("@DESG_CODE", SqlDbType.Int).Value = desg;// Valid_drpdesg.SelectedValue;
+                    cm.Parameters.Add("@ERRORMSG", SqlDbType.VarChar, 500);
+                    cm.Parameters["@ERRORMSG"].Direction = ParameterDirection.Output;
+                    cm.Parameters.Add("@ERRORCODE", SqlDbType.Int);
+                    cm.Parameters["@ERRORCODE"].Direction = ParameterDirection.Output;
+                    cm.ExecuteNonQuery();
+                    ERRMSG = cm.Parameters["@ERRORMSG"].Value.ToString();
+                    ERRCODE = Convert.ToInt32(cm.Parameters["@ERRORCODE"].Value.ToString());
+                    // FileUpload2.SaveAs(Server.MapPath(filename));
+                    //string message = "alert('Data Save Sucessfully.')";
+                    //ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                  //  obj.Data_bind();
+                   // obj.clearcontrol();
+
+                }
+                #endregion
+                rtn= "1";
+            }
+            else if (submitsts == "Update")
+            {
+                #region update
+                con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+                con.Open();
+
+
+                using (SqlCommand cm = new SqlCommand("SP_DOC_MASTER", con))
+                {
+                    cm.CommandType = CommandType.StoredProcedure;
+                    cm.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+
+                    cm.Parameters.Add("@EMP_CODE", SqlDbType.Int).Value = orgcode;
+                    cm.Parameters.Add("@EMP_NAME", SqlDbType.VarChar).Value = empname;// A_Valid_txtempname.Text;
+                    cm.Parameters.Add("@EMP_GENDER", SqlDbType.Char).Value = gender;// Valid_drpgender.SelectedItem.Text;
+                    cm.Parameters.Add("@EMP_JOI", SqlDbType.VarChar).Value = doj;// Dt_Valid_txtdoj.Text;
+                    cm.Parameters.Add("@EMP_ADRS", SqlDbType.VarChar).Value = presentaddr;// Valid_txtpresentaddrss.Text;
+                    cm.Parameters.Add("@EMP_MOBILE", SqlDbType.VarChar).Value = mobileno;// Num_Valid_txtmobileno.Text;
+                    cm.Parameters.Add("@EMP_SPECIALISATION", SqlDbType.VarChar).Value = spl;// A_txtspl.Text;
+                    cm.Parameters.Add("@EMP_QUALIFICATION", SqlDbType.VarChar).Value = qualifications;// A_txtqualifiaction.Text;
+                    cm.Parameters.Add("@EMP_EMAIL", SqlDbType.VarChar).Value = emailid;// Email_txtmailid.Text;
+                    cm.Parameters.Add("@DEPT_CODE", SqlDbType.Int).Value = dept;// Valid_drpdept.SelectedValue;
+                    cm.Parameters.Add("@EMP_PHOTO", SqlDbType.VarChar).Value = filenameupdated;// filename.ToString();
+                    cm.Parameters.Add("@EMP_AVAIL_TIME", SqlDbType.VarChar).Value = availtime;// txtavailtime.Text;
+                    cm.Parameters.Add("@EMP_STATUS", SqlDbType.VarChar).Value = actsts;// drpacstatus.SelectedItem.Text;
+                    cm.Parameters.Add("@DESG_CODE", SqlDbType.Int).Value = desg;// Valid_drpdesg.SelectedValue;
+                    cm.Parameters.Add("@ERRORMSG", SqlDbType.VarChar, 500);
+                    cm.Parameters["@ERRORMSG"].Direction = ParameterDirection.Output;
+                    cm.Parameters.Add("@ERRORCODE", SqlDbType.Int);
+                    cm.Parameters["@ERRORCODE"].Direction = ParameterDirection.Output;
+
+                    cm.ExecuteNonQuery();
+                    ERRMSG = cm.Parameters["@ERRORMSG"].Value.ToString();
+                    ERRCODE =Convert.ToInt32(cm.Parameters["@ERRORCODE"].Value.ToString());
+                    // FileUpload2.SaveAs(Server.MapPath(filename));
+                    //string message = "alert('Data Update Sucessfully.')";
+
+                    //ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                  //  obj.Data_bind();
+                   // obj.clearcontrol();
+
+                }
+
+                #endregion
+                rtn= "2";
+            }
+
+        }
+        catch (Exception ex)
+        {
+            rtn= "An error occurred: " + ex.ToString();
+
+        }
+        finally
+        {
+            con.Close();
+        }
+        return JsonConvert.SerializeObject(new { CODE = rtn, DEFAULTMSG = ERRMSG , ERRCODE=ERRCODE});
+        //return rtn;
+    }
+
+End Class

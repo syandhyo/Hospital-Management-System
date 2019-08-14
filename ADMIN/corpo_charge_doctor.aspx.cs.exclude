@@ -1,0 +1,457 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class ADMIN_corpo_charge_doctor : System.Web.UI.Page
+{
+    string num1 = "PR000";
+    SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+    SqlCommand com, cmd, cmd1, cmd2;
+    SqlDataReader dr;
+    SqlDataAdapter da, da1;
+    DataTable dt;
+
+
+    public void auto()
+    {
+        //SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        string qry1 = " select ID from CORPORATE_I_CHARGE";
+
+        com = new SqlCommand(qry1, con);
+        dr = null;
+
+        dr = com.ExecuteReader();
+
+        while (dr.Read())
+        {
+            num1 = dr["ID"].ToString();
+        }
+        num1 = string.Format("CD{0}", (Convert.ToUInt32(num1.Substring(2)) + 1).ToString("D4"));
+        txtid.Text = num1;
+
+
+        dr.Close();
+        con.Close();
+    }
+    public void binddata()
+    {
+       // SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+        {
+            COM.CommandType = CommandType.StoredProcedure;
+            COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+            SqlDataReader dr = COM.ExecuteReader();
+            if (dr.Read())
+            {
+                lblfyear.Text = dr["FYEAR"].ToString();
+            }
+            dr.Close();
+        }
+        
+        using (SqlCommand cmd = new SqlCommand("ADMIN_corpo_charge_doctor", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECTALL";
+            cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = "a";
+            cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+            cmd.Parameters.Add("@idt", SqlDbType.VarChar).Value = "a";
+            cmd.Parameters.Add("@DOCTOR", SqlDbType.VarChar).Value = "a";
+            cmd.Parameters.Add("@FOLLOW_UP", SqlDbType.VarChar).Value = "a";
+            cmd.Parameters.Add("@CHARGES", SqlDbType.VarChar).Value = "0.00";
+            cmd.Parameters.Add("@CID", SqlDbType.VarChar).Value = txtid.Text;
+            cmd.Parameters.Add("@CORPORATE_ID", SqlDbType.VarChar).Value = ddlcorporate.SelectedValue;
+            cmd.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = ddlcorporate.SelectedValue;
+            cmd.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = "2018-01-01";
+            cmd.Parameters.Add("@DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy-MM-dd");
+            cmd.ExecuteNonQuery();
+            SqlDataAdapter Adp = new SqlDataAdapter(cmd);
+            DataTable Dt = new DataTable();
+            Adp.Fill(Dt);
+            GridView2.DataSource = Dt;
+           
+            GridView2.DataKeyNames = new string[] { "ID" };
+            GridView2.DataBind();
+        }
+     
+      
+        con.Close();
+
+    }
+    protected void Page_Load(object sender, EventArgs e)
+    {
+       // SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+       
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+        if (IsPostBack != true)
+        {
+            //DataTable dt = new DataTable();
+            //dt.Columns.AddRange(new DataColumn[6] { new DataColumn("ID"), new DataColumn("NAME"), new DataColumn("INV"), new DataColumn("RANGE"), new DataColumn("UNIT"), new DataColumn("PRICE") });
+            //ViewState["ITEM"] = dt;
+            con.Open();
+            using (SqlCommand cmd = new SqlCommand("ADMIN_corpo_charge_doctor", con))
+            {
+
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECTDROP";
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text.ToString();
+                cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                cmd.Parameters.Add("@idt", SqlDbType.VarChar).Value = txtid.Text.ToString();
+                cmd.Parameters.Add("@DOCTOR", SqlDbType.VarChar).Value = "";
+                cmd.Parameters.Add("@FOLLOW_UP", SqlDbType.VarChar).Value = "";
+                cmd.Parameters.Add("@CHARGES", SqlDbType.VarChar).Value = "0.00";
+                cmd.Parameters.Add("@CID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd.Parameters.Add("@CORPORATE_ID", SqlDbType.VarChar).Value = "1";
+                cmd.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = "1";
+                cmd.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = "2018-01-01";
+                cmd.Parameters.Add("@DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy-MM-dd");
+                cmd.ExecuteNonQuery();
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable ds = new DataTable();
+                da.Fill(ds);
+                ddlcorporate.DataSource = ds;
+                ddlcorporate.DataTextField = "CNAME";
+                ddlcorporate.DataValueField = "ID";
+                ddlcorporate.DataBind();
+                ddlcorporate.Items.Insert(0, "---Select---");
+            }
+            con.Close();
+          
+        }
+
+        binddata();
+    }
+    protected void ddlcorporate_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        //SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        if (ddlcorporate.SelectedIndex != 0)
+        {
+            DataTable dt = new DataTable();
+            SqlDataAdapter da = new SqlDataAdapter("select * from [Doctor_charges] where CID is null", con);
+            da.Fill(dt);
+            GridView1.DataSource = null;
+            GridView1.DataBind();
+            GridView1.DataSource = dt;
+            //GridView1.DataKeyNames = new string[] { "SLNO" };
+            GridView1.DataBind();
+        }
+        con.Close();
+    }
+    protected void btnSubmit_Click(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        try
+        {
+            if (ddlcorporate.SelectedIndex == 0)
+            {
+                string message = "alert('Please!! Select The Corporate..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (Txtdate.Text == "")
+            {
+                string message = "alert('Please Select The Apply Date..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else
+            {
+               
+                if (ddlcorporate.SelectedIndex != 0 && Txtdate.Text != "")
+                {
+                    //SqlCommand cmd = new SqlCommand("select * From CORPORATE_DOCTOR_CHARGE where CORPORATE='" + ddlcorporate.SelectedItem.Text + "' and APPLY_DATE='" + Txtdate.Text + "'", con);
+                    using (SqlCommand COM = new SqlCommand("ADMIN_CORPORATE_doctor_CHARGE", con))
+                    {
+                        COM.CommandType = CommandType.StoredProcedure;
+                        COM.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "select_date";
+                        COM.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = ddlcorporate.SelectedItem.Text;
+                        COM.Parameters.Add("@date", SqlDbType.Date).Value = Convert.ToDateTime(Txtdate.Text).ToString("yyyy-MM-dd");
+                        SqlDataReader dr = COM.ExecuteReader();
+                        if (dr.Read() == true)
+                        {
+                            string message4 = "alert(' Please Change The Apply Date..')";
+                            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message4, true);
+                            return;
+                        }
+                        dr.Close();
+                    }
+                }
+                auto();
+                foreach (GridViewRow row in GridView1.Rows)
+                {
+                    var id = row.FindControl("lblid") as Label;
+                    var doctor = row.FindControl("lbldoctor") as Label;
+                    var follow_up = row.FindControl("lblfollow") as Label;
+                    var AMT = row.FindControl("txtNchrage") as TextBox;
+                    if (AMT.Text == "")
+                    {
+                        AMT.Text = "0.00";
+                    }
+                    using (SqlCommand cmd = new SqlCommand("ADMIN_corpo_charge_doctor", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERTGRID";
+                        cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = id.Text.ToString();
+                        cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                        cmd.Parameters.Add("@idt", SqlDbType.VarChar).Value = id.Text.ToString();
+                        cmd.Parameters.Add("@DOCTOR", SqlDbType.VarChar).Value = doctor.Text.ToString();
+                        cmd.Parameters.Add("@FOLLOW_UP", SqlDbType.VarChar).Value = follow_up.Text.ToString();
+                        cmd.Parameters.Add("@CHARGES", SqlDbType.VarChar).Value = AMT.Text.ToString();
+                        cmd.Parameters.Add("@CID", SqlDbType.VarChar).Value = txtid.Text;
+                        cmd.Parameters.Add("@CORPORATE_ID", SqlDbType.VarChar).Value = ddlcorporate.SelectedValue;
+                        cmd.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = ddlcorporate.SelectedValue;
+                        cmd.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = Convert.ToDateTime(Txtdate.Text).ToString("yyyy-MM-dd");
+                        cmd.Parameters.Add("@DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy-MM-dd");
+                        cmd.ExecuteNonQuery();
+                    }
+
+                }
+                using (SqlCommand cmd = new SqlCommand("ADMIN_corpo_charge_doctor", con))
+                {
+
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                    cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text.ToString();
+                    cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                    cmd.Parameters.Add("@idt", SqlDbType.VarChar).Value = txtid.Text.ToString();
+                    cmd.Parameters.Add("@DOCTOR", SqlDbType.VarChar).Value = "";
+                    cmd.Parameters.Add("@FOLLOW_UP", SqlDbType.VarChar).Value = "";
+                    cmd.Parameters.Add("@CHARGES", SqlDbType.VarChar).Value = "0.00";
+                    cmd.Parameters.Add("@CID", SqlDbType.VarChar).Value = txtid.Text;
+                    cmd.Parameters.Add("@CORPORATE_ID", SqlDbType.VarChar).Value = ddlcorporate.SelectedValue;
+                    cmd.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = ddlcorporate.SelectedItem.Text;
+                    cmd.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = Convert.ToDateTime(Txtdate.Text).ToString("yyyy-MM-dd");
+                    cmd.Parameters.Add("@DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy-MM-dd");
+                    cmd.ExecuteNonQuery();
+
+                }
+                con.Close();
+                string message1 = "alert('Successfully Saved.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+               
+
+                 Response.Redirect("~/ADMIN/corpo_charge_doctor.aspx");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/corpo_charge_doctor.aspx");
+    }
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (Txtdate.Text == "")
+            {
+                string message = "alert('Please Select The Apply Date..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            // SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand cmd1 = new SqlCommand("delete from Doctor_charges where CID='" + txtid.Text + "'", con);
+            cmd1.ExecuteNonQuery();
+            foreach (GridViewRow row in GridView3.Rows)
+            {
+                var id = row.FindControl("lblid1") as Label;
+                var doctor = row.FindControl("lbldoctor1") as Label;
+                var follow_up = row.FindControl("lblfollow1") as Label;
+                var AMT = row.FindControl("txtNchrage1") as TextBox;
+                if (AMT.Text == "")
+                {
+                    AMT.Text = "0.00";
+                }
+                using (SqlCommand cmd = new SqlCommand("ADMIN_corpo_charge_doctor", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERTGRID";
+                    cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = id.Text.ToString();
+                    cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                    cmd.Parameters.Add("@idt", SqlDbType.VarChar).Value = id.Text.ToString();
+                    cmd.Parameters.Add("@DOCTOR", SqlDbType.VarChar).Value = doctor.Text.ToString();
+                    cmd.Parameters.Add("@FOLLOW_UP", SqlDbType.VarChar).Value = follow_up.Text.ToString();
+                    cmd.Parameters.Add("@CHARGES", SqlDbType.VarChar).Value = AMT.Text.ToString();
+                    cmd.Parameters.Add("@CID", SqlDbType.VarChar).Value = txtid.Text;
+                    cmd.Parameters.Add("@CORPORATE_ID", SqlDbType.VarChar).Value = ddlcorporate.SelectedValue;
+                    cmd.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = ddlcorporate.SelectedValue;
+                    cmd.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = Convert.ToDateTime(Txtdate.Text).ToString("yyyy-MM-dd");
+                    cmd.Parameters.Add("@DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy-MM-dd");
+                    cmd.ExecuteNonQuery();
+                }
+
+            }
+
+            SqlCommand cmd2 = new SqlCommand("update CORPORATE_DOCTOR_CHARGE set APPLY_DATE=@APPLY_DATE where ID='" + txtid.Text + "'", con);
+            cmd2.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = Convert.ToDateTime(Txtdate.Text).ToString("yyyy-MM-dd");
+            cmd2.ExecuteNonQuery();
+        
+            string message1 = "alert('Successfully Updated.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/corpo_charge_doctor.aspx");    
+    }
+    protected void btndelete_Click(object sender, EventArgs e)
+    {
+
+        try
+        {
+            //SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            using (SqlCommand cmd = new SqlCommand("ADMIN_corpo_charge_doctor", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "DELETE";
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                cmd.Parameters.Add("@idt", SqlDbType.VarChar).Value = "id";
+                cmd.Parameters.Add("@DOCTOR", SqlDbType.VarChar).Value = "id";
+                cmd.Parameters.Add("@FOLLOW_UP", SqlDbType.VarChar).Value = "id";
+                cmd.Parameters.Add("@CHARGES", SqlDbType.VarChar).Value = "0.00";
+                cmd.Parameters.Add("@CID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd.Parameters.Add("@CORPORATE_ID", SqlDbType.VarChar).Value = ddlcorporate.SelectedValue;
+                cmd.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = ddlcorporate.SelectedValue;
+                cmd.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = Convert.ToDateTime(Txtdate.Text).ToString("yyyy-MM-dd");
+                cmd.Parameters.Add("@DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy-MM-dd");
+                cmd.ExecuteNonQuery();
+            }
+
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/corpo_charge_doctor.aspx");
+    }
+    protected void btncancel_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/ADMIN/corpo_charge_doctor.aspx");
+    }
+    protected void GridView2_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+          
+            var slno = GridView2.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+            SqlCommand C2m = new SqlCommand("select * from CORPORATE_DOCTOR_CHARGE where ID='" + slno + "'", con);
+            dr = C2m.ExecuteReader();
+            if (dr.Read() == true)
+            {
+                ddlcorporate.SelectedItem.Text = dr["CORPORATE"].ToString();
+                Txtdate.Text = Convert.ToDateTime(dr["APPLY_DATE"]).ToString("dd-MM-yyyy");
+            }
+            dr.Close();
+            // 
+             using (SqlCommand cmd2 = new SqlCommand("ADMIN_corpo_charge_doctor_select", con))
+            {
+                cmd2.CommandType = CommandType.StoredProcedure;
+                cmd2.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd2.Parameters.Add("@CID", SqlDbType.VarChar).Value = slno;
+                cmd2.Parameters.Add("@DATE", SqlDbType.DateTime).Value = Convert.ToDateTime(Txtdate.Text).ToString("yyyy-MM-dd");
+                SqlDataAdapter da = new SqlDataAdapter(cmd2);
+                //SqlDataAdapter da = new SqlDataAdapter("select * from Doctor_charges where CID='" + slno + "' and APPLY_DATE='" + Txtdate.Text + "'", con);
+                DataSet ds = new DataSet();
+                da.Fill(ds);
+                btnSubmit.Visible = false;
+                btndelete.Visible = true;
+                btnupdate.Visible = true;
+                txtid.Text = ds.Tables[0].Rows[0]["CID"].ToString();
+                GridView3.DataSource = ds;
+                GridView3.DataBind();
+                GridView1.Visible = false;
+
+
+                //SqlCommand Cm = new SqlCommand("select * from CORPORATE_DOCTOR_CHARGE where ID='" + slno + "'", con);
+                //dr = Cm.ExecuteReader();
+                //if (dr.Read() == true)
+                //{
+                //    ddlcorporate.SelectedItem.Text = dr["CORPORATE"].ToString();
+                //    Txtdate.Text = dr["APPLY_DATE"].ToString();
+                //}
+                //dr.Close();
+
+
+                SqlDataAdapter da1 = new SqlDataAdapter("select * from Corporate_Table where ISACTIVE='true' and CNAME='" + ddlcorporate.SelectedItem.Text + "'", con);
+                DataTable ds1 = new DataTable();
+                da1.Fill(ds1);
+                ddlcorporate.DataSource = ds1;
+                ddlcorporate.DataTextField = "CNAME";
+                ddlcorporate.DataValueField = "ID";
+                ddlcorporate.DataBind();
+              
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void GridView2_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        try
+        {
+            //SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            using (SqlCommand cmd = new SqlCommand("ADMIN_corpo_charge_doctor", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECTALL";
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = "id";
+                cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                cmd.Parameters.Add("@idt", SqlDbType.VarChar).Value = "id";
+                cmd.Parameters.Add("@DOCTOR", SqlDbType.VarChar).Value = "id";
+                cmd.Parameters.Add("@FOLLOW_UP", SqlDbType.VarChar).Value = "id";
+                cmd.Parameters.Add("@CHARGES", SqlDbType.VarChar).Value = "0.00";
+                cmd.Parameters.Add("@CID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd.Parameters.Add("@CORPORATE_ID", SqlDbType.VarChar).Value = ddlcorporate.SelectedValue;
+                cmd.Parameters.Add("@CORPORATE", SqlDbType.VarChar).Value = ddlcorporate.SelectedValue;
+                cmd.Parameters.Add("@APPLY_DATE", SqlDbType.DateTime).Value = Convert.ToDateTime(Txtdate.Text).ToString("yyyy-MM-dd");
+                cmd.Parameters.Add("@DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy-MM-dd");
+                cmd.ExecuteNonQuery();
+                SqlDataAdapter Adp = new SqlDataAdapter(cmd);
+                DataTable Dt = new DataTable();
+                Adp.Fill(Dt);
+                GridView2.DataSource = Dt;
+                GridView2.PageIndex = e.NewPageIndex;
+                GridView2.DataKeyNames = new string[] { "ID" };
+                GridView2.DataBind();
+            }
+
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+}

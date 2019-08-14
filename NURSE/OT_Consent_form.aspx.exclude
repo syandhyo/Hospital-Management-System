@@ -1,0 +1,137 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/NURSE/MasterPage.master" AutoEventWireup="true" CodeFile="OT_Consent_form.aspx.cs" Inherits="NURSE_OT_Consent_form" %>
+
+<%@ Register Assembly="CrystalDecisions.Web, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304" Namespace="CrystalDecisions.Web" TagPrefix="CR" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
+    <style type="text/css">
+        .auto-style1 {
+            text-decoration: underline;
+        }
+    </style>
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" Runat="Server">
+<asp:Label ID="lblid" runat="server" Text="Label"></asp:Label>(<asp:Label ID="lblfyear" runat="server" Text="Label"></asp:Label>)
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
+ <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+          <ContentTemplate>
+    <div>
+         <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+        <asp:Label ID="lblorgid" runat="server" Text="Label" Visible="false"> </asp:Label>
+            <asp:Label ID="lbluid" runat="server" Text="Label" Visible="false"> </asp:Label>
+       
+    </td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%; text-align: center;" align="right" class="auto-style1"><strong>OT CONCENT FORM</strong></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%; text-align: center;" align="right" class="auto-style1"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+        <table width="100%">
+     <tr>
+    
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label1" runat="server" ForeColor="#CC0000" Text="*"></asp:Label>
+        Select Bed No :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:DropDownList ID="dropbedno" runat="server" AutoPostBack="true" OnSelectedIndexChanged="dropbedno_SelectedIndexChanged">
+        </asp:DropDownList>
+         </td>
+    <td style="width:20%" align="right">Date :</td>
+    <td style="width:20%" align="left"><asp:TextBox ID="TXTDATE" runat="server" Enabled="False"></asp:TextBox></td>
+    <td style="width:20%" align="right"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    
+    <td style="width:20%; text-align: right;" align="left">        
+        Name :</td>
+    <td style="width:30%; text-align: left;" align="right">
+        <asp:Label ID="lblname" runat="server"></asp:Label>
+         </td>
+    <td style="width:10%; text-align: right;" align="left">Bed No :</td>
+    <td style="width:20%; text-align: left;" align="center">
+        <asp:Label ID="lblbedno" runat="server"></asp:Label>
+         </td>
+         <td style="width:20%" align="right"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    
+    <td style="width:20%; text-align: right;" align="left">        
+        IPD No :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:Label ID="lblipno" runat="server"></asp:Label>
+         </td>
+    <td style="width:20%; text-align: right;" align="left">Ward :</td>
+    <td style="width:20%; text-align: left;" align="center">
+        <asp:Label ID="lblward" runat="server"></asp:Label>
+         </td>
+         <td style="width:20%" align="right"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left">
+        
+         </td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:Button ID="btngenerate" runat="server" CssClass="btn btn-danger btn-sm" OnClick="Button3_Click" Text="Generate" />
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+         <table width="100%" >
+        <tr>
+            <td style="padding-left:140px;"> <asp:Button ID="btnPrint" runat="server" Visible="false" BackColor="Yellow" Text="Print" OnClick="btnPrint_Click"  /></td>
+        </tr>
+    </table>
+        <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td align="center">
+        <CR:CrystalReportViewer ID="CrystalReportViewer1" runat="server" AutoDataBind="true" ToolPanelView="None"/>
+    </td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+        </div>
+          </ContentTemplate></asp:UpdatePanel>
+</asp:Content>
+

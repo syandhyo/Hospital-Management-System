@@ -1,0 +1,240 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Configuration;
+
+
+public partial class ADMIN_DesignationEntry : System.Web.UI.Page
+{
+    SqlDataReader dr;
+    SqlConnection con;
+    
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+
+        binddata();
+    }
+    protected void GridView1_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            // reference the Delete LinkButton
+            LinkButton db = (LinkButton)e.Row.Cells[1].Controls[0];
+
+            db.OnClientClick = "return confirm('Are you sure want to delete this info ?');";
+        }
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+
+        using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+        {
+            COM.CommandType = CommandType.StoredProcedure;
+            COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+            SqlDataReader dr = COM.ExecuteReader();
+            if (dr.Read())
+            {
+                lblfyear.Text = dr["FYEAR"].ToString();
+            }
+            dr.Close();
+        }
+        con.Close();
+
+        SqlDataAdapter Adp = new SqlDataAdapter("select id,DesgName from tblDesignation order by id desc", con);
+        DataTable Dt = new DataTable();
+        Adp.Fill(Dt);
+        GridView1.DataSource = Dt;
+        GridView1.DataBind();
+    }
+
+    protected void gvDetails_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            string slno = GridView1.DataKeys[e.RowIndex].Values["id"].ToString();
+            SqlCommand cm = new SqlCommand("delete from tblDesignation where id='" + slno + "'", con);
+            cm.ExecuteNonQuery();
+
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void GridView1_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlDataAdapter da = new SqlDataAdapter("select id,DesgName from tblDesignation", con);
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            GridView1.DataSource = dt;
+            GridView1.PageIndex = e.NewPageIndex;
+            GridView1.DataKeyNames = new string[] { "id" };
+            GridView1.DataBind();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+
+    protected void GridView1_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+            var slno = GridView1.DataKeys[e.NewSelectedIndex].Values["id"].ToString();
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand com = new SqlCommand("select * from tblDesignation where id='" + slno + "'", con);
+            dr = com.ExecuteReader();
+            if (dr.Read())
+            {
+                btncreate.Visible = false;
+                btnupdate.Visible = true;
+                txtid.Text = dr["ID"].ToString();
+                txtdesg.Text = dr["DesgName"].ToString();
+            }
+            dr.Close();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+
+
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtdesg.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand cmd1 = new SqlCommand("select DesgName from tblDesignation where DesgName='" + txtdesg.Text + "'", con);
+            object i = cmd1.ExecuteScalar();
+            if (i != null)
+            {
+                string message = "alert('* Designation Name " + txtdesg.Text + " Already Exist.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+           // SqlCommand cmd = new SqlCommand("insert into tblDesignation(ORGID,DesgName,DateStamp)values(@ORGID,@DesgName,@DateStamp)", con);
+
+            using (SqlCommand cmd = new SqlCommand("SP_DESIGNATION_MASTER", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                cmd.Parameters.Add("@DesgName", SqlDbType.VarChar).Value = txtdesg.Text;
+                cmd.Parameters.Add("@DateStamp", SqlDbType.DateTime).Value = DateTime.Now.ToString();
+                cmd.Parameters.Add("@ID", SqlDbType.Int).Value = 1;
+                cmd.ExecuteNonQuery();
+            }
+            binddata();
+            con.Close();
+            clearcontrol();
+            string message1 = "alert('Successfully Saved.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/DesignationEntry.aspx");
+     
+    }
+
+    public void clearcontrol()
+    {
+        txtdesg.Text = "";        
+    }
+
+    protected void Button2_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtdesg.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand cmd2 = new SqlCommand("select DesgName from tblDesignation where DesgName='" + txtdesg.Text + "'", con);
+            object i = cmd2.ExecuteScalar();
+            if (i != null)
+            {
+                string message = "alert('* Designation Name " + txtdesg.Text + " Already Exist.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+           // SqlCommand cmd1 = new SqlCommand("UPDATE tblDesignation SET DesgName=@DesgName WHERE id=@id", con);
+            using (SqlCommand cmd1 = new SqlCommand("SP_DESIGNATION_MASTER", con))
+            {
+            cmd1.CommandType = CommandType.StoredProcedure;
+            cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+            cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+            cmd1.Parameters.Add("@DesgName", SqlDbType.VarChar).Value = txtdesg.Text;
+            cmd1.Parameters.Add("@ORGID", SqlDbType.VarChar).Value ="";
+            cmd1.Parameters.Add("@DateStamp", SqlDbType.DateTime).Value = DateTime.Now.ToString();
+            cmd1.ExecuteNonQuery();
+            }
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/DesignationEntry.aspx");
+    }
+    protected void Button3_Click(object sender, EventArgs e)
+    {
+        binddata();
+        Response.Redirect("~/ADMIN/DesignationEntry.aspx");
+    }
+}

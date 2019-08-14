@@ -1,0 +1,248 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Data;
+public partial class ADMIN_Corporate_Emp : System.Web.UI.Page
+{
+    string num1 = "SJ000";
+    SqlConnection con;
+    SqlCommand com, cmd;
+    SqlDataReader dr;
+    SqlDataAdapter da;
+    DataTable dt;
+    decimal total_amt = 0;
+    decimal total_vat_amt = 0;
+    int i, no, no1, sl;
+    GridViewRow gr;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+        if (!IsPostBack)
+        {
+            binddata();
+        }
+        
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlDataAdapter Adp = new SqlDataAdapter("select ID,CNAME,ISACTIVE from Corporate_Table order by ID desc", con);
+        DataTable Dt = new DataTable();
+        Adp.Fill(Dt);
+        grvcorprte.DataSource = Dt;
+        grvcorprte.DataBind();
+        //----------------------
+        //DataTable dt = new DataTable();
+        //dt.Columns.AddRange(new DataColumn[3] { new DataColumn("ID"), new DataColumn("INV"), new DataColumn("PRICE") });
+        //ViewState["ITEM"] = dt;
+        //this.BindGrid();
+
+        using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+        {
+            COM.CommandType = CommandType.StoredProcedure;
+            COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+            SqlDataReader dr = COM.ExecuteReader();
+            if (dr.Read())
+            {
+                lblfyear.Text = dr["FYEAR"].ToString();
+            }
+            dr.Close();
+        }
+        con.Close();
+    }
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            // Validation
+            if (txtname.Text == "")
+            {
+                string message = "alert('* Name Is Mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            SqlCommand cmd = new SqlCommand("select CNAME from Corporate_Table where CNAME='" + txtname.Text + "'", con);
+            object i = cmd.ExecuteScalar();
+            if (i != null)
+            {
+                string message = "alert('*" + txtname.Text + " Already Exist.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+
+           // SqlCommand cmd1 = new SqlCommand("insert into Corporate_Table (CNAME,ISACTIVE) values (@CNAME,@ISACTIVE)", con);
+
+            using (SqlCommand cmd1 = new SqlCommand("ADMIN_CORPORATE_Master", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = 1;
+                cmd1.Parameters.Add("@CNAME", SqlDbType.VarChar).Value = txtname.Text.ToUpper();
+                cmd1.Parameters.Add("@ISACTIVE", SqlDbType.VarChar).Value = CheckBox1.Checked;
+                cmd1.ExecuteNonQuery();
+            }
+            string message1 = "alert('Created Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+            resetCt();
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+
+        Response.Redirect("~/ADMIN/Corporate_Emp.aspx");
+    }
+    public void resetCt()
+    {
+        txtname.Text = "";
+    }
+    protected void Button2_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            // Validation
+            if (txtname.Text == "")
+            {
+                string message = "alert('* Fields Are Mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+           // SqlCommand cmd1 = new SqlCommand("update Corporate_Table set CNAME=@CNAME,ISACTIVE=@ISACTIVE where ID=@ID", con);
+            using (SqlCommand cmd1 = new SqlCommand("ADMIN_CORPORATE_Master", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd1.Parameters.Add("@CNAME", SqlDbType.VarChar).Value = txtname.Text.ToUpper();
+                cmd1.Parameters.Add("@ISACTIVE", SqlDbType.VarChar).Value = CheckBox1.Checked;
+                cmd1.ExecuteNonQuery();
+            }
+            string message1 = "alert('Updated Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+            resetCt();
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+            Response.Redirect("~/ADMIN/Corporate_Emp.aspx");
+    }
+
+    protected void grvcorprte_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+            var slno = grvcorprte.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand com = new SqlCommand("select * from Corporate_Table where ID='" + slno + "'", con);
+            dr = com.ExecuteReader();
+            if (dr.Read())
+            {
+                btncreate.Visible = false;
+                btnupdate.Visible = true;
+                txtid.Text = slno.ToString();
+                txtname.Text = dr["CNAME"].ToString();
+                string chkactv = dr["ISACTIVE"].ToString();
+                if (chkactv == "True")
+                {
+                    CheckBox1.Checked = true;
+                }
+                else
+                {
+                    CheckBox1.Checked = false;
+                }
+
+            }
+            dr.Close();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void grvcorprte_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            // reference the Delete LinkButton
+            LinkButton db = (LinkButton)e.Row.Cells[3].Controls[0];
+
+            db.OnClientClick = "return confirm('Are you sure want to delete this item ?');";
+        }
+    }
+    protected void grvcorprte_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            string slno = grvcorprte.DataKeys[e.RowIndex].Values["ID"].ToString();
+            SqlCommand cm = new SqlCommand("delete from Corporate_Table where ID='" + slno + "'", con);
+            cm.ExecuteNonQuery();
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void grvcorprte_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlDataAdapter Adp = new SqlDataAdapter("select ID,CNAME,ISACTIVE from Corporate_Table order by ID desc", con);
+            DataTable dt = new DataTable();
+            Adp.Fill(dt);
+            grvcorprte.DataSource = dt;
+            grvcorprte.PageIndex = e.NewPageIndex;
+            grvcorprte.DataKeyNames = new string[] { "ID" };
+            grvcorprte.DataBind();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void btncancel_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/ADMIN/Corporate_Emp.aspx");
+    }
+}

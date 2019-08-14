@@ -1,0 +1,688 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="MasterPage.master.cs" Inherits="ACCOUNTS_MasterPage" %>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server" id="j_idt2">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <br />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/font-awesome.min.css" />
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/theme.css9e5e.css" />
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/font-awesome.css408e.css" />
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/components.css408e.css" />
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/inputswitch.css408e.css" />
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/keyboard.css408e.css" />
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/nanoscroller.cssb45c.css" />
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/layout-blue.cssb45c.css" />
+
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/layout-blue.css" />
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/nanoscroller.css" />
+
+    <script type="text/javascript" src="../bootstraptemplate/js/jquery.js408e.xhtml"></script>
+    <script type="text/javascript" src="../bootstraptemplate/js/jquery-plugins.js408e.xhtml"></script>
+    <script type="text/javascript" src="../bootstraptemplate/js/core.js408e.xhtml"></script>
+    <script type="text/javascript" src="../bootstraptemplate/js/components.js408e.xhtml"></script>
+    <script type="text/javascript" src="../bootstraptemplate/js/inputswitch.js408e.xhtml"></script>
+    <script type="text/javascript" src="../bootstraptemplate/js/keyboard.js408e.xhtml"></script>
+    <script type="text/javascript" src="../bootstraptemplate/js/nanoscroller.jsb45c.xhtml"></script>
+    <script type="text/javascript" src="../bootstraptemplate/js/layout.jsb45c.xhtml"></script>
+    <script src='<%=ResolveUrl("~/crystalreportviewers13/js/crviewer/crv.js")%>' type="text/javascript"></script>
+    <title>ADMIN</title>
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+    <!--- css for input type ---->
+    <style>
+        .ui-inputfield:focus {
+            outline: 0;
+            -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgb(104, 145, 162);
+            box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgb(104, 145, 162);
+        }
+    </style>
+    <!---End css for input type ---->
+
+</head>
+<body class="main-body">
+    <form id="form1" runat="server">
+        <div class="layout-wrapper ">
+
+            <input type="hidden" name="j_idt11" value="j_idt11" />
+
+            <div id="layout-megamenu" class="ui-g-12 layout-megamenu layout-megamenu-dark ">
+                <div class="ui-g-12 ui-md-6 ui-lg-3 layout-megamenu-submenu">
+                    <ul>
+                        <li>
+                            <a href="../home.aspx">
+                                <i class="fa fa-fw fa-th-list"></i>
+                                <span>HOME</span>
+                            </a>
+                        </li>
+                        <li>
+
+                            <a href="../admin/adminhome.aspx">
+                                <i class="fa fa-fw fa-th-list"></i>
+                                <span>ADMIN</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="Default.aspx">
+                                <i class="fa fa-fw fa-server"></i>
+                                <span>ACCOUNTS</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="../LABORATORY/Home.aspx">
+                                <i class="fa fa-fw fa-server"></i>
+                                <span>LAB</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="../RADIOLOGY/Home.aspx">
+                                <i class="fa fa-fw fa-server"></i>
+                                <span>RADIOLOGY</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="../NURSE/home.aspx">
+                                <i class="fa fa-fw fa-users"></i>
+                                <span>NURSE</span>
+                            </a>
+
+                        </li>
+                        <li>
+                            <a href="../OT/Home.aspx">
+                                <i class="fa fa-fw fa-server"></i>
+                                <span>OT</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="../PHARMACYSTORE/StoreType.aspx">
+                                <i class="fa fa-fw fa-database"></i>
+                                <span>PHARMACY</span>
+                            </a>
+
+                        </li>
+
+                        <li>
+                            <a href="../RECEPTION/Default.aspx">
+                                <i class="fa fa-fw fa-bar-chart"></i>
+                                <span>RECEPTION</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="../GENERALSTOCK/Home.aspx">
+                                <i class="fa fa-fw fa-server"></i>
+                                <span>DEPT. STOCK</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="../STOREKEEPER/Home.aspx">
+                                <i class="fa fa-fw fa-server"></i>
+                                <span>STORE</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="../ASSET/Home.aspx">
+                                <i class="fa fa-fw fa-server"></i>
+                                <span>ASSET</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+            <input type="hidden" name="javax.faces.ViewState" id="j_id1:javax.faces.ViewState:0" value="-6706802491831525269:5066372470393129965" autocomplete="off" />
+
+            <div class="layout-topbar">
+                <a href="../home.aspx" class="logo">
+                    <img id="j_idt20" src="../bootstraptemplate/images/logo.png.png?ln=zemusitech" alt="" /></a>
+
+                <a id="menu-button" href="#">
+                    <i class="fa fa-align-left"></i>
+                </a>
+
+                <a id="layout-megamenu-button" href="#">
+                    <i class="fa fa-angle-down"></i>
+                    <span class="mega-menu-title">CATEGORY</span>
+                </a>
+
+                <a id="right-sidebar-button" href="#" style="display: none;">
+                    <i class="fa fa-ellipsis-v"></i>
+                    <span class="username">Hello
+                                <asp:ContentPlaceHolder ID="ContentPlaceHolder2" runat="server"></asp:ContentPlaceHolder>
+                    </span>
+                </a>
+
+            </div>
+
+            <div class="layout-sidebar layout-sidebar-dark ">
+                <div id="nano-container" class="nano">
+                    <div class="nano-content sidebar-scroll-content">
+                        <div class="user-profile">
+                            <a id="sidebar-profile-button" href="../home.aspx">
+                                <img id="j_idt40" src="../bootstraptemplate/images/avatar.pngb45c.png?ln=zemusitech" alt="" />
+                                <%-- <span class="sidebar-profile-name">Pauline Harrell</span>--%>
+                                
+                            </a>
+
+                        </div>
+
+                        <input type="hidden" name="menuform" value="menuform" />
+                        <ul id="menuform:j_idt52" class="layout-menu">
+
+                            <li id="menuform:om_hierarchy" role="menuitem" class="ui-menuitem-submenu"><a href="#"><i class="fa fa-fw fa-desktop"></i><span>Transaction</span>
+                                <i class="layout-menuitem-toggler fa fa-fw fa-angle-down"></i></a>
+                                <ul role="menu">
+                                    <li id="menuform:om_sm1" role="menuitem" class="ui-menuitem-submenu"><a href="account_daily_expense.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Daily Expense</span></a></li>
+                                    <li id="Li1" role="menuitem" class="ui-menuitem-submenu"><a href="account_new_assets_entry.aspx"><i class="fa fa-fw fa-sign-in"></i><span> Assets Valuation</span></a></li>
+                                    <li id="Li2" role="menuitem" class="ui-menuitem-submenu"><a href="account_damage_assets_entry.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Damage Assets Entry</span></a></li>
+                                    <li id="Li3" role="menuitem" class="ui-menuitem-submenu"><a href="account_ambulance_fuel.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Ambulance Fuel</span></a></li>
+                                    <li id="Li4" role="menuitem" class="ui-menuitem-submenu"><a href="account_referral_settlement.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Referral Settlement</span></a></li>
+
+                                </ul>
+                            </li>
+                            <li id="Li5" role="menuitem" class="ui-menuitem-submenu"><a href="#"><i class="fa fa-fw fa-desktop"></i><span>Reports</span>
+                                <i class="layout-menuitem-toggler fa fa-fw fa-angle-down"></i></a>
+                                <ul role="menu">
+                                    <li id="Li6" role="menuitem" class="ui-menuitem-submenu"><a href="account_patient_status.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Patient Status</span></a></li>
+                                    <li id="Li7" role="menuitem" class="ui-menuitem-submenu"><a href="account_ambulance_report.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Ambulance Report</span></a></li>
+                                    <li id="Li8" role="menuitem" class="ui-menuitem-submenu"><a href="account_op_consultancy_report.aspx"><i class="fa fa-fw fa-sign-in"></i><span>OP Consultancy Report</span></a></li>
+                                    <li id="Li9" role="menuitem" class="ui-menuitem-submenu"><a href="account_party_payment_report.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Party Payment Report</span></a></li>
+                                    <li id="Li10" role="menuitem" class="ui-menuitem-submenu"><a href="account_daily_collection.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Daily Collection</span></a></li>
+                                    <li id="Li11" role="menuitem" class="ui-menuitem-submenu"><a href="account_daily_admission.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Daily Admission</span></a></li>
+                                    <li id="Li12" role="menuitem" class="ui-menuitem-submenu"><a href="account_daily_discharge.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Daily Discharge</span></a></li>
+                                    <li id="Li13" role="menuitem" class="ui-menuitem-submenu"><a href="account_doctor_collection.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Doctor Collection</span></a></li>
+                                    <li id="Li14" role="menuitem" class="ui-menuitem-submenu"><a href="account_radiology_collection.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Radiology Collection</span></a></li>
+                                    <li id="Li15" role="menuitem" class="ui-menuitem-submenu"><a href="account_lab_collection.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Lab Collection</span></a></li>
+                                    <li id="Li16" role="menuitem" class="ui-menuitem-submenu"><a href="account_corporate_insurance.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Corporate/Insurance</span></a></li>
+
+                                </ul>
+                            </li>
+
+                        </ul>
+                        <script id="menuform:j_idt52_s" type="text/javascript">PrimeFaces.cw("California", "me", { id: "menuform:j_idt52" });</script>
+                        <input type="hidden" name="javax.faces.ViewState" id="j_id1:javax.faces.ViewState:38" value="4458205077111000725:-2545980840278889821" autocomplete="off" />
+
+                    </div>
+                </div>
+            </div>
+            <%--  ///////////////--%>
+            <div id="layout-right-sidebar">
+                <div id="j_idt54" class="ui-tabs ui-widget ui-widget-content ui-corner-all ui-hidden-container ui-tabs-top" data-widget="widget_j_idt54">
+                    <ul class="ui-tabs-nav ui-helper-reset ui-widget-header ui-corner-all" role="tablist">
+                        <li class="ui-tabs-header ui-state-default ui-tabs-selected ui-state-active ui-corner-top" role="tab" aria-expanded="true" aria-selected="true" data-index="0"><a href="#j_idt54:j_idt55" tabindex="-1">
+                            <i class="fa fa-cog"></i></a></li>
+                        <li class="ui-tabs-header ui-state-default ui-corner-top" role="tab" aria-expanded="false" aria-selected="false" data-index="1"><a href="#j_idt54:j_idt58" tabindex="-1">
+                            <i class="fa fa-inbox"></i></a></li>
+                        <li class="ui-tabs-header ui-state-default ui-corner-top" role="tab" aria-expanded="false" aria-selected="false" data-index="2"><a href="#j_idt54:j_idt69" tabindex="-1">
+                            <i class="fa fa-calendar"></i></a></li>
+                    </ul>
+                    <div class="ui-tabs-panels">
+                        <div id="j_idt54:j_idt55" class="ui-tabs-panel ui-widget-content ui-corner-bottom" role="tabpanel" aria-hidden="false" data-index="0">
+                            <div class="submenu-title">
+                                <span>Settings</span>
+                            </div>
+                            <div class="submenu-content settings">
+                                <ul>
+                                    <li>
+                                        <div class="order-settings ui-g-12">
+                                            <i class="fa fa-plus"></i>
+                                            <span>NEW ORDERS</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="sales-settings ui-g-12">
+                                            <i class="fa fa-line-chart"></i>
+                                            <span>TOTAL SALES</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="shipment-settings ui-g-12">
+                                            <i class="fa fa-ship"></i>
+                                            <span>PENDING SHIPMENTS</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="visitors-settings ui-g-12">
+                                            <i class="fa fa-user-circle"></i>
+                                            <span>UNIQUE VISITORS</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="history-settings ui-g-12">
+                                            <i class="fa fa-history"></i>
+                                            <span>SALES HISTORY</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="leads-settings ui-g-12">
+                                            <i class="fa fa-handshake-o"></i>
+                                            <span>ALL LEADS</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div id="j_idt54:j_idt58" class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-helper-hidden" role="tabpanel" aria-hidden="true" data-index="1">
+                            <div class="submenu-title">
+                                <span>Inbox</span>
+                            </div>
+                            <div class="submenu-content messages">
+                                <ul>
+                                    <li>
+                                        <div>
+                                            <img id="j_idt54:j_idt61" src="../bootstraptemplate/images/avatar-john.pngb45c.png?ln=california-layout" alt="" />
+                                            <span class="time-stamp">1m</span>
+                                        </div>
+                                        <span class="messager-name">John Swisher</span>
+                                        <span class="message-text">Ab nobis, magnam sunt eum. Laudantium…</span>
+                                    </li>
+                                    <li>
+                                        <div>
+                                            <img id="j_idt54:j_idt63" src="../bootstraptemplate/images/avatar-warren.pngb45c.png?ln=california-layout" alt="" />
+                                            <span class="time-stamp">33m</span>
+                                        </div>
+                                        <span class="messager-name">Warren Shaw</span>
+                                        <span class="message-text">Ab nobis, magnam sunt eum. Laudantium…</span>
+                                    </li>
+                                    <li>
+                                        <div>
+                                            <img id="j_idt54:j_idt65" src="../bootstraptemplate/images/avatar-brenda.pngb45c.png?ln=california-layout" alt="" />
+                                            <span class="time-stamp">2h</span>
+                                        </div>
+                                        <span class="messager-name">Brenda Soto</span>
+                                        <span class="message-text">Ab nobis, magnam sunt eum. Laudantium…</span>
+                                    </li>
+                                    <li>
+                                        <div>
+                                            <img id="j_idt54:j_idt67" src="../bootstraptemplate/images/avatar-arlene.pngb45c.png?ln=california-layout" alt="" />
+                                            <span class="time-stamp">1d</span>
+                                        </div>
+                                        <span class="messager-name">Arlene Welch</span>
+                                        <span class="message-text">Ab nobis, magnam sunt eum. Laudantium…</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div id="j_idt54:j_idt69" class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-helper-hidden" role="tabpanel" aria-hidden="true" data-index="2">
+                            <div class="submenu-title">
+                                <span>Events</span>
+                            </div>
+                            <div class="submenu-content events">
+                                <ul>
+                                    <li>
+                                        <a href="admin.aspx">
+                                            <i class="fa fa-fw fa-th-list"></i>
+                                            <span>ADMIN</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="accounts.aspx">
+                                            <i class="fa fa-fw fa-server"></i>
+                                            <span>ACCOUNTS</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="lab.aspx">
+                                            <i class="fa fa-fw fa-server"></i>
+                                            <span>LAB</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="radiology.aspx">
+                                            <i class="fa fa-fw fa-server"></i>
+                                            <span>RADIOLOGY</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="nurse.aspx">
+                                            <i class="fa fa-fw fa-users"></i>
+                                            <span>NURSE</span>
+                                        </a>
+
+                                    </li>
+                                    <li>
+                                        <a href="ot.aspx">
+                                            <i class="fa fa-fw fa-server"></i>
+                                            <span>OT</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="StoreType.aspx">
+                                            <i class="fa fa-fw fa-database"></i>
+                                            <span>PHARMACY</span>
+                                        </a>
+
+                                    </li>
+
+                                    <li>
+                                        <a href="reception.aspx">
+                                            <i class="fa fa-fw fa-bar-chart"></i>
+                                            <span>RECEPTION</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="dept_stock.aspx">
+                                            <i class="fa fa-fw fa-server"></i>
+                                            <span>DEPT. STOCK</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="store.aspx">
+                                            <i class="fa fa-fw fa-server"></i>
+                                            <span>STORE</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+                    <input type="hidden" id="j_idt54_activeIndex" name="j_idt54_activeIndex" value="0" autocomplete="off" />
+
+                </div>
+                <script id="j_idt54_s" type="text/javascript">PrimeFaces.cw("TabView", "widget_j_idt54", { id: "j_idt54", effectDuration: "normal", scrollable: false });</script>
+            </div>
+
+            <div class="layout-main">
+
+
+                <%-----------------------%>
+
+                <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+                </asp:ContentPlaceHolder>
+
+                <div class="layout-footer ui-g-12">
+                    <div class="ui-g">
+                        <div class="ui-g-12 ui-md-6 footer-left">
+                            <h3>Hospicare</h3>
+                            <p>© 2018 Copyright <a href="http://zemusitech.com/" target="_blank">Zemusi Tech Solutions</a> All rights reserved.</p>
+                        </div>
+                        <div class="ui-g-12 ui-md-6 footer-right">
+                            <a href="#">
+                                <i class="fa fa-twitter"></i>
+                            </a>
+                            <a href="#">
+                                <i class="fa fa-facebook"></i>
+                            </a>
+                            <a href="#">
+                                <i class="fa fa-github"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="j_idt225" style="width: 32px; height: 32px; position: fixed; right: 7px; bottom: 7px">
+            <div id="j_idt225_start" style="display: none">
+                <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"></i>
+            </div>
+            <div id="j_idt225_complete" style="display: none"></div>
+        </div>
+        <script id="j_idt225_s" type="text/javascript">$(function () { PrimeFaces.cw("AjaxStatus", "widget_j_idt225", { id: "j_idt225" }); });</script>
+
+        <script>
+            $(document).ready(function () {
+
+                $('.user-profile').click(function () {
+                    window.location.href = "../home.aspx";
+
+                });
+            });
+        </script>
+
+        <!-- container section start -->
+        <%--<section id="container" class="">
+     
+      
+      <header class="header dark-bg">
+            <div class="toggle-nav">
+                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"><i class="icon_menu"></i></div>
+            </div>
+
+            <a href="Default.aspx" class="logo">Account <span class="lite">User</span></a>
+            <!--logo end-->
+
+            
+
+            <div class="top-nav notification-row">                
+                <!-- notificatoin dropdown start-->
+                <ul class="nav pull-right top-menu">
+                    
+                    <!-- task notificatoin start -->
+                    <li id="task_notificatoin_bar" class="dropdown">
+                       
+                    </li>
+                    <!-- task notificatoin end -->
+                    <!-- inbox notificatoin start-->
+                    <li id="mail_notificatoin_bar" class="dropdown">
+                       
+                    </li>
+                    <!-- inbox notificatoin end -->
+                    <!-- alert notification start-->
+                    <li id="alert_notificatoin_bar" class="dropdown">
+                        <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+
+                          
+                        </a>
+                        
+                    </li>
+                    <!-- alert notification end-->
+                    <!-- user login dropdown start-->
+                    <li class="dropdown">
+                        <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                            <span class="profile-ava">
+                             
+                            </span>
+                            <span class="username">Hello
+                                <asp:ContentPlaceHolder ID="ContentPlaceHolder2" runat="server"></asp:ContentPlaceHolder>
+                            </span>
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu extended logout">
+                            <div class="log-arrow-up"></div>
+                            <li class="eborder-top">
+                              
+                               
+                                <asp:LinkButton ID="LinkButton1" runat="server" OnClick="LinkButton1_Click" >Back To Home</asp:LinkButton>
+                            </li>
+                            <li>
+                                
+                            </li>
+                            <li>
+                               
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- user login dropdown end -->
+                </ul>
+                <!-- notificatoin dropdown end-->
+            </div>
+      </header>      
+      <!--header end-->
+
+
+      <!--sidebar start-->
+      <aside>
+          <div id="sidebar"  class="nav-collapse ">
+              <!-- sidebar menu start-->
+              <ul class="sidebar-menu">                
+               <li class="sub-menu" style="background-color:#009997; color:black" >
+                      <a href="../home.aspx" class="">
+                          <i  class=""></i>
+                        <span >Back To Home</span>
+                          <span class="menu-arrow arrow_carrot-right"></span>
+                      </a>
+                   
+                  </li>  
+                  <li class="sub-menu">
+                      <a href="javascript:;" class="">
+                          <i class="icon_desktop"></i>
+                          <span>Transaction</span>
+                          <span class="menu-arrow arrow_carrot-right"></span>
+                      </a>
+                      <ul class="sub">                                                   
+                          <li><a class="" href="DailyExpense.aspx">Daily Expense</a></li>
+                          <li><a class="" href="Assets.aspx">New Assets Entry</a></li>
+                          <li><a class="" href="AssetDamageEntry.aspx">Damage Assets Entry</a></li>
+                          <li><a class="" href="AmbulanceFuel.aspx">Ambulance Fuel</a></li>
+                          <li><a class="" href="PatientStatus.aspx">Patient Status</a></li>   
+                        
+                            <li><a class="" href="RefferalSatelment.aspx">Referral Settlement</a></li>
+                     
+                                    
+                      </ul>
+                  </li>
+                  <li class="sub-menu">
+                      <a class="" >
+                          <i class="icon_genius"></i>
+                          <span>Reports</span>
+                           <span class="menu-arrow arrow_carrot-right"></span>
+                      </a>
+                        <ul class="sub">
+                            <li><a class="" href="AmbulanceRpt.aspx">Ambulance Report</a></li>
+                            <li><a class="" href="OPConsultancyReport.aspx">OP Consultancy Report</a></li>
+                            <li><a class="" href="PartyPaymentRport.aspx">Party Payment Report</a></li> 
+                           <li><a class="" href="User_DailyCollect_Rpt.aspx"> Daily Collection</a></li>
+                            <li><a class="" href="Daily_AdmissionRpt.aspx"> Daily Admission</a></li>
+                            <li><a class="" href="Decharge_Rpt.aspx"> Daily Discharge</a></li>
+                               <li><a class="" href="Doctor_consultwise_Rpt.aspx"> Doctor Collection</a></li>
+                            <li><a class="" href="Monthly_Radio_lab.aspx">Radiology Collection</a></li>
+                            <li><a class="" href="Lab_Requestion_Rpt.aspx"> Lab Collection</a></li>
+                            <li><a class="" href="Corp_Insrance_RPT.aspx"> Corporate/Insurance Report</a></li>
+                             
+                      </ul>
+
+
+                  </li>
+                  <li>                     
+                  
+                                         
+                  </li>
+                  <li class="sub-menu">
+                     
+                      <ul class="sub">                          
+                          <li><a class="" href="profile.aspx">Profile</a></li>
+                          <li><a class="" href="login.aspx"><span>Login Page</span></a></li>
+                          <li><a class="" href="blank.aspx">Blank Page</a></li>
+                          <li><a class="" href="404.aspx">404 Error</a></li>
+                      </ul>
+                  </li>
+                  
+              </ul>
+              <!-- sidebar menu end-->
+          </div>
+      </aside>
+      <!--sidebar end-->
+      
+      <!--main content start-->
+      <section id="main-content">
+          <section class="wrapper">            
+         <div>
+        <asp:ContentPlaceHolder id="ContentPlaceHolder1" runat="server">        
+        </asp:ContentPlaceHolder>
+    </div>
+
+          </section>
+          
+      </section>
+      <!--main content end-->
+  </section>--%>
+        <!-- container section start -->
+
+        <%--<!-- javascripts -->
+    <script src="js/jquery.js"></script>
+	<script src="js/jquery-ui-1.10.4.min.js"></script>
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.9.2.custom.min.js"></script>
+    <!-- bootstrap -->
+    <script src="js/bootstrap.min.js"></script>
+    <!-- nice scroll -->
+    <script src="js/jquery.scrollTo.min.js"></script>
+    <script src="js/jquery.nicescroll.js" type="text/javascript"></script>
+    <!-- charts scripts -->
+    <script src="assets/jquery-knob/js/jquery.knob.js"></script>
+    <script src="js/jquery.sparkline.js" type="text/javascript"></script>
+    <script src="assets/jquery-easy-pie-chart/jquery.easy-pie-chart.js"></script>
+    <script src="js/owl.carousel.js" ></script>
+    <!-- jQuery full calendar -->
+    <<script src="js/fullcalendar.min.js"></script> <!-- Full Google Calendar - Calendar -->
+	<script src="assets/fullcalendar/fullcalendar/fullcalendar.js"></script>
+    <!--script for this page only-->
+    <script src="js/calendar-custom.js"></script>
+	<script src="js/jquery.rateit.min.js"></script>
+    <!-- custom select -->
+    <script src="js/jquery.customSelect.min.js" ></script>
+	<script src="assets/chart-master/Chart.js"></script>
+   
+    <!--custome script for all page-->
+    <script src="js/scripts.js"></script>
+    <!-- custom script for this page-->
+    <script src="js/sparkline-chart.js"></script>
+    <script src="js/easy-pie-chart.js"></script>
+	<script src="js/jquery-jvectormap-1.2.2.min.js"></script>
+	<script src="js/jquery-jvectormap-world-mill-en.js"></script>
+	<script src="js/xcharts.min.js"></script>
+	<script src="js/jquery.autosize.min.js"></script>
+	<script src="js/jquery.placeholder.min.js"></script>
+	<script src="js/gdp-data.js"></script>	
+	<script src="js/morris.min.js"></script>
+	<script src="js/sparklines.js"></script>	
+	<script src="js/charts.js"></script>
+	<script src="js/jquery.slimscroll.min.js"></script>--%>
+        <script>
+
+            //knob
+            //$(function () {
+            //    $(".knob").knob({
+            //        'draw': function () {
+            //            $(this.i).val(this.cv + '%')
+            //        }
+            //    })
+            //});
+
+            ////carousel
+            //$(document).ready(function () {
+            //    $("#owl-slider").owlCarousel({
+            //        navigation: true,
+            //        slideSpeed: 300,
+            //        paginationSpeed: 400,
+            //        singleItem: true
+
+            //    });
+            //});
+
+            ////custom select box
+
+            //$(function () {
+            //    $('select.styled').customSelect();
+            //});
+
+            ///* ---------- Map ---------- */
+            //$(function () {
+            //    $('#map').vectorMap({
+            //        map: 'world_mill_en',
+            //        series: {
+            //            regions: [{
+            //                values: gdpData,
+            //                scale: ['#000', '#000'],
+            //                normalizeFunction: 'polynomial'
+            //            }]
+            //        },
+            //        backgroundColor: '#eef3f7',
+            //        onLabelShow: function (e, el, code) {
+            //            el.html(el.html() + ' (GDP - ' + gdpData[code] + ')');
+            //        }
+            //    });
+            //});
+
+        </script>
+    </form>
+</body>
+</html>

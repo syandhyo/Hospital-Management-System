@@ -1,0 +1,172 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/ACCOUNTS/MasterPage.master" AutoEventWireup="true" CodeFile="Percentage_Payment.aspx.cs" Inherits="ACCOUNTS_Percentage_Payment" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" Runat="Server">
+    <asp:Label ID="lblid" runat="server" Text="Label"></asp:Label>( <asp:Label ID="lblfyear" runat="server" Text="Label" Font-Size="Smaller" ForeColor="#CCCCCC"></asp:Label>)
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
+ <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+          <ContentTemplate>
+     <div>
+         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js" type="text/javascript"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js" type="text/javascript"></script>
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="Stylesheet" type="text/css" />
+    <script type="text/javascript">
+        Sys.Application.add_load(function () {
+
+            $('.formdate').datepicker({
+                dateFormat: 'dd-mm-yy',
+                changeMonth: true,
+                changeYear: true,
+                minDate: '-75Y',
+                yearRange: "c-75:c+10",
+
+            });
+            $('.todate').datepicker({
+                dateFormat: 'dd-mm-yy',
+                changeMonth: true,
+                changeYear: true,
+                minDate: '-75Y',
+                yearRange: "c-75:c+10",
+            });
+        });
+    </script>
+         <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table> <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+        <asp:Label ID="lblorgid" runat="server" Text="Label" Visible="false"></asp:Label>   
+        <asp:Label ID="lbluid" runat="server" Text="Label" Visible="false"> </asp:Label>     
+    </td>
+</tr>
+</table>
+         <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%; text-align: center; text-decoration: underline; font-weight: 700; color: #000000;" align="right">Report For Referal</td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label1" runat="server" Text="*" ForeColor="Red"></asp:Label>Date :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:TextBox ID="txtdate" runat="server" CssClass="formdate"></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">Recipient Name :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:DropDownList ID="droprecipient" runat="server" AutoPostBack="True" OnSelectedIndexChanged="droprecipient_SelectedIndexChanged" style="width:153px">
+        </asp:DropDownList>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">Total Amount :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:TextBox ID="txttotalamt" runat="server" pattern="[0-9]+([,\.][0-9]+)?" title="Please Enter numeric value">0.00</asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">Paid Amount :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:TextBox ID="txtpaidamt" runat="server" Enabled="False" pattern="[0-9]+([,\.][0-9]+)?" title="Please Enter numeric value">0.00</asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">Amount To Be Paid :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:TextBox ID="txttopaid" runat="server" Enabled="False" pattern="[0-9]+([,\.][0-9]+)?">0.00</asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left"><asp:Label ID="Label2" runat="server" Text="*" ForeColor="Red"></asp:Label>Amount :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:TextBox ID="txtamt" runat="server" Text="0.00" pattern="[0-9]+([,\.][0-9]+)?" title="Please Enter numeric value"></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+         <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">Payment Mode :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:DropDownList ID="droppaymode" runat="server" AutoPostBack="True" OnSelectedIndexChanged="droprecipient_SelectedIndexChanged" style="width:153px">
+            <asp:ListItem>Cash</asp:ListItem>
+            <asp:ListItem>Cheque</asp:ListItem>
+        </asp:DropDownList>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">Voucher No :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:TextBox ID="txtvcno" runat="server"></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+         <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:Button ID="Button1" runat="server" Text="Save" Width="71px" OnClick="Button1_Click" />
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+     </div></ContentTemplate></asp:UpdatePanel>
+</asp:Content>
+

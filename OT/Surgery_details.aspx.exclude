@@ -1,0 +1,215 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/OT/MasterPage.master" AutoEventWireup="true" CodeFile="Surgery_details.aspx.cs" Inherits="OT_Surgery_details" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" Runat="Server"><asp:Label ID="lblid" runat="server" Text="Label"></asp:Label>(<asp:Label ID="lblfyear" runat="server" Text="Label"></asp:Label>)
+</asp:Content>
+
+<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
+ <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+          <ContentTemplate>
+              
+    <div>
+          <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+         <asp:Label ID="LBBALANCEAMT" runat="server" Text="0" Visible="false"></asp:Label>
+         <asp:Label ID="LBPAIDAMT" runat="server" Text="0" Visible="false"></asp:Label>
+    </td>
+    </tr>
+</table>
+     <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+        <asp:Label ID="lblorgid" runat="server" Text="Label" Visible="false"></asp:Label>
+        <asp:Label ID="lbluid" runat="server" Text="Label" Visible="false"> </asp:Label>
+    </td>
+</tr>
+</table>
+     <table width="100%">
+     <tr>
+    <td style="width:20%" align="right">&nbsp;</td>
+    <td style="width:20%" align="left">&nbsp;</td>
+    <td style="width:20%" align="center" class="auto-style1"><strong>SURGERY DETAIL ENTRY</strong></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+        <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"><asp:TextBox ID="txtid" runat="server" CssClass="form-control input-sm m-bot15" Visible="false"></asp:TextBox>
+    </td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+         <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"><asp:Label ID="Label2" runat="server" Text="*" ForeColor="#CC0000"></asp:Label>Select Bed NO. :</td>
+    <td style="width:20%" align="left">
+        <asp:DropDownList ID="dropbedno" runat="server" CssClass="form-control input-sm m-bot15" AutoPostBack="True" OnSelectedIndexChanged="dropipdno_SelectedIndexChanged">
+        </asp:DropDownList>
+         </td>
+    <td style="width:20%" align="right">Datetime :</td>
+    <td style="width:20%" align="left"> <asp:TextBox ID="txtinvdate" runat="server" CssClass="form-control input-sm m-bot15" Enabled="False" ></asp:TextBox></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+        <table width="100%">
+     <tr>
+    <td style="width:20%" align="right">Name :</td>
+    <td style="width:20%" align="left">
+        <asp:Label ID="lblname" runat="server" Text="" Visible="true"></asp:Label>
+         </td>
+    <td style="width:20%" align="right">IPDNO. :</td>
+    <td style="width:20%" align="left">
+        <asp:Label ID="lblipdno" runat="server" Text="" Visible="true"></asp:Label>
+         </td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+        
+        <table width="100%">
+     <tr>
+    <td style="width:20%" align="right">SurgeryType :</td>
+    <td style="width:20%" align="left">
+        <asp:DropDownList ID="dropsurgerytype" runat="server" CssClass="form-control input-sm m-bot15">
+        </asp:DropDownList>
+         </td>
+    <td style="width:20%" align="right">Surgeon :</td>
+    <td style="width:20%" align="left">
+                <asp:TextBox ID="dropsurgeon" runat="server" TextMode="MultiLine"></asp:TextBox>
+         
+        &nbsp;</td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+        <table width="100%">
+     <tr>
+    <td style="width:20%" align="right">
+        <asp:Label ID="Label1" runat="server" style="color: #CC0000" Text="*"></asp:Label>
+        Anaesthesia :</td>
+    <td style="width:20%" align="left">
+        <asp:TextBox ID="txtanaesthesia" runat="server" CssClass="form-control input-sm m-bot15" Visible="true"></asp:TextBox>
+         </td>
+    <td style="width:20%" align="right">Anaesthesist :</td>
+    <td style="width:20%" align="left">
+                <asp:TextBox ID="dropanaesthesist" runat="server" TextMode="MultiLine"></asp:TextBox>
+         
+        &nbsp;</td>
+    <td style="width:20%" align="center"></td>
+</tr>
+
+</table>
+        <table width="100%">
+     <tr>
+    <td style="width:20%" align="right">Staff Nurse :</td>
+    <td style="width:20%" align="left">
+        <asp:TextBox ID="dropsn" runat="server" TextMode="MultiLine"></asp:TextBox>
+         </td>
+    <td style="width:20%" align="right">Pharmacist :</td>
+    <td style="width:20%" align="left">
+                <asp:TextBox ID="droppharmacist" runat="server" TextMode="MultiLine"></asp:TextBox>
+         
+        &nbsp;</td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+        
+        <table width="100%">
+     <tr>
+    <td style="width:20%" align="right">
+        <asp:Label ID="Label3" runat="server" style="color: #CC0000" Text="*"></asp:Label>
+        Surgery Charge</td>
+    <td style="width:20%" align="left">
+        <asp:TextBox ID="txtscharge" runat="server" CssClass="form-control input-sm m-bot15" MaxLength="10" 
+             pattern="[0-9]+([,\.][0-9]+)?"  value="0" 
+            onclick="if(this.value=='0'){this.value=''}" onblur="if(this.value==''){this.value='0'}" title="Please Enter Numeric Value" >
+
+        </asp:TextBox>
+         </td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+        <table width="100%">
+     <tr>
+    <td style="width:20%" align="right">
+        
+    </td>
+    <td style="text-align: center;" align="left">
+        <asp:Button ID="btncreate" runat="server" CssClass="btn btn-primary btn-sm" OnClick="Button1_Click" Text="Create" />
+        &nbsp;<asp:Button ID="btndelete" runat="server" CssClass="btn btn-primary btn-sm" OnClick="Btndelete_Click" Text="Delete" Visible="False" />
+        &nbsp;<asp:Button ID="btnupdate" runat="server" CssClass="btn btn-success btn-sm" OnClick="Button2_Click" Text="Update" Visible="false" />
+       <%-- &nbsp;<asp:Button ID="btndelete" runat="server" CssClass="btn btn-warning btn-sm" OnClick="Btndelete_Click" Text="Delete" Visible="False" />--%>
+        &nbsp;<asp:Button ID="btncancel" runat="server" CssClass="btn btn-danger btn-sm" OnClick="Button3_Click" Text="Cancel" />
+         </td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+        <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+        <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+        <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="text-align: center;" align="center">
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="id"   AllowPaging="True"
+             AllowSorting="True" PageSize="10" OnSelectedIndexChanging="GridView1_SelectedIndexChanging" 
+            OnPageIndexChanging="GridView1_PageIndexChanging"  CssClass="table table-bordered" >
+            <Columns>                
+                <asp:BoundField DataField="SurgeryType" HeaderText="SurgeryType" /> 
+                <asp:BoundField DataField="Surgeon" HeaderText="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Surgeon&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" />
+                <asp:BoundField DataField="Anaesthesia" HeaderText="Anaesthesia" />
+                <asp:BoundField DataField="Anaesthesist" HeaderText="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Anaesthesist&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" />
+                <asp:BoundField DataField="SNurse" HeaderText="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Staff&nbsp;Nurse&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" />
+                <asp:BoundField DataField="Pharmacist" HeaderText="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pharmacist&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" />                        
+                <asp:CommandField ShowDeleteButton="false" ShowEditButton="False" ShowSelectButton="true" SelectText="&nbsp;&nbsp;&nbsp; Edit" HeaderText="Action" />
+            </Columns>
+             <SelectedRowStyle BackColor="LightPink" Font-Italic="true" ForeColor="Crimson" />
+              <FooterStyle BackColor="#99CCCC" ForeColor="#003399" />
+              <HeaderStyle BackColor="#003399" Font-Bold="True" ForeColor="#CCCCFF" />
+              <PagerStyle BackColor="#99CCCC" ForeColor="#003399" HorizontalAlign="Left" />
+              <RowStyle BackColor="White" ForeColor="#003399" />
+              <SelectedRowStyle BackColor="#009999" Font-Bold="True" ForeColor="#CCFF99" />
+              <SortedAscendingCellStyle BackColor="#EDF6F6" />
+              <SortedAscendingHeaderStyle BackColor="#0D4AC4" />
+              <SortedDescendingCellStyle BackColor="#D6DFDF" />
+              <SortedDescendingHeaderStyle BackColor="#002876" />
+        </asp:GridView>
+    </td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+    </div>
+              </ContentTemplate></asp:UpdatePanel>
+
+</asp:Content>
+

@@ -1,0 +1,180 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.IO;
+
+
+
+public partial class ACCOUNTS_PatientStatus : System.Web.UI.Page
+{
+    SqlDataReader dr;
+    SqlConnection con;
+    //SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+    DataSet ds = new DataSet();
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        try
+        {
+            lblid.Text = Session["NAME"].ToString();
+            lblorgid.Text = Session["ORGID"].ToString();
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand COM = new SqlCommand("SELECT FYEAR FROM FYEAR1_TABLE WHERE  ORGID='" + lblorgid.Text + "'", con);
+            dr = COM.ExecuteReader();
+            if (dr.Read())
+            {
+                lblfyear.Text = dr["FYEAR"].ToString();
+            }
+            dr.Close();
+            con.Close();
+
+            if (Session["out"] == "INACTIVE")
+            {
+                Response.Redirect("~/index.aspx");
+            }
+            Response.Buffer = true;
+
+            Response.CacheControl = "no-cache";
+            if (Session["NAME"] == null)
+            {
+                Response.Redirect("~/index.aspx");
+            }
+
+            //if (!IsPostBack)
+            //{
+            //   // binddata();
+
+            //    SqlDataAdapter Adp = new SqlDataAdapter("select ID,NAME from PATIENT_REG_TABLE", con);
+            //    DataTable Dt = new DataTable();
+            //    Adp.Fill(Dt);
+            //    dropname.DataSource = Dt;
+            //    dropname.DataTextField = "NAME";
+            //    dropname.DataValueField = "ID";
+            //    dropname.DataBind();
+            //    dropname.Items.Insert(0, "---select---");
+            //}
+            
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+         
+    }
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            //var slno = GridView1.DataKeys[e.NewSelectedIndex].Values["id"].ToString();
+            //SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            //con.Open();
+            //SqlDataAdapter Adp = new SqlDataAdapter("SELECT BED_TABLE.PID,BED_TABLE.WARD, BED_TABLE.BEDNO, BED_TABLE.PID, BED_TABLE.PNAME, ADMISSION_TABLE.DATE FROM BED_TABLE INNER JOIN ADMISSION_TABLE ON BED_TABLE.PID = ADMISSION_TABLE.ID where ADMISSION_TABLE.Date between '" + Convert.ToDateTime(txtfdate.Text).ToString("yyyy-MM-dd") + "' and '" + Convert.ToDateTime(txttdate.Text).ToString("yyyy-MM-dd") + "'", con);
+            //DataTable Dt = new DataTable();
+            //Adp.Fill(Dt);
+            //GridView1.DataSource = Dt;
+            //GridView1.DataBind();
+            //con.Close();
+
+            //if (Dt.Rows.Count > 0)
+            //{
+            //    Button1.Visible = true;
+            //}
+
+
+
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            using (SqlCommand cmd = new SqlCommand("SP_PATIENT_STATUS", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "DISPLAY";
+                cmd.Parameters.Add("@FDATE", SqlDbType.DateTime).Value = txtfdate.Text;
+                cmd.Parameters.Add("@TDATE", SqlDbType.DateTime).Value = txttdate.Text;
+               // cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                SqlDataAdapter adp = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                adp.Fill(dt);
+                GridView1.DataSource = dt;
+                GridView1.DataBind();
+
+                if (dt.Rows.Count > 0)
+                {
+                    Button1.Visible = true;
+                }
+                else
+                {
+                    string message = "alert(' No Record Found')";
+                    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                }
+            }
+
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void ExportToExcel(object sender, EventArgs e)
+    {
+        if (GridView1.Rows.Count > 0)
+        {
+            Response.ClearContent();
+            Response.Buffer = true;
+            Response.AddHeader("content-disposition", string.Format("attachment; filename={0}", "PatientStatus.xls"));
+            Response.ContentType = "application/ms-excel";
+
+            //Response.ContentType = "application/ms-excel";
+            StringWriter sw = new StringWriter();
+            HtmlTextWriter htw = new HtmlTextWriter(sw);
+            GridView1.AllowPaging = false;
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            using (SqlCommand cmd = new SqlCommand("SP_PATIENT_STATUS", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "DISPLAY";
+                cmd.Parameters.Add("@FDATE", SqlDbType.DateTime).Value = txtfdate.Text;
+                cmd.Parameters.Add("@TDATE", SqlDbType.DateTime).Value = txttdate.Text;
+                // cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                SqlDataAdapter adp = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                adp.Fill(dt);
+
+                GridView1.DataSource = dt;
+                GridView1.DataBind();
+            }
+            //SqlDataAdapter Adp = new SqlDataAdapter("SELECT BED_TABLE.PID,BED_TABLE.WARD, BED_TABLE.BEDNO, BED_TABLE.PID, BED_TABLE.PNAME, ADMISSION_TABLE.DATE FROM BED_TABLE INNER JOIN ADMISSION_TABLE ON BED_TABLE.PID = ADMISSION_TABLE.ID where ADMISSION_TABLE.Date between '" + Convert.ToDateTime(txtfdate.Text).ToString("yyyy-MM-dd") + "' and '" + Convert.ToDateTime(txttdate.Text).ToString("yyyy-MM-dd") + "'", con);
+            //DataTable Dt = new DataTable();
+            //Adp.Fill(ds);
+            //GridView1.DataSource = ds.Tables[0];
+            //GridView1.DataBind();
+            con.Close();
+
+
+            
+            //Change the Header Row back to white color
+            GridView1.HeaderRow.Style.Add("background-color", "#FFFFFF");
+            //Applying stlye to gridview header cells
+            for (int i = 0; i < GridView1.HeaderRow.Cells.Count; i++)
+            {
+                GridView1.HeaderRow.Cells[i].Style.Add("background-color", "#df5015");
+            }
+            GridView1.RenderControl(htw);
+            Response.Write(sw.ToString());
+            Response.End();
+        }
+    }
+    public override void VerifyRenderingInServerForm(Control control)
+    {
+        //base.VerifyRenderingInServerForm(control);
+    }
+}

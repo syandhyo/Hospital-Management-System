@@ -1,0 +1,250 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class ADMIN_Special_Discount : System.Web.UI.Page
+{
+    string num1 = "SJ000";
+    SqlConnection con;
+    SqlDataAdapter da, da1, da2;
+    DataSet ds = new DataSet();
+    SqlCommand com, cmd, cmd1, cmd2, cmd3;
+    SqlDataReader dr, dr1, dr2;
+    DataTable dt;
+    string AMOUNT;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            if (Session["out"] == "INACTIVE")
+            {
+                Response.Redirect("~/index.aspx");
+            }
+            Response.Buffer = true;
+
+            Response.CacheControl = "no-cache";
+            if (Session["NAME"] == null)
+            {
+                Response.Redirect("~/index.aspx");
+            }
+            lblid.Text = Session["NAME"].ToString();
+            //lbluid.Text = Session["UID"].ToString();
+            lblorgid.Text = Session["ORGID"].ToString();
+
+            if (!IsPostBack)
+            {
+                binddata();
+
+                div1.Visible = false;
+                div2.Visible = false;
+                //SqlDataAdapter Adp = new SqlDataAdapter("select * from PATIENT_REG_TABLE ", con);
+                //DataTable Dt = new DataTable();
+                //Adp.Fill(Dt);
+                //dropopno.DataSource = Dt;
+                //dropopno.DataTextField = "ID";
+                //dropopno.DataValueField = "ID";
+                //dropopno.DataBind();
+                //dropopno.Items.Insert(0, "---select---");
+
+                //SqlDataAdapter Adp1 = new SqlDataAdapter("select * from tblStaff where DesgId LIKE 'Doc%'", con);
+                //DataTable Dt1 = new DataTable();
+                //Adp1.Fill(Dt1);
+                //dropdoctor.DataSource = Dt1;
+                //dropdoctor.DataTextField = "Sname";
+                //dropdoctor.DataValueField = "id";
+                //dropdoctor.DataBind();
+                //dropdoctor.Items.Insert(0, "Please Select");
+            }
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+       
+    }
+    public void binddata()
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                SqlDataReader dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void btnshow_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            if (dropipop.SelectedIndex == 1)
+            {
+                if (dropdiscon.SelectedIndex == 1)
+                {
+                    SqlCommand cmd1 = new SqlCommand("select (PAIDAMT+DUEAMT) AS TOTALAMT from LABRES_TABLE WHERE PID=@id", con);
+                    cmd1.Parameters.Add("@id", SqlDbType.VarChar).Value = txtop.Text;
+                    dr = cmd1.ExecuteReader();
+                    if (dr.Read())
+                    {
+                        txttotalamount.Text = dr["TOTALAMT"].ToString();
+                    }
+                    dr.Close();
+                }
+                else if (dropdiscon.SelectedIndex == 2)
+                {
+                    SqlCommand cmd1 = new SqlCommand("select TOTALAMT as DT from SA_TABLE WHERE IPNO=@id", con);
+                    cmd1.Parameters.Add("@id", SqlDbType.VarChar).Value = txtop.Text;
+                    dr = cmd1.ExecuteReader();
+                    if (dr.Read())
+                    {
+                        txttotalamount.Text = dr["DT"].ToString();
+                    }
+                    dr.Close();
+                }
+            }
+            else if (dropipop.SelectedIndex == 2)
+            {
+                SqlCommand cmd1 = new SqlCommand("select CREDIT AS TOTALAMT from PA_MASTER WHERE VN=@id", con);
+                cmd1.Parameters.Add("@id", SqlDbType.VarChar).Value = txtop.Text;
+                dr = cmd1.ExecuteReader();
+                if (dr.Read())
+                {
+                    txttotalamount.Text = dr["TOTALAMT"].ToString();
+                    div1.Visible = true;
+                    div2.Visible = true;
+
+                }
+                dr.Close();
+            }
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void Btnsave_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtop.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+
+            else if (dropipop.SelectedIndex == 0)
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            else if (dropdiscon.SelectedIndex == 0)
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            else if (txttotaldisc.Text == "" || Convert.ToDouble(txttotaldisc.Text) <= 0)
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            if (dropipop.SelectedIndex == 1)
+            {
+                if (dropdiscon.SelectedIndex == 1)
+                {
+                    using (SqlCommand cm1 = new SqlCommand("USP_SPECIALDISC", con))
+                    {
+                        cm1.CommandType = CommandType.StoredProcedure;
+                        cm1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "LABUPDATE";
+                        cm1.Parameters.Add("@DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy-MM-dd");
+                        cm1.Parameters.Add("@OP", SqlDbType.VarChar).Value = dropipop.Text;
+                        cm1.Parameters.Add("@PID", SqlDbType.VarChar).Value = txtop.Text;
+                        cm1.Parameters.Add("@DISCON", SqlDbType.VarChar).Value = dropdiscon.SelectedItem.Text;
+                        cm1.Parameters.Add("@TAMT", SqlDbType.Decimal).Value = txttotalamount.Text;
+                        cm1.Parameters.Add("@DAMT", SqlDbType.Decimal).Value = txttotaldisc.Text;
+                        cm1.ExecuteNonQuery();
+                    }
+                }
+                else if (dropdiscon.SelectedIndex == 2)
+                {
+                    using (SqlCommand cm1 = new SqlCommand("USP_SPECIALDISC", con))
+                    {
+                        cm1.CommandType = CommandType.StoredProcedure;
+                        cm1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "PHARMAUPDATE";
+                        cm1.Parameters.Add("@DATE", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy-MM-dd");
+                        cm1.Parameters.Add("@OP", SqlDbType.VarChar).Value = dropipop.Text;
+                        cm1.Parameters.Add("@PID", SqlDbType.VarChar).Value = txtop.Text;
+                        cm1.Parameters.Add("@DISCON", SqlDbType.VarChar).Value = dropdiscon.SelectedItem.Text;
+                        cm1.Parameters.Add("@TAMT", SqlDbType.Decimal).Value = txttotalamount.Text;
+                        cm1.Parameters.Add("@DAMT", SqlDbType.Decimal).Value = txttotaldisc.Text;
+                        cm1.ExecuteNonQuery();
+                    }
+                }
+            }
+            else if (dropipop.SelectedIndex == 2)
+            {
+                using (SqlCommand cm1 = new SqlCommand("USP_PA_TRAN_CREDIT", con))
+                {
+                    cm1.CommandType = CommandType.StoredProcedure;
+                    cm1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                    cm1.Parameters.Add("@DATETIME", SqlDbType.DateTime).Value = DateTime.Now.ToString("yyyy-MM-dd");
+                    cm1.Parameters.Add("@VOUCHERNO", SqlDbType.VarChar).Value = "1";
+                    cm1.Parameters.Add("@PID", SqlDbType.VarChar).Value = txtop.Text;
+                    cm1.Parameters.Add("@BEDNO", SqlDbType.VarChar).Value = "null";
+                    cm1.Parameters.Add("@DESCRIPTION", SqlDbType.VarChar).Value = "SPECIAL DISCOUNT ON OVERALL CHARGE";
+                    cm1.Parameters.Add("@CHARGES", SqlDbType.VarChar).Value = '-' + txttotaldisc.Text;
+                    cm1.Parameters.Add("@PTYPE", SqlDbType.VarChar).Value = "INPATIENT";
+                    cm1.Parameters.Add("@DEBIT", SqlDbType.VarChar).Value = "0";
+                    cm1.Parameters.Add("@CREDIT", SqlDbType.VarChar).Value = '-' + txttotaldisc.Text;
+                    cm1.Parameters.Add("@VN", SqlDbType.VarChar).Value = txtop.Text;
+                    cm1.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = "TOTAL DISCOUNT";
+                    cm1.ExecuteNonQuery();
+                }
+            }
+            con.Close();
+            string message1 = "alert('Saved Sucessfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/Special_Discount.aspx");
+    }
+}

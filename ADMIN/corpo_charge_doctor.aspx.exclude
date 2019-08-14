@@ -1,0 +1,313 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/ADMIN/MasterPage.master" AutoEventWireup="true" CodeFile="corpo_charge_doctor.aspx.cs" Inherits="ADMIN_corpo_charge_doctor" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
+    <style type="text/css">
+        .auto-style1 {
+            text-decoration: underline;
+            color: #000000;
+            font-size:17px;
+        }
+        .auto-style2 {
+            background-color: #CCCCCC;
+            font-size:14px
+        }
+        .auto-style3{
+            text-decoration: underline;
+            /*background-color: #e899ef;*/
+            font-size:15px
+        }
+        
+    </style>
+    <script type="text/javascript">
+        function DeleteItem() {
+            if (confirm("Are you sure you want to delete ...?")) {
+                return true;
+            }
+            return false;
+        }
+        function SetTarget() {
+
+            document.forms[0].target = "_blank";
+
+        }
+ </script>
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" Runat="Server">
+     <asp:Label ID="lblid" runat="server" Text="Label"></asp:Label>( <asp:Label ID="lblfyear" runat="server" Text="Label" Font-Size="Smaller" ForeColor="#CCCCCC"></asp:Label>)
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+     <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
+ <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+          <ContentTemplate>
+    <div>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js" type="text/javascript"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js" type="text/javascript"></script>
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="Stylesheet" type="text/css" />
+    <script type="text/javascript">
+        //Sys.Application.add_load(function () {
+
+
+        //    $('.formdate').datepicker({
+        //        dateFormat: 'yy/mm/dd',
+        //        changeMonth: true,
+        //        changeYear: true,
+        //        minDate: '-75Y',
+        //        yearRange: "c-75:c+10",
+
+        //    });
+        //    $('.todate').datepicker({
+        //        dateFormat: 'yy/mm/dd',
+        //        changeMonth: true,
+        //        changeYear: true,
+        //        minDate: '-75Y',
+        //        yearRange: "c-75:c+10",
+        //    });
+        //});
+        $(function () {
+            SetDatePicker();
+        });
+
+        //On UpdatePanel Refresh.
+        var prm = Sys.WebForms.PageRequestManager.getInstance();
+        if (prm != null) {
+            prm.add_endRequest(function (sender, e) {
+                if (sender._postBackSettings.panelsToUpdate != null) {
+                    SetDatePicker();
+                }
+            });
+        };
+        function SetDatePicker() {
+            $("[id$=Txtdate]").datepicker({
+                dateFormat: 'dd-mm-yy',
+                showOn: 'button',
+                buttonImageOnly: true,
+                dateFormat: 'dd-mm-yy',
+                changeMonth: true,
+                changeYear: true,
+                maxDate: '0',
+
+                yearRange: "c-75:c+10",
+                buttonImage: '../images/calendar.png'
+
+            });
+        }
+    </script>
+   
+        <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+    </tr>
+</table>
+        
+        <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"><asp:Label ID="lblorgid" runat="server" Text="Label" Visible="false"></asp:Label></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+      
+        <br></br>
+        <br />
+        <table width="100%">
+            <tr>
+                <td align="right" style="width:20%">&nbsp;</td>
+                <td align="left" style="width:20%">&nbsp;</td>
+                <td align="center" class="auto-style1" style="width:20%"><strong>CORPORATE CHARGES FOR DOCTORS</strong></td>
+                <td align="left" style="width:20%"></td>
+                <td align="center" style="width:20%"></td>
+            </tr>
+        </table>
+        <table width="100%">
+            <tr>
+                <td align="right" style="width:20%"></td>
+                <td align="left" style="width:20%">
+                    <asp:TextBox ID="txtid" runat="server" Visible="false"></asp:TextBox>
+                </td>
+                <td align="right" style="width:20%">
+                    <td align="left" style="width:20%"></td>
+                    <td align="center" style="width:20%"></td>
+                </td>
+            </tr>
+        </table>
+        <div style="border-style: solid; border-width: thin">
+            <br />
+            <table width="100%">
+                <tr>
+                    <td align="right" style="width:20%"></td>
+                    <td align="left" style="width:20%"></td>
+                    <td align="Center" class="auto-style2" style="width:20%">Corporate Name:<asp:DropDownList ID="ddlcorporate" runat="server" AutoPostBack="true" OnSelectedIndexChanged="ddlcorporate_SelectedIndexChanged">
+                        </asp:DropDownList>
+                    </td>
+                    <td align="left" style="width:20%"></td>
+                    <td align="center" style="width:20%"></td>
+                </tr>
+            </table>
+            <table width="100%">
+                <tr>
+                    <td align="right" style="width:20%"></td>
+                    <td align="left" style="width:20%"></td>
+                    <td align="Left" class="auto-style2" style="width:20%">Apply From:&nbsp;<asp:TextBox ID="Txtdate" runat="server" CssClass="formdate" onkeydown="return false;" onpaste ="return false;"></asp:TextBox>
+                    </td>
+                    <td align="left" style="width:20%"></td>
+                    <td align="center" style="width:20%"></td>
+                </tr>
+            </table>
+        </div>
+        <div style="border-style: solid; border-width: thin">
+            <br />
+            <table width="100%">
+                <tr>
+                    <td align="right" style="width:20%"></td>
+                    <td align="left" style="text-align: center;">
+                        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" CssClass="table table-bordered" >
+                            <Columns>
+                                <asp:TemplateField HeaderText="ID" HeaderStyle-CssClass="text-center" Visible="false">
+                                    <ItemTemplate>
+                                        <asp:Label ID="lblid" runat="server" Text='<%#Eval("ID")%>'></asp:Label>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                <asp:TemplateField HeaderText="DOCTOR&nbsp;NAME" HeaderStyle-CssClass="text-center">
+                                    <ItemTemplate>
+                                        <asp:Label ID="lbldoctor" runat="server" Text='<%#Eval("DOCTOR")%>'></asp:Label>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                
+                                <asp:TemplateField HeaderText="FOLLOW_UP DAYS" HeaderStyle-CssClass="text-center">
+                                    <ItemTemplate>
+                                        <asp:Label ID="lblfollow" runat="server" Text='<%#Eval("FOLLOW_UP")%>'></asp:Label>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                  <asp:TemplateField HeaderText="CHARGE" HeaderStyle-CssClass="text-center">
+                                    <ItemTemplate>
+                                        <asp:Label ID="lblchage" runat="server" Text='<%#Eval("CHARGES")%>'></asp:Label>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                  <asp:TemplateField HeaderText="CORPORATE CHARGE" HeaderStyle-CssClass="text-center">
+                                    <ItemTemplate>
+                                        <asp:TextBox ID="txtNchrage" runat="server" Text="0.00" MaxLength="6" pattern="[0-9]+([,\.][0-9]+)?"></asp:TextBox>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                
+                            </Columns>
+                            <SelectedRowStyle BackColor="LightPink" Font-Italic="true" ForeColor="Crimson" />
+                            <FooterStyle BackColor="#99CCCC" ForeColor="#003399" />
+                            <HeaderStyle BackColor="#003399" Font-Bold="True" ForeColor="#CCCCFF" />
+                            <PagerStyle BackColor="#99CCCC" ForeColor="#003399" HorizontalAlign="Left" />
+                            <RowStyle BackColor="White" ForeColor="#003399" />
+                            <SelectedRowStyle BackColor="#009999" Font-Bold="True" ForeColor="#CCFF99" />
+                            <SortedAscendingCellStyle BackColor="#EDF6F6" />
+                            <SortedAscendingHeaderStyle BackColor="#0D4AC4" />
+                            <SortedDescendingCellStyle BackColor="#D6DFDF" />
+                            <SortedDescendingHeaderStyle BackColor="#002876" />
+                        </asp:GridView>
+                    </td>
+                    <td align="center" style="width:20%"></td>
+                </tr>
+            </table>
+            <table width="100%">
+                <tr>
+                    <td align="right" style="width:20%"></td>
+                    <td align="left" style="text-align: center;">
+                        <asp:GridView ID="GridView3" runat="server" AutoGenerateColumns="False" CssClass="table table-bordered" DataKeyNames="ID">
+                            <Columns>
+                               <asp:TemplateField HeaderText="ID" HeaderStyle-CssClass="text-center" Visible="false">
+                                    <ItemTemplate>
+                                        <asp:Label ID="lblid1" runat="server" Text='<%#Eval("ID")%>'></asp:Label>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                <asp:TemplateField HeaderText="DOCTOR&nbsp;NAME" HeaderStyle-CssClass="text-center">
+                                    <ItemTemplate>
+                                        <asp:Label ID="lbldoctor1" runat="server" Text='<%#Eval("DOCTOR")%>'></asp:Label>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                
+                                <asp:TemplateField HeaderText="FOLLOW_UP DAYS" HeaderStyle-CssClass="text-center">
+                                    <ItemTemplate>
+                                        <asp:Label ID="lblfollow1" runat="server" Text='<%#Eval("FOLLOW_UP")%>'></asp:Label>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                               
+                                  <asp:TemplateField HeaderText="CORPORATE CHARGE" HeaderStyle-CssClass="text-center">
+                                    <ItemTemplate>
+                                        <asp:TextBox ID="txtNchrage1" runat="server" Text='<%#Eval("CHARGES")%>' MaxLength="6" pattern="[0-9]+([,\.][0-9]+)?" ></asp:TextBox>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                
+                            </Columns>
+                            <SelectedRowStyle BackColor="LightPink" Font-Italic="true" ForeColor="Crimson" />
+                            <FooterStyle BackColor="#99CCCC" ForeColor="#003399" />
+                            <HeaderStyle BackColor="#003399" Font-Bold="True" ForeColor="#CCCCFF" />
+                            <PagerStyle BackColor="#99CCCC" ForeColor="#003399" HorizontalAlign="Left" />
+                            <RowStyle BackColor="White" ForeColor="#003399" />
+                            <SelectedRowStyle BackColor="#009999" Font-Bold="True" ForeColor="#CCFF99" />
+                            <SortedAscendingCellStyle BackColor="#EDF6F6" />
+                            <SortedAscendingHeaderStyle BackColor="#0D4AC4" />
+                            <SortedDescendingCellStyle BackColor="#D6DFDF" />
+                            <SortedDescendingHeaderStyle BackColor="#002876" />
+                        </asp:GridView>
+                    </td>
+                    <td align="center" style="width:20%"></td>
+                </tr>
+            </table>
+            <table width="100%">
+                <tr>
+                    <td align="right" style="width:20%">&nbsp;</td>
+                    <td align="left" style="width:20%">&nbsp;</td>
+                    <td align="center" style="width:20%">
+                        <asp:Button ID="btnSubmit" runat="server" CssClass="btn btn-primary btn-sm" OnClick="btnSubmit_Click" Text="Submit" />
+                        &nbsp;<asp:Button ID="btnupdate" runat="server" CssClass="btn btn-success btn-sm" OnClick="btnupdate_Click" Text="Update" Visible="False" />
+                        &nbsp;<asp:Button ID="btndelete" runat="server" CssClass="btn btn-warning btn-sm" OnClick="btndelete_Click" OnClientClick="return DeleteItem()" Text="Delete" Visible="False" />
+                        &nbsp;<asp:Button ID="btncancel" runat="server" CssClass="btn btn-danger btn-sm" OnClick="btncancel_Click" Text="Cancel" />
+                    </td>
+                    <td align="left" style="width:20%">&nbsp;</td>
+                    <td align="center" style="width:20%"></td>
+                </tr>
+            </table>
+            </td>
+            <td align="right" style="width:20%"></td>
+            </tr>
+            </table>
+        </div>
+        <div style="border-style: solid; border-width: thin">
+            <br>
+            <table width="100%">
+                <tr>
+                    <td align="right" style="width:15%"></td>
+                    <td align="center" style="width:15%"></td>
+                    <td align="center" style="width:40%">
+                        <asp:GridView ID="GridView2" runat="server" AllowPaging="true" AllowSorting="true" AutoGenerateColumns="False" BackColor="White" BorderColor="#3366CC" BorderStyle="None" BorderWidth="1px" CellPadding="4" CssClass="table table-bordered" DataKeyNames="ID"  OnSelectedIndexChanging="GridView2_SelectedIndexChanging" OnPageIndexChanging="GridView2_PageIndexChanging" pagesize="10">
+                            <Columns>
+                                <asp:BoundField DataField="ID" HeaderStyle-CssClass="text-center" HeaderText="ID" ItemStyle-HorizontalAlign="center" Visible="false"/>
+                                <asp:BoundField DataField="CORPORATE" HeaderStyle-CssClass="text-center" HeaderText="CORPORATE NAME" ItemStyle-HorizontalAlign="center" />
+                                <asp:BoundField DataField="Date" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-CssClass="text-center" HeaderText="DATE" ItemStyle-HorizontalAlign="center" />
+                                <asp:BoundField DataField="APPLY_DATE" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-CssClass="text-center" HeaderText="APPLY DATE" ItemStyle-HorizontalAlign="center" />
+                                <asp:CommandField HeaderStyle-CssClass="text-center" HeaderText="ACTION" ItemStyle-HorizontalAlign="center" ShowDeleteButton="false" ShowSelectButton="true" />
+                            </Columns>
+                            <SelectedRowStyle BackColor="LightPink" Font-Italic="true" ForeColor="Crimson" />
+                            <FooterStyle BackColor="#99CCCC" ForeColor="#003399" />
+                            <HeaderStyle BackColor="#003399" Font-Bold="True" ForeColor="#CCCCFF" />
+                            <PagerStyle BackColor="#99CCCC" ForeColor="#003399" HorizontalAlign="Left" />
+                            <RowStyle BackColor="White" ForeColor="#003399" />
+                            <SelectedRowStyle BackColor="#009999" Font-Bold="True" ForeColor="#CCFF99" />
+                            <SortedAscendingCellStyle BackColor="#EDF6F6" />
+                            <SortedAscendingHeaderStyle BackColor="#0D4AC4" />
+                            <SortedDescendingCellStyle BackColor="#D6DFDF" />
+                            <SortedDescendingHeaderStyle BackColor="#002876" />
+                        </asp:GridView>
+                    </td>
+                    <td align="left" style="width:15%"></td>
+                    <td align="center" style="width:15%"></td>
+                </tr>
+            </table>
+           
+              </ContentTemplate></asp:UpdatePanel>
+
+</asp:Content>
+

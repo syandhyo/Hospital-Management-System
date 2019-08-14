@@ -1,0 +1,488 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class NURSE_IP_doctor_charges : System.Web.UI.Page
+{
+    string num1 = "PR000";
+    SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+    SqlCommand com, cmd, cmd1, cmd2;
+    SqlDataReader dr,dr1,dr2;
+    SqlDataAdapter da, da1;
+    DataSet ds = new DataSet();
+    DataTable dt;
+    public void auto()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        string qry1 = " select ID from dbo.ip_doctor_charge";
+
+        com = new SqlCommand(qry1, con);
+        dr = null;
+
+        dr = com.ExecuteReader();
+
+        while (dr.Read())
+        {
+            num1 = dr["ID"].ToString();
+        }
+        num1 = string.Format("DC{0}", (Convert.ToUInt32(num1.Substring(2)) + 1).ToString("D4"));
+        txtid.Text = num1;
+
+
+        dr.Close();
+        con.Close();
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        try
+        {
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+
+        SqlDataAdapter da = new SqlDataAdapter("select * from ip_doctor_charge order by ID desc", con);
+        DataTable dt = new DataTable();
+        da.Fill(dt);
+        GridView2.SelectedIndex = 0;
+        GridView2.DataSource = dt;
+        GridView2.DataKeyNames = new string[] { "ID" };
+        GridView2.DataBind();
+
+        con.Close();
+
+    }
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+
+        if (!IsPostBack)
+        {
+
+            SqlDataAdapter da = new SqlDataAdapter("select DISTINCT DOCTOR from Doctor_charges", con);
+            DataTable ds = new DataTable();
+            da.Fill(ds);
+            ddldoctor.DataSource = ds;
+            ddldoctor.DataTextField = "DOCTOR";
+            ddldoctor.DataValueField = "DOCTOR";
+            ddldoctor.DataBind();
+            ddldoctor.Items.Insert(0, "---Select---");
+
+            SqlDataAdapter da1 = new SqlDataAdapter("SELECT DISTINCT BEDNO FROM BED_TABLE", con);
+            DataTable dt1 = new DataTable();
+            da1.Fill(dt1);
+            //dropbedno.SelectedIndex = 0;
+            ddlbed.DataSource = dt1;
+            ddlbed.DataTextField = "BEDNO";
+            ddlbed.DataValueField = "BEDNO";
+            ddlbed.DataBind();
+            ddlbed.Items.Insert(0, "Please Select");
+            con.Close();
+            Txtdate.Text = DateTime.Today.ToString("dd-MM-yyyy");
+            div1.Visible = false;
+            binddata();
+        }
+        con.Close();
+       
+        
+    }
+    protected void GridView2_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+     {
+         try
+         {
+             var slno = GridView2.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+             SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+             con.Open();
+
+             //txtid.Text = ds.Tables[0].Rows[0]["ID"].ToString();
+             SqlCommand com = new SqlCommand("select * from ip_doctor_charge where ID='" + slno + "'", con);
+             dr = com.ExecuteReader();
+             if (dr.Read())
+             {
+                 div1.Visible = true;
+                 btnSubmit.Visible = false;
+                 btnupdate.Visible = true;
+                 btndelete.Visible = true;
+                 txtid.Text = dr["ID"].ToString();
+                 txtip.Text = dr["IPNO"].ToString();
+                 lblip.Text = dr["IPNO"].ToString();
+                 lblbed.Text = dr["bed"].ToString();
+                 ddlbed.SelectedItem.Text = dr["bed"].ToString();
+                 ddldoctor.SelectedItem.Text = dr["Doctor"].ToString();
+                 lblprice.Text = dr["price"].ToString();
+                 Txtdate.Text = Convert.ToDateTime(dr["date"].ToString()).ToString("dd-MM-yyyy");
+             }
+             dr.Close();
+
+             SqlCommand com1 = new SqlCommand("select NAME from dbo.ADMISSION_TABLE where VN='" + lblip.Text + "'", con);
+             dr1 = com1.ExecuteReader();
+             if (dr1.Read())
+             {
+                 lblname.Text = dr1["NAME"].ToString();
+             }
+             dr1.Close();
+
+             con.Close();
+         }
+         catch (Exception ex)
+         {
+             Console.WriteLine("An error occurred: '{0}'", ex);
+         }
+    }
+    protected void GridView2_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlDataAdapter Adp = new SqlDataAdapter("select * from ip_doctor_charge order by ID desc", con);
+        DataTable Dt = new DataTable();
+        Adp.Fill(Dt);
+        GridView2.DataSource = Dt;
+        GridView2.PageIndex = e.NewPageIndex;
+        GridView2.DataKeyNames = new string[] { "ID" };
+        GridView2.DataBind();
+        con.Close();
+    }
+    protected void btnSubmit_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            
+            if (lblip.Text == "" && lblbed.Text == "")
+            {
+
+                string message = "alert('Please!! Click On Show Button To Save The Page..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (Txtdate.Text == "")
+            {
+                string message = "alert('Please!! Enter The Date..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (ddldoctor.SelectedIndex == 0)
+            {
+                string message = "alert('Please!! Select The Doctor To Save The Page..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                //insert into ip_doctor_charge (ID,IPNO,bed,Doctor,price,date) values (@ID,@IPNO,@bed,@Doctor,@price,@date)
+                return;
+            }
+            
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            auto();
+            //SqlCommand cmd1 = new SqlCommand("insert into ip_doctor_charge (ID,IPNO,bed,Doctor,price,date) values (@ID,@IPNO,@bed,@Doctor,@price,@date)", con);
+            using (SqlCommand cmd1 = new SqlCommand("SP_DOCTOR_CHARGES", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd1.Parameters.Add("@IPNO", SqlDbType.VarChar).Value = lblip.Text;
+                cmd1.Parameters.Add("@bed", SqlDbType.VarChar).Value = lblbed.Text;
+                cmd1.Parameters.Add("@Doctor", SqlDbType.VarChar).Value = ddldoctor.SelectedItem.Text;
+                cmd1.Parameters.Add("@price", SqlDbType.VarChar).Value = lblprice.Text;
+                cmd1.Parameters.Add("@date", SqlDbType.DateTime).Value = Txtdate.Text;
+                cmd1.ExecuteNonQuery();
+            }
+            using (SqlCommand cm = new SqlCommand("USP_PA_TRAN_CREDIT", con))
+            {
+                cm.CommandType = CommandType.StoredProcedure;
+                cm.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cm.Parameters.Add("@DATETIME", SqlDbType.DateTime).Value = Txtdate.Text;
+                cm.Parameters.Add("@VOUCHERNO", SqlDbType.VarChar).Value = txtid.Text;
+                cm.Parameters.Add("@PID", SqlDbType.VarChar).Value = lblip.Text;
+                cm.Parameters.Add("@BEDNO", SqlDbType.VarChar).Value = lblbed.Text;
+                cm.Parameters.Add("@DESCRIPTION", SqlDbType.VarChar).Value = "DOCTOR CHARGES";
+                cm.Parameters.Add("@CHARGES", SqlDbType.VarChar).Value = lblprice.Text;
+                cm.Parameters.Add("@PTYPE", SqlDbType.VarChar).Value = "INPATIENT";
+                cm.Parameters.Add("@DEBIT", SqlDbType.VarChar).Value = "0";
+                cm.Parameters.Add("@CREDIT", SqlDbType.VarChar).Value = lblprice.Text;
+                cm.Parameters.Add("@VN", SqlDbType.VarChar).Value = lblip.Text;
+                cm.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = "OTHER CHARGES";
+                cm.ExecuteNonQuery();
+            }
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/NURSE/IP_doctor_charges.aspx");
+
+    }
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (Txtdate.Text == "")
+            {
+                string message = "alert('Please!! Enter The Date..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            using (SqlCommand cm1 = new SqlCommand("USP_PA_TRAN_CREDIT", con))
+            {
+                cm1.CommandType = CommandType.StoredProcedure;
+                cm1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE1";
+                cm1.Parameters.Add("@DATETIME", SqlDbType.DateTime).Value = Txtdate.Text;
+                cm1.Parameters.Add("@VOUCHERNO", SqlDbType.VarChar).Value = txtid.Text;
+                cm1.Parameters.Add("@PID", SqlDbType.VarChar).Value = lblip.Text;
+                cm1.Parameters.Add("@BEDNO", SqlDbType.VarChar).Value = lblbed.Text;
+                cm1.Parameters.Add("@DESCRIPTION", SqlDbType.VarChar).Value = "DOCTOR CHARGES";
+                cm1.Parameters.Add("@CHARGES", SqlDbType.VarChar).Value = lblprice.Text;
+                cm1.Parameters.Add("@PTYPE", SqlDbType.VarChar).Value = "INPATIENT";
+                cm1.Parameters.Add("@DEBIT", SqlDbType.VarChar).Value = "0";
+                cm1.Parameters.Add("@CREDIT", SqlDbType.VarChar).Value = lblprice.Text;
+                cm1.Parameters.Add("@VN", SqlDbType.VarChar).Value = lblip.Text;
+                cm1.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = "OTHER CHARGES";
+                cm1.ExecuteNonQuery();
+            }
+            //SqlCommand cmd1 = new SqlCommand("Update ip_doctor_charge set IPNO=@IPNO,bed=@bed,Doctor=@Doctor,price=@price,date=@date where ID=@ID", con);
+            using (SqlCommand cmd1 = new SqlCommand("SP_DOCTOR_CHARGES", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd1.Parameters.Add("@IPNO", SqlDbType.VarChar).Value = lblip.Text;
+                cmd1.Parameters.Add("@bed", SqlDbType.VarChar).Value = lblbed.Text;
+                cmd1.Parameters.Add("@Doctor", SqlDbType.VarChar).Value = ddldoctor.SelectedItem.Text;
+                cmd1.Parameters.Add("@price", SqlDbType.VarChar).Value = lblprice.Text;
+                cmd1.Parameters.Add("@date", SqlDbType.DateTime).Value = Txtdate.Text;
+                cmd1.ExecuteNonQuery();
+            }
+
+
+            using (SqlCommand cm = new SqlCommand("USP_PA_TRAN_CREDIT", con))
+            {
+                cm.CommandType = CommandType.StoredProcedure;
+                cm.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+                cm.Parameters.Add("@DATETIME", SqlDbType.DateTime).Value = Txtdate.Text;
+                cm.Parameters.Add("@VOUCHERNO", SqlDbType.VarChar).Value = txtid.Text;
+                cm.Parameters.Add("@PID", SqlDbType.VarChar).Value = lblip.Text;
+                cm.Parameters.Add("@BEDNO", SqlDbType.VarChar).Value = lblbed.Text;
+                cm.Parameters.Add("@DESCRIPTION", SqlDbType.VarChar).Value = "DOCTOR CHARGES";
+                cm.Parameters.Add("@CHARGES", SqlDbType.VarChar).Value = lblprice.Text;
+                cm.Parameters.Add("@PTYPE", SqlDbType.VarChar).Value = "INPATIENT";
+                cm.Parameters.Add("@DEBIT", SqlDbType.VarChar).Value = "0";
+                cm.Parameters.Add("@CREDIT", SqlDbType.VarChar).Value = lblprice.Text;
+                cm.Parameters.Add("@VN", SqlDbType.VarChar).Value = lblip.Text;
+                cm.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = "OTHER CHARGES";
+                cm.ExecuteNonQuery();
+            }
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/NURSE/IP_doctor_charges.aspx");
+    }
+    protected void btndelete_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand com = new SqlCommand("select * from  USER_PERMISSION_TABLE where ID='" + Session["UID"].ToString() + "' and PER='Delete' and selected='False'", con);
+            dr = com.ExecuteReader();
+            if (dr.Read())
+            {
+                string message = "alert('* You Cant delete.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else
+            {
+                dr.Close();
+
+                SqlCommand com1 = new SqlCommand("delete from ip_doctor_charge where ID='" + txtid.Text + "'", con);
+                com1.ExecuteNonQuery();
+
+                using (SqlCommand cm = new SqlCommand("USP_PA_TRAN_CREDIT", con))
+                {
+                    cm.CommandType = CommandType.StoredProcedure;
+                    cm.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "DELETE";
+                    cm.Parameters.Add("@DATETIME", SqlDbType.DateTime).Value = Txtdate.Text;
+                    cm.Parameters.Add("@VOUCHERNO", SqlDbType.VarChar).Value = txtid.Text;
+                    cm.Parameters.Add("@PID", SqlDbType.VarChar).Value = lblip.Text;
+                    cm.Parameters.Add("@BEDNO", SqlDbType.VarChar).Value = lblbed.Text;
+                    cm.Parameters.Add("@DESCRIPTION", SqlDbType.VarChar).Value = "DOCTOR CHARGES";
+                    cm.Parameters.Add("@CHARGES", SqlDbType.VarChar).Value = lblprice.Text;
+                    cm.Parameters.Add("@PTYPE", SqlDbType.VarChar).Value = "INPATIENT";
+                    cm.Parameters.Add("@DEBIT", SqlDbType.VarChar).Value = "0";
+                    cm.Parameters.Add("@CREDIT", SqlDbType.VarChar).Value = lblprice.Text;
+                    cm.Parameters.Add("@VN", SqlDbType.VarChar).Value = lblip.Text;
+                    cm.Parameters.Add("@CATEGORY", SqlDbType.VarChar).Value = "OTHER CHARGES";
+                    cm.ExecuteNonQuery();
+                }
+                binddata();
+            }
+           
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/NURSE/IP_doctor_charges.aspx");
+    }
+    protected void btncancel_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/NURSE/IP_doctor_charges.aspx");
+    }
+    protected void btnshow_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtip.Text == "" && ddlbed.SelectedIndex == 0)
+            {
+                string message = "alert('Please!! Either Enter IPNO OR select BED..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (ddlbed.SelectedIndex == 0)
+            {
+                SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+                con.Open();
+
+                //Invalid IP Number
+                SqlCommand cmd2 = new SqlCommand("select * from BED_TABLE where VN='" + txtip.Text + "'", con);
+                dr1 = cmd2.ExecuteReader();
+                if (dr1.Read())
+                {
+                    string message = "alert('Invalid IPD Number.')";
+                    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                    return;
+                }
+                else
+                {
+                    dr1.Close();
+                    SqlCommand cmd1 = new SqlCommand("SELECT A.VN,A.BEDNO,A.PNAME,B.PHONE,B.ECONTACT,B.DISEASE,B.DATE,B.CORPORATE FROM BED_TABLE A, ADMISSION_TABLE B WHERE A.VN=B.VN AND A.VN= '" + txtip.Text + "' and A.ORGID='" + lblorgid.Text + "' ", con);
+                    dr = cmd1.ExecuteReader();
+                    if (dr.Read())
+                    {
+                        lblip.Text = dr["VN"].ToString();
+                        lblname.Text = dr["PNAME"].ToString();
+                        lblbed.Text = dr["BEDNO"].ToString();
+                        lblcorpo.Text = dr["CORPORATE"].ToString();
+                        div1.Visible = true;
+                    }
+                    dr.Close();
+                }
+                con.Close();
+            }
+            else
+            {
+                SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+                con.Open();
+
+                SqlCommand cmd1 = new SqlCommand("SELECT A.VN,A.BEDNO,A.PNAME,B.PHONE,B.ECONTACT,B.DISEASE,B.DATE,B.CORPORATE FROM BED_TABLE A, ADMISSION_TABLE B WHERE A.VN=B.VN AND A.BEDNO= '" + ddlbed.Text + "' and A.ORGID='" + lblorgid.Text + "'", con);
+                dr = cmd1.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblip.Text = dr["VN"].ToString();
+                    lblname.Text = dr["PNAME"].ToString();
+                    lblbed.Text = dr["BEDNO"].ToString();
+                    lblcorpo.Text = dr["CORPORATE"].ToString();
+                    div1.Visible = true;
+                }
+                dr.Close();
+                con.Close();
+
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+
+    protected void ddldoctor_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (Txtdate.Text == "")
+        {
+            string message = "alert('Please!! Enter The Date..')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+        }
+        else
+        {
+            try
+            {
+                SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+                con.Open();
+                if (lblcorpo.Text != "0" )
+                {
+                   // string date = System.DateTime.Today.ToString("dd/MM/yy");
+                    string Date = Convert.ToDateTime(Txtdate.Text).ToString("MM-dd-yyyy");
+                  
+
+                    SqlCommand cmd1 = new SqlCommand("select * from Doctor_charges where APPLY_DATE=(select MAX(APPLY_DATE)As LDATE from Doctor_charges where APPLY_DATE<='" + Date + "') and CORPORATE_ID='" + lblcorpo.Text + "' and DOCTOR='" + ddldoctor.SelectedItem.Text + "'", con);
+                    dr1 = cmd1.ExecuteReader();
+                    if (dr1.Read())
+                    {
+                        lblprice.Text = dr1["CHARGES"].ToString();
+                    }
+                    dr1.Close();
+                   
+                }
+                else
+                {
+                  
+                    SqlCommand cmd1 = new SqlCommand("select * from Doctor_charges where CORPORATE_ID is null and DOCTOR='" + ddldoctor.SelectedItem.Text +"'", con);
+                    dr1 = cmd1.ExecuteReader();
+                    if (dr1.Read())
+                    {
+                        lblprice.Text = dr1["CHARGES"].ToString();
+                    }
+                    dr1.Close();
+                   
+                }
+                con.Close();
+            }
+            catch(Exception ex)
+            {
+                con.Close();
+                Console.WriteLine("An error occurred: '{0}'", ex);
+            }
+        }
+    }
+}

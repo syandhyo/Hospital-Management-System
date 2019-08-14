@@ -1,0 +1,535 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class LABORATORY_Lab_stock_reconcilation : System.Web.UI.Page
+{
+    string num1 = "000";
+    SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+    SqlCommand com, cmd, cmd1;
+    SqlDataReader dr;
+    SqlDataAdapter da, da1;
+    DataTable dt;
+    public void auto()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        string qry1 = " select slno as ID from TBL_STOCKRECONLAB";
+
+        com = new SqlCommand(qry1, con);
+        dr = null;
+
+        dr = com.ExecuteReader();
+
+        while (dr.Read())
+        {
+            num1 = dr["ID"].ToString();
+        }
+
+        TXTID.Text = "STC" + num1;
+
+        dr.Close();
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        try
+        {
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+        using (SqlCommand cmd = new SqlCommand("LAB_STOCK_RECONCILIATION", con))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_STCK_RECON_PAGE";
+            cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = "NULL";
+            cmd.Parameters.Add("@DEPTID", SqlDbType.VarChar).Value = Ddldept.SelectedValue;
+            cmd.Parameters.Add("@ITEMNAME", SqlDbType.VarChar).Value = "NULL";
+            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            //SqlDataAdapter da = new SqlDataAdapter(" select * from TBL_STOCKRECONLAB where DEPTID=" + Ddldept.SelectedValue + "order by SLNO desc", con);
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            GridView1.SelectedIndex = 0;
+            GridView1.DataSource = dt;
+            GridView1.DataKeyNames = new string[] { "ID" };
+            GridView1.DataBind();
+        }
+
+
+    }
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+        lbldate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
+        if (IsPostBack != true)
+        {
+            using (SqlCommand cmd = new SqlCommand("LAB_STOCK_RECONCILIATION", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_2DEPT_DROP";
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = "NULL";
+                cmd.Parameters.Add("@DEPTID", SqlDbType.VarChar).Value = "NULL";
+                cmd.Parameters.Add("@ITEMNAME", SqlDbType.VarChar).Value = "NULL";
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                //SqlDataAdapter da = new SqlDataAdapter("select * from tblDepartment where DeptName='Pathology'", con);
+                DataTable ds = new DataTable();
+                da.Fill(ds);
+                Ddldept.DataSource = ds;
+                Ddldept.DataTextField = "DeptName";
+                Ddldept.DataValueField = "id";
+                Ddldept.DataBind();
+            }
+            using (SqlCommand cmd1 = new SqlCommand("LAB_STOCK_RECONCILIATION", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_2DEPT_MAT";
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = Ddldept.SelectedValue;
+                cmd1.Parameters.Add("@DEPTID", SqlDbType.VarChar).Value = "NULL";
+                cmd1.Parameters.Add("@ITEMNAME", SqlDbType.VarChar).Value = "NULL";
+                SqlDataAdapter da1 = new SqlDataAdapter(cmd1);
+                //SqlDataAdapter da1 = new SqlDataAdapter("Select SLNO as id,ITEMNAME from TBL_DEPT_MAT_STOCK where ID='" + Ddldept.SelectedValue + "' ", con);
+                DataTable ds1 = new DataTable();
+                da1.Fill(ds1);
+                Ddlitem.DataSource = ds1;
+                Ddlitem.DataTextField = "ITEMNAME";
+                Ddlitem.DataValueField = "id";
+                Ddlitem.DataBind();
+                Ddlitem.Items.Insert(0, "---Please Select---");
+            }
+        }
+        con.Close();
+        binddata();
+
+    }
+    public void clearfield()
+    {
+        txt_des.Text = txtquant.Text = Txt_minus.Text = TXTID.Text = "";
+        Ddldept.SelectedIndex = Ddlitem.SelectedIndex = 0;
+        lblquant.Text = "";
+    }
+    protected void txtquant_TextChanged(object sender, EventArgs e)
+    {
+        Txt_minus.Text = (Convert.ToDouble(lblquant.Text) - Convert.ToDouble(txtquant.Text)).ToString();
+    }
+    protected void Ddlitem_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            if (Ddlitem.SelectedIndex != 0)
+            {
+                con.Open();
+                cmd = con.CreateCommand();
+                using (SqlCommand cmd1 = new SqlCommand("LAB_STOCK_RECONCILIATION", con))
+                {
+                    cmd1.CommandType = CommandType.StoredProcedure;
+                    cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_ITEMNAME";
+                    cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = "NULL";
+                    cmd1.Parameters.Add("@DEPTID", SqlDbType.VarChar).Value = "NULL";
+                    cmd1.Parameters.Add("@ITEMNAME", SqlDbType.VarChar).Value = Ddlitem.SelectedItem.Text;
+                    //SqlDataAdapter da1 = new SqlDataAdapter(cmd1);
+                    //cmd.CommandText = "  Select * from TBL_DEPT_MAT_STOCK where ITEMNAME='" + Ddlitem.SelectedItem.Text + "'";
+                    dr = cmd1.ExecuteReader(CommandBehavior.CloseConnection);
+                    if (dr.Read() == true)
+                    {
+                        lblquant.Text = dr["STOCK"].ToString();
+                        dr.Close();
+                        con.Close();
+
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void btnsubmit_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (Ddlitem.SelectedIndex == 0)
+            {
+                string message = "alert('Please!! Select The Item..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txtquant.Text == "" || txtquant.Text == "0")
+            {
+                string message = "alert('Please!! Select The Quantity..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txt_des.Text == "")
+            {
+                string message = "alert('Please!! Select The Reason..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (lblquant.Text == "0.00")
+            {
+                string message = "alert('There Is No Stock..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (Convert.ToDecimal(txtquant.Text) > Convert.ToDecimal(lblquant.Text))
+            {
+                string message = "alert('Insufficient Stock')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            auto();
+            con.Open();
+            using (SqlCommand cmd = new SqlCommand("USP_STOCKRECLAB", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+                cmd.Parameters.Add("@DATE", SqlDbType.DateTime).Value = Convert.ToDateTime(lbldate.Text).ToString("yyyy-MM-dd");
+                cmd.Parameters.Add("@ITEM", SqlDbType.VarChar).Value = Ddlitem.SelectedItem.Text;
+                cmd.Parameters.Add("@DESCRIPTN", SqlDbType.VarChar).Value = txt_des.Text.ToUpper();
+                cmd.Parameters.Add("@QUANTITY", SqlDbType.Decimal).Value = txtquant.Text;
+                cmd.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+                cmd.Parameters.Add("@USERID", SqlDbType.VarChar).Value = lblid.Text;
+                cmd.Parameters.Add("@DEPTID", SqlDbType.Int).Value = Convert.ToInt32(Ddldept.SelectedValue).ToString();
+                cmd.ExecuteNonQuery();
+            }
+            binddata();
+            dr.Close();
+            con.Close();
+
+            string message1 = "alert('Successfully Inserted.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+
+            con.Open(); 
+            using (SqlCommand cmd = new SqlCommand("LAB_STOCK_RECONCILIATION", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = Txt_minus.Text;
+                cmd.Parameters.Add("@DEPTID", SqlDbType.VarChar).Value = "NULL";
+                cmd.Parameters.Add("@ITEMNAME", SqlDbType.VarChar).Value = Ddlitem.SelectedItem.Text;
+                //cmd1 = con.CreateCommand();
+                //cmd1.CommandText = "update TBL_DEPT_MAT_STOCK set STOCK='" + Txt_minus.Text + "' where ITEMNAME='" + Ddlitem.SelectedItem.Text + "'";
+                cmd.ExecuteNonQuery();
+            }
+            dr.Close();
+            con.Close();
+            clearfield();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("Lab_stock_reconcilation.aspx");
+
+    
+    }
+    protected void btncancel_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            con.Open();
+            using (SqlCommand cmd4 = new SqlCommand("LAB_RECON_NEW", con))
+            {
+                cmd4.CommandType = CommandType.StoredProcedure;
+                cmd4.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "CANCEL";
+                cmd4.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+                cmd4.Parameters.Add("@STOCK", SqlDbType.Decimal).Value = Convert.ToDecimal(txtquant.Text).ToString();
+                cmd4.Parameters.Add("@ITEMNAME", SqlDbType.VarChar).Value = Ddlitem.SelectedItem.Text;
+                cmd4.ExecuteNonQuery();
+            }
+            con.Close();
+            clearfield();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("Lab_stock_reconcilation.aspx");
+    }
+    protected void GridView1_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+
+        try
+        {
+            con.Open();
+            using (SqlCommand cmd = new SqlCommand("LAB_STOCK_RECONCILIATION", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_STCK_RECON_PAGE";
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = "NULL";
+                cmd.Parameters.Add("@DEPTID", SqlDbType.VarChar).Value = Ddldept.SelectedValue;
+                cmd.Parameters.Add("@ITEMNAME", SqlDbType.VarChar).Value = "NULL";
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                //SqlDataAdapter da = new SqlDataAdapter("select * from TBL_STOCKRECONLAB where DEPTID=" + Ddldept.SelectedValue + "", con);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                GridView1.DataSource = dt;
+                GridView1.PageIndex = e.NewPageIndex;
+                GridView1.DataKeyNames = new string[] { "ID" };
+                GridView1.DataBind();
+            }
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void GridView1_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+            var slno = GridView1.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            using (SqlCommand cmd = new SqlCommand("LAB_STOCK_RECONCILIATION", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_1EVENT";
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = slno;
+                cmd.Parameters.Add("@DEPTID", SqlDbType.VarChar).Value = "";
+                cmd.Parameters.Add("@ITEMNAME", SqlDbType.VarChar).Value = "NULL";
+                //SqlDataAdapter da = new SqlDataAdapter(com);
+                //SqlCommand com = new SqlCommand("select * from TBL_STOCKRECONLAB where ID='" + slno + "'", con);
+                dr = cmd.ExecuteReader();
+                if (dr.Read())
+                {
+                    btnsubmit.Visible = false;
+                    btnupdate.Visible = true;
+                    btndelete.Visible = true;
+                    btncancel.Visible = true;
+                    btncancel1.Visible = false;
+                    TXTID.Text = dr["ID"].ToString();
+                    lbldate.Text = dr["DATE"].ToString();
+                    Ddlitem.SelectedItem.Text = dr["ITEM"].ToString();
+                    //Session["i_id"] = dr["ITEM"].ToString();
+                    txt_des.Text = dr["DESCRIPTN"].ToString();
+                    txtquant.Text = dr["QUANTITY"].ToString();
+
+                }
+            }
+            dr.Close();
+            using (SqlCommand cmd4 = new SqlCommand("LAB_RECON_NEW", con))
+            {
+                cmd4.CommandType = CommandType.StoredProcedure;
+                cmd4.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "EDIT";
+                cmd4.Parameters.Add("@ID", SqlDbType.VarChar).Value = slno;
+                cmd4.Parameters.Add("@STOCK", SqlDbType.Decimal).Value = Convert.ToDecimal(txtquant.Text).ToString();
+                cmd4.Parameters.Add("@ITEMNAME", SqlDbType.VarChar).Value = Ddlitem.SelectedItem.Text;
+                cmd4.ExecuteNonQuery();
+            }
+            con.Close();
+
+            con.Open();
+            using (SqlCommand cmd1 = new SqlCommand("LAB_STOCK_RECONCILIATION", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_2DEPT_DROP";
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = "";
+                cmd1.Parameters.Add("@DEPTID", SqlDbType.VarChar).Value = "";
+                cmd1.Parameters.Add("@ITEMNAME", SqlDbType.VarChar).Value = "NULL";
+                SqlDataAdapter da = new SqlDataAdapter(cmd1);
+                //SqlDataAdapter da = new SqlDataAdapter("  select * from tblDepartment where DeptName='Pathology'", con);
+                DataTable ds = new DataTable();
+                da.Fill(ds);
+                Ddldept.DataSource = ds;
+                Ddldept.DataTextField = "DeptName";
+                Ddldept.DataValueField = "id";
+                Ddldept.DataBind();
+            }
+            con.Close();
+
+            con.Open();
+            using (SqlCommand cmd2 = new SqlCommand("LAB_STOCK_RECONCILIATION", con))
+            {
+                cmd2.CommandType = CommandType.StoredProcedure;
+                cmd2.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_ITEMNAME";
+                cmd2.Parameters.Add("@ID", SqlDbType.VarChar).Value = slno;
+                cmd2.Parameters.Add("@DEPTID", SqlDbType.VarChar).Value = Ddldept.SelectedValue;
+                cmd2.Parameters.Add("@ITEMNAME", SqlDbType.VarChar).Value = Ddlitem.SelectedItem.Text;
+                //SqlDataAdapter da = new SqlDataAdapter(cmd2);
+                //cmd = con.CreateCommand();
+                //cmd.CommandText = "  select * from TBL_DEPT_MAT_STOCK where ITEMNAME='" + Ddlitem.SelectedItem.Text + "'";
+                dr = cmd2.ExecuteReader(CommandBehavior.CloseConnection);
+                if (dr.Read() == true)
+                {
+                    lblquant.Text = dr["STOCK"].ToString();
+                    dr.Close();
+                    con.Close();
+
+                }
+            }
+            using (SqlCommand cmd3 = new SqlCommand("LAB_STOCK_RECONCILIATION", con))
+            {
+                cmd3.CommandType = CommandType.StoredProcedure;
+                cmd3.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_3EVENT";
+                cmd3.Parameters.Add("@ID", SqlDbType.VarChar).Value = Ddldept.SelectedValue;
+                cmd3.Parameters.Add("@DEPTID", SqlDbType.VarChar).Value = Ddldept.SelectedValue;
+                cmd3.Parameters.Add("@ITEMNAME", SqlDbType.VarChar).Value = Ddlitem.SelectedItem.Text;
+                SqlDataAdapter da1 = new SqlDataAdapter(cmd3);
+                //SqlDataAdapter da1 = new SqlDataAdapter("Select SLNO as id,ITEMNAME from TBL_DEPT_MAT_STOCK where ID='" + Ddldept.SelectedValue + "' and ITEMNAME='" + Ddlitem.SelectedItem.Text + "' ", con);
+                DataTable ds1 = new DataTable();
+                da1.Fill(ds1);
+                Ddlitem.DataSource = ds1;
+                Ddlitem.DataTextField = "ITEMNAME";
+                Ddlitem.DataValueField = "id";
+                Ddlitem.DataBind();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+
+    }
+    protected void btndelete_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            using (SqlCommand cm = new SqlCommand("LAB_STOCK_RECONCILIATION", con))
+            {
+                cm.CommandType = CommandType.StoredProcedure;
+                cm.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "DELETE";
+                cm.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+                cm.Parameters.Add("@DEPTID", SqlDbType.VarChar).Value = "";
+                cm.Parameters.Add("@ITEMNAME", SqlDbType.VarChar).Value = "";
+                //SqlCommand cm = new SqlCommand("  delete from TBL_STOCKRECONLAB where ID='" + TXTID.Text + "'", con);
+                cm.ExecuteNonQuery();
+            }
+
+            binddata();
+            con.Close();
+
+            //using (SqlCommand cmd = new SqlCommand("LAB_STOCK_RECONCILIATION", con))
+            //{
+            //    cmd.CommandType = CommandType.StoredProcedure;
+            //    cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "SELECT_2DEPT_MAT";
+            //    cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = Ddldept.SelectedValue;
+            //    cmd.Parameters.Add("@DEPTID", SqlDbType.VarChar).Value = Ddldept.SelectedValue;
+            //    cmd.Parameters.Add("@ITEMNAME", SqlDbType.VarChar).Value = Ddlitem.SelectedItem.Text;
+            //    SqlDataAdapter da1 = new SqlDataAdapter(cmd);
+            //    //SqlDataAdapter da1 = new SqlDataAdapter("Select SLNO as id,ITEMNAME from TBL_DEPT_MAT_STOCK where ID='" + Ddldept.SelectedValue + "' ", con);
+            //    DataTable ds1 = new DataTable();
+            //    da1.Fill(ds1);
+            //    Ddlitem.DataSource = ds1;
+            //    Ddlitem.DataTextField = "ITEMNAME";
+            //    Ddlitem.DataValueField = "id";
+            //    Ddlitem.DataBind();
+            //    Ddlitem.Items.Insert(0, "---Please Select---");
+            //}
+            clearfield();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("Lab_stock_reconcilation.aspx");
+    }
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (txtquant.Text == "" || txtquant.Text == "0")
+            {
+                string message = "alert('Please!! Select The Quantity..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (txt_des.Text == "")
+            {
+                string message = "alert('Please!! Select The Reason..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (lblquant.Text == "0.00")
+            {
+                string message = "alert('There Is No Stock..')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (Convert.ToDecimal(txtquant.Text) >= Convert.ToDecimal(lblquant.Text))
+            {
+                string message = "alert('Insufficient Stock')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            con.Open();
+            using (SqlCommand cmd = new SqlCommand("Add_new_stock", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@STCK", SqlDbType.Decimal).Value = Convert.ToDecimal(txtquant.Text).ToString();
+                cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+                cmd.Parameters.Add("@DESCR", SqlDbType.VarChar).Value = txt_des.Text;
+                cmd.ExecuteNonQuery();
+            }
+            binddata();
+            dr.Close();
+            con.Close();
+
+            string message1 = "alert('Item Updated Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+
+            con.Open();
+            using (SqlCommand cmd = new SqlCommand("new_release_stock", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "ADD";
+                cmd.Parameters.Add("@STCK", SqlDbType.VarChar).Value = txtquant.Text;
+                cmd.Parameters.Add("@ITEMNAME", SqlDbType.VarChar).Value = Session["i_id"].ToString();
+                cmd.ExecuteNonQuery();
+            }
+            dr.Close();
+            con.Close();
+            clearfield();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+
+        Response.Redirect("Lab_stock_reconcilation.aspx");
+    }
+    protected void btncancel1_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("Lab_stock_reconcilation.aspx");
+    }
+}

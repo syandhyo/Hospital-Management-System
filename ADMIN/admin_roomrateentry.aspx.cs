@@ -1,0 +1,259 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Data;
+
+public partial class ADMIN_admin_roomrateentry : System.Web.UI.Page
+{
+    string num1 = "SJ000";
+    SqlConnection con;
+    SqlCommand com, cmd;
+    SqlDataReader dr;
+    SqlDataAdapter da;
+    DataTable dt;
+    decimal total_amt = 0;
+    decimal total_vat_amt = 0;
+    int i, no, no1, sl;
+    GridViewRow gr;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+
+        lblid.Text = Session["NAME"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+        if (!IsPostBack)
+        {
+            binddata();
+        }
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        // SqlDataAdapter Adp = new SqlDataAdapter("select A.ID,A.WARDID,A.PRICE,B.NAME from TBL_ROOMRATE A,WARD_TABLE B WHERE A.ID=B.ID ORDER BY A.ID DESC", con);
+        SqlDataAdapter Adp = new SqlDataAdapter("select ID,WARDID,PRICE from TBL_ROOMRATE ORDER BY ID DESC", con);
+        DataTable Dt = new DataTable();
+        Adp.Fill(Dt);
+        grvrooment.DataSource = Dt;
+        grvrooment.DataBind();
+
+        //----------------------
+        da = new SqlDataAdapter("select distinct NAME from WARD_TABLE", con);
+        DataTable ds = new DataTable();
+        da.Fill(ds);
+        dropWard.DataSource = ds;
+        dropWard.DataTextField = "NAME";
+        dropWard.DataValueField = "NAME";
+        dropWard.DataBind();
+        dropWard.Items.Insert(0, "Please Select");
+
+        try
+        {
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+
+
+        con.Close();
+    }
+    protected void grvrooment_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+            var slno = grvrooment.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand com = new SqlCommand("select * from TBL_ROOMRATE where ID='" + slno + "'", con);
+            dr = com.ExecuteReader();
+            if (dr.Read())
+            {
+                btncreate.Visible = false;
+                btnupdate.Visible = true;
+                txtid.Text = slno.ToString();
+                dropWard.Text = dr["WARDID"].ToString();
+                txtprice.Text = dr["PRICE"].ToString();
+
+            }
+            dr.Close();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void grvrooment_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            // reference the Delete LinkButton
+            LinkButton db = (LinkButton)e.Row.Cells[3].Controls[0];
+
+            db.OnClientClick = "return confirm('Are you sure want to delete this item ?');";
+        }
+    }
+    protected void grvrooment_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+
+            string slno = grvrooment.DataKeys[e.RowIndex].Values["ID"].ToString();
+            SqlCommand cm = new SqlCommand("delete from TBL_ROOMRATE where ID='" + slno + "'", con);
+            cm.ExecuteNonQuery();
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void grvrooment_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlDataAdapter Adp = new SqlDataAdapter("select ID,WARDID,PRICE from TBL_ROOMRATE", con);
+            DataTable dt = new DataTable();
+            Adp.Fill(dt);
+            grvrooment.DataSource = dt;
+            grvrooment.PageIndex = e.NewPageIndex;
+            grvrooment.DataKeyNames = new string[] { "ID" };
+            grvrooment.DataBind();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void btncreate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (dropWard.SelectedIndex == 0)
+            {
+                string message = "alert('* Please Select Ward.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            if (txtprice.Text == "")
+            {
+                string message = "alert('* Price is mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand cmd2 = new SqlCommand("select WARDID from TBL_ROOMRATE where WARDID='" + dropWard.Text + "'", con);
+            object i = cmd2.ExecuteScalar();
+            if (i != null)
+            {
+                string message = "alert('* WARDID Name " + dropWard.Text + " Already Exist.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            using (SqlCommand cmd1 = new SqlCommand("ADMIN_ROOMENTRY", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = 1;
+                cmd1.Parameters.Add("@WARDID", SqlDbType.VarChar).Value = dropWard.SelectedItem.Text;
+                cmd1.Parameters.Add("@PRICE", SqlDbType.VarChar).Value = txtprice.Text;
+                cmd1.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+
+                cmd1.ExecuteNonQuery();
+            }
+            string message1 = "alert('Created Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+            resetCt();
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    public void resetCt()
+    {
+        txtprice.Text = "";
+        dropWard.SelectedIndex = 0;
+    }
+    protected void btnupdate_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (dropWard.SelectedIndex == 0)
+            {
+                string message = "alert('* Please Select Ward.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            if (txtprice.Text == "")
+            {
+                string message = "alert('* Price is mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            using (SqlCommand cmd1 = new SqlCommand("ADMIN_ROOMENTRY", con))
+            {
+                cmd1.CommandType = CommandType.StoredProcedure;
+                cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "UPDATE";
+                cmd1.Parameters.Add("@ID", SqlDbType.VarChar).Value = txtid.Text;
+                cmd1.Parameters.Add("@WARDID", SqlDbType.VarChar).Value = dropWard.SelectedItem.Text;
+                cmd1.Parameters.Add("@PRICE", SqlDbType.VarChar).Value = txtprice.Text;
+                cmd1.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+                cmd1.ExecuteNonQuery();
+            }
+            string message1 = "alert('Updated Successfully.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+            resetCt();
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/ADMIN/admin_roomrateentry.aspx");
+    }
+    protected void btncancel_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/ADMIN/admin_roomrateentry.aspx");
+    }
+}

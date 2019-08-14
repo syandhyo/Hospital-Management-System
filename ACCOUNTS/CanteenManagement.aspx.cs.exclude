@@ -1,0 +1,265 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class ACCOUNTS_CanteenManagement : System.Web.UI.Page
+{
+    SqlDataReader dr;
+    SqlConnection con;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        lbluid.Text = Session["UID"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+
+        if (!IsPostBack)
+        {
+            binddata();
+
+            SqlDataAdapter Adp = new SqlDataAdapter("select id,Sname from tblStaff", con);
+            DataTable Dt = new DataTable();
+            Adp.Fill(Dt);
+            dropstaff.DataSource = Dt;
+            dropstaff.DataTextField = "Sname";
+            dropstaff.DataValueField = "id";
+            dropstaff.DataBind();
+            dropstaff.Items.Insert(0, "Please Select");
+
+            SqlDataAdapter Adp1 = new SqlDataAdapter("select id,Item from tblCanteenMaster", con);
+            DataTable Dt1 = new DataTable();
+            Adp1.Fill(Dt1);
+            dropmenu.DataSource = Dt1;
+            dropmenu.DataTextField = "Item";
+            dropmenu.DataValueField = "id";
+            dropmenu.DataBind();
+            dropmenu.Items.Insert(0, "Please Select");
+        }
+        con.Close();
+        txtdate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand COM = new SqlCommand("SELECT FYEAR FROM FYEAR1_TABLE WHERE  ORGID='" + lblorgid.Text + "'", con);
+        dr = COM.ExecuteReader();
+        if (dr.Read())
+        {
+            lblfyear.Text = dr["FYEAR"].ToString();
+        }
+        dr.Close();
+        con.Close();
+
+        SqlDataAdapter Adp = new SqlDataAdapter("SELECT tblCanteenMaster.Item as Menu, tblCanteenMaster.Price, tblCanteenManagement.CDate, tblStaff.Sname, tblStaff.id FROM tblStaff INNER JOIN tblCanteenManagement ON tblStaff.id = tblCanteenManagement.Sname INNER JOIN tblCanteenMaster ON tblCanteenManagement.Menu = tblCanteenMaster.id order by tblCanteenMaster.id desc", con);
+        DataTable Dt = new DataTable();
+        Adp.Fill(Dt);
+        GridView1.DataSource = Dt;
+        GridView1.DataBind();
+    }
+    protected void gvDetails_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+
+        string slno = GridView1.DataKeys[e.RowIndex].Values["id"].ToString();
+        SqlCommand cm = new SqlCommand("delete from tblCanteenManagement where id='" + slno + "'", con);
+        cm.ExecuteNonQuery();
+
+        binddata();
+        con.Close();
+    }
+
+    protected void GridView1_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            // reference the Delete LinkButton
+            LinkButton db = (LinkButton)e.Row.Cells[4].Controls[0];
+
+            db.OnClientClick = "return confirm('Are you sure want to delete this info ?');";
+        }
+    }
+
+    protected void GridView1_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+            var slno = GridView1.DataKeys[e.NewSelectedIndex].Values["id"].ToString();
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand com = new SqlCommand("SELECT id,Sname,Menu,Price,CDate from tblCanteenManagement where id='" + slno + "'", con);
+            dr = com.ExecuteReader();
+            if (dr.Read())
+            {
+                btnSubmit.Visible = false;
+                btnupdate.Visible = true;
+                txtid.Text = dr["ID"].ToString();
+                dropstaff.Text = dr["Sname"].ToString();
+                dropmenu.Text = dr["Menu"].ToString();
+                txtprice.Text = dr["Price"].ToString();
+                txtdate.Text = dr["CDate"].ToString();
+            }
+            dr.Close();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+
+    }
+
+    protected void GridView1_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlDataAdapter da = new SqlDataAdapter("SELECT tblCanteenMaster.Item as Menu, tblCanteenMaster.Price, tblCanteenManagement.CDate, tblStaff.Sname, tblStaff.id FROM tblStaff INNER JOIN tblCanteenManagement ON tblStaff.id = tblCanteenManagement.Sname INNER JOIN tblCanteenMaster ON tblCanteenManagement.Menu = tblCanteenMaster.id", con);
+        DataTable dt = new DataTable();
+        da.Fill(dt);
+        GridView1.DataSource = dt;
+        GridView1.PageIndex = e.NewPageIndex;
+        GridView1.DataKeyNames = new string[] { "id" };
+        GridView1.DataBind();
+        con.Close();
+    }
+    
+
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (dropstaff.SelectedIndex == 0)
+            {
+                string message = "alert('* Please Select Staff.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            else if (dropmenu.SelectedIndex == 0)
+            {
+                string message = "alert('* Please Select Staff.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            using (SqlCommand cmd = new SqlCommand("Acct_CanteenMnt", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd.Parameters.Add("@id", SqlDbType.VarChar).Value = txtid.Text;
+                cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                cmd.Parameters.Add("@Sname", SqlDbType.Int).Value = dropstaff.Text;
+                cmd.Parameters.Add("@Menu", SqlDbType.Int).Value = dropmenu.Text;
+                cmd.Parameters.Add("@Price", SqlDbType.Decimal).Value = txtprice.Text;
+                cmd.Parameters.Add("@CDate", SqlDbType.DateTime).Value = txtdate.Text;                
+                cmd.Parameters.Add("@UserId", SqlDbType.VarChar).Value = lbluid.Text;
+                cmd.ExecuteNonQuery();
+            }
+           
+            clearcontrol();
+            string message1 = "alert('* Successfully Saved.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    public void clearcontrol()
+    {
+        dropstaff.SelectedIndex = 0;
+        dropmenu.SelectedIndex = 0;
+        txtprice.Text = "";
+        //txtdate.Text = "";
+    }
+    protected void Button2_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (dropstaff.SelectedIndex == 0)
+            {
+                string message = "alert('* Please Select Staff.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            else if (dropmenu.SelectedIndex == 0)
+            {
+                string message = "alert('* Please Select Staff.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            using (SqlCommand cmd = new SqlCommand("Acct_CanteenMnt", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                cmd.Parameters.Add("@id", SqlDbType.VarChar).Value = txtid.Text;
+                cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                cmd.Parameters.Add("@Sname", SqlDbType.Int).Value = dropstaff.Text;
+                cmd.Parameters.Add("@Menu", SqlDbType.Int).Value = dropmenu.Text;
+                cmd.Parameters.Add("@Price", SqlDbType.Decimal).Value = txtprice.Text;
+                cmd.Parameters.Add("@CDate", SqlDbType.DateTime).Value = txtdate.Text;
+                cmd.Parameters.Add("@UserId", SqlDbType.VarChar).Value = lbluid.Text;
+                cmd.ExecuteNonQuery();
+            }            
+            string message1 = "alert('Successfully Updated.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+
+            binddata();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/Accounts/CanteenManagement.aspx");
+    }
+    protected void Button3_Click(object sender, EventArgs e)
+    {
+        binddata();
+        Response.Redirect("~/Accounts/CanteenManagement.aspx");
+    }
+    protected void dropmenu_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand com = new SqlCommand("SELECT Price from tblCanteenMaster where Item='" + dropmenu.SelectedItem.Text.ToString() + "'", con);
+        dr = com.ExecuteReader();
+        if (dr.Read())
+        {
+            txtprice.Text = dr["Price"].ToString();
+        }
+        dr.Close();
+        con.Close();
+    }
+
+}

@@ -1,0 +1,231 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/ADMIN/MasterPage.master" AutoEventWireup="true" CodeFile="Percentage_Entry.aspx.cs" Inherits="ADMIN_Corporate_Emp" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" Runat="Server">
+    <asp:Label ID="lblid" runat="server" Text="Label"></asp:Label>(<asp:Label ID="lblfyear" runat="server" Text="Label"></asp:Label>)
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+   
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"> <asp:Label ID="lblorgid" runat="server" Text="Label" Visible="false"></asp:Label>
+
+    </td>
+</tr>
+</table>
+   
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%; text-align: center;" align="right" class="auto-style1"><strong>Percentage Entry&nbsp;</strong></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+         <asp:Label ID="Label1" runat="server" Text="Label" Visible="false"></asp:Label>
+    </td>
+</tr>
+</table>
+   <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label8" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        TYPE :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:DropDownList ID="drptype" runat="server" CssClass="form-control input-sm m-bot15" style="width:150px" AutoPostBack="true"  OnSelectedIndexChanged="drptype_SelectedIndexChanged">
+        <asp:ListItem>Please Select</asp:ListItem>
+            <asp:ListItem>Staff</asp:ListItem>
+            <asp:ListItem>Broker</asp:ListItem>
+
+        </asp:DropDownList>&nbsp;</td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label2" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        Select Recipient :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:DropDownList ID="droprecipient" runat="server" CssClass="form-control input-sm m-bot15" style="width:150px"></asp:DropDownList>&nbsp;</td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label3" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        % In Pharmacy :</td>
+    <td style="width:20%; text-align: left;" align="right"> <asp:TextBox ID="txtdiscpharmacy" runat="server"  pattern="[0-9]+([,\.][0-9]+)?" MaxLength="11" 
+        CssClass="form-control input-sm m-bot15" value="0.00" 
+            onclick="if(this.value=='0.00'){this.value=''}" onblur="if(this.value==''){this.value='0.00'}" ></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label4" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        % In Lab :&nbsp;</td>
+    <td style="width:20%; text-align: left;" align="right"> 
+          <asp:TextBox ID="txtdisclab" runat="server" CssClass="form-control input-sm m-bot15"  pattern="[0-9]+([,\.][0-9]+)?" value="0.00" 
+            onclick="if(this.value=='0.00'){this.value=''}" onblur="if(this.value==''){this.value='0.00'}" ></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label5" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        % In Room Charge :</td>
+    <td style="width:20%; text-align: left;" align="right"> <asp:TextBox ID="txtroomcharge" runat="server"   
+        pattern="[0-9]+([,\.][0-9]+)?" MaxLength="2" CssClass="form-control input-sm m-bot15"
+        value="0.00" 
+            onclick="if(this.value=='0.00'){this.value=''}" onblur="if(this.value==''){this.value='0.00'}"></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label7" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        % In Radiology Charge :</td>
+    <td style="width:20%; text-align: left;" align="right"> <asp:TextBox ID="txtradiology" runat="server" pattern="[0-9]+([,\.][0-9]+)?"
+         MaxLength="2" CssClass="form-control input-sm m-bot15" value="0.00" 
+            onclick="if(this.value=='0.00'){this.value=''}" onblur="if(this.value==''){this.value='0.00'}"></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+    
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left">
+        <asp:Label ID="Label6" runat="server" ForeColor="Red" Text="*"></asp:Label>
+        % In Others :</td>
+    <td style="width:20%; text-align: left;" align="right">
+        <asp:TextBox ID="discothers" runat="server" CssClass="form-control input-sm m-bot15" Enabled="true" value="0.00" pattern="[0-9]+([,\.][0-9]+)?"
+            onclick="if(this.value=='0.00'){this.value=''}" onblur="if(this.value==''){this.value='0.00'}"></asp:TextBox>
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+        <asp:TextBox ID="txtid" runat="server" Visible="False"></asp:TextBox>
+         </td>
+</tr>
+</table>
+
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="right">&nbsp;</td>
+    <td style="width:20%" align="left">
+        &nbsp;</td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%; text-align: right;" align="left"></td>
+    <td style="width:20%; text-align: left;" align="right">
+         <asp:Button ID="btncreate" runat="server" Text="Create" CssClass="btn btn-primary btn-sm" OnClick="Button1_Click" />
+&nbsp;<asp:Button ID="btnupdate" runat="server" Text="Update" CssClass="btn btn-success btn-sm"  OnClick="Button2_Click" Visible="False" />
+         </td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:30%; text-align: left;" align="right">
+&nbsp;&nbsp;</td>
+    <td style="width:10%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+</asp:Content>
+

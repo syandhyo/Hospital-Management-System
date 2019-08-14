@@ -1,0 +1,416 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Text;
+using System.Configuration;
+using System.Web.Services;
+public partial class NURSE_Labtest_Indent : System.Web.UI.Page
+{
+    string num1 = "SJ000";
+    SqlConnection con;
+    SqlDataAdapter da, da1, da2, da3, da4, da5, da6, da7;
+    DataSet ds = new DataSet();
+    SqlCommand com, cmd, cmd1 ;
+    SqlDataReader dr, dr1, dr2;
+    DataTable dt;
+    DataRow dtr;
+    GridViewRow gr;
+    [WebMethod]
+    public void auto()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        string qry1 = "select ID from LABIND_TABLE";
+
+        com = new SqlCommand(qry1, con);
+        dr = null;
+
+        dr = com.ExecuteReader();
+
+        while (dr.Read())
+        {
+            num1 = dr["ID"].ToString();
+        }
+        num1 = string.Format("LI{0}", (Convert.ToUInt32(num1.Substring(2)) + 1).ToString("D4"));
+        TXTID.Text = num1;
+
+        dr.Close();
+    }
+    protected void Timer1_Tick(object sender, EventArgs e)
+       {
+           binddata();
+ 
+       }
+    protected void GridView1_RowDataBound(object sender, GridViewRowEventArgs e)
+    {
+       
+        if (e.Row.RowType == DataControlRowType.DataRow)
+        {
+            ImageButton img = (ImageButton)e.Row.FindControl("img_user");
+            if (e.Row.Cells[5].Text == "Waiting")
+            {
+
+                img.ImageUrl = "~/gimg/Waiting.png";
+            }
+            else if (e.Row.Cells[5].Text == "Finished")
+            {
+
+                img.ImageUrl = "~/gimg/Finished.png";
+            }
+            else if (e.Row.Cells[5].Text == "Declined")
+            {
+
+                img.ImageUrl = "~/gimg/Declined.png";
+            }
+            
+        }
+      
+
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand COM = new SqlCommand("SELECT FYEAR FROM FYEAR1_TABLE WHERE  ORGID='" + lblorgid.Text + "'", con);
+        dr = COM.ExecuteReader();
+        if (dr.Read())
+        {
+            //Label1.Text = dr["FYEAR"].ToString();
+            lblfyear.Text = dr["FYEAR"].ToString();
+        }
+        dr.Close();
+        SqlDataAdapter da = new SqlDataAdapter("SELECT ID as ID,WARD,DATE AS DATE,PID,PNAME AS NAME,BEDNO,STATUS FROM LABIND_TABLE WHERE WARD='" + dropward.Text + "' AND  ORGID='" + lblorgid.Text + "'ORDER BY ID DESC", con);
+        DataTable dt = new DataTable();
+        da.Fill(dt);
+        GridView2.SelectedIndex = 0;
+        GridView2.DataSource = dt;
+        GridView2.DataKeyNames = new string[] { "ID" };
+        GridView2.DataBind();
+      
+    }
+  
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        lbluid.Text = Session["UID"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+        txtinvdate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
+       // GridView2.Columns[05].Visible = false;
+        binddata();
+        if (!IsPostBack)
+        {
+           
+            da = new SqlDataAdapter("select DISTINCT WARD FROM BED_TABLE where ORGID='" + lblorgid.Text + "'", con);
+            DataTable ds = new DataTable();
+            da.Fill(ds);
+            dropward.DataSource = ds;
+            dropward.DataTextField = "WARD";
+            dropward.DataValueField = "WARD";
+            dropward.DataBind();
+            dropward.Items.Insert(0, "-----Select-----");
+
+            da1 = new SqlDataAdapter("select ID,NAME FROM TEST_CATEGORY_TABLE where ORGID='" + lblorgid.Text + "'", con);
+            DataTable ds1 = new DataTable();
+            da1.Fill(ds1);
+            droptesttype.DataSource = ds1;
+            droptesttype.DataTextField = "NAME";
+            droptesttype.DataValueField = "ID";
+            droptesttype.DataBind();
+            droptesttype.Items.Insert(0, "-----Select-----");
+        }
+        con.Close();
+    }
+  
+    protected void dropbedno_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand com = new SqlCommand("select * from BED_TABLE where BEDNO='" + dropbedno.SelectedItem.Text + "' AND ORGID='" + lblorgid.Text + "'", con);
+        dr = com.ExecuteReader();
+        if (dr.Read())
+        {
+            lblpname.Text = dr["PNAME"].ToString();
+            lblward.Text = dr["WARD"].ToString();
+        }
+        dr.Close();
+        con.Close();
+    }
+    public void clearcontrol()
+    {
+       
+        lblpname.Text = "";
+        lblward.Text = "";
+
+    }
+    protected void GridView2_PageIndexChanging(object sender, GridViewPageEventArgs e)
+    {
+        SqlDataAdapter da = new SqlDataAdapter("SELECT ID as ID,WARD,DATE AS DATE,PID,PNAME AS NAME,BEDNO,STATUS FROM LABIND_TABLE WHERE  ORGID='" + lblorgid.Text + "'ORDER BY ID DESC", con);
+        DataTable dt = new DataTable();
+        da.Fill(dt);
+        GridView2.SelectedIndex = 0;
+        GridView2.DataSource = dt;
+        GridView2.PageIndex = e.NewPageIndex;
+        GridView2.DataKeyNames = new string[] { "ID" };
+        GridView2.DataBind();
+
+    }
+    protected void Button3_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/NURSE/Labtest_Indent.aspx");
+    }
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (lblpname.Text == "")
+            {
+                string message = "alert('* Fields are mandatory.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else if (droptesttype.SelectedIndex == 0)
+            {
+                string message = "alert('*Select Test Type.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            auto();
+            MIND_TABLE();
+            Save();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/NURSE/Labtest_Indent.aspx");
+    }
+    public void MIND_TABLE()
+    {
+        //try
+        //{
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand stock_cmd = new SqlCommand("insert into LABIND_TABLE (FYEAR,ORGID,ID,DATE,PID,WARD,PNAME,TYPE,BEDNO,TESTTYPE,UNAME,UID,STATUS) values (@FYEAR,@ORGID,@ID,@DATE,@PID,@WARD,@PNAME,@TYPE,@BEDNO,@TESTTYPE,@UNAME,@UID,@STATUS)", con);
+        stock_cmd.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+        stock_cmd.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+        stock_cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+        stock_cmd.Parameters.Add("@DATE", SqlDbType.DateTime).Value = txtinvdate.Text;
+        stock_cmd.Parameters.Add("@PID", SqlDbType.VarChar).Value = dropbedno.SelectedValue.ToString();
+        stock_cmd.Parameters.Add("@WARD", SqlDbType.VarChar).Value = lblward.Text;
+        stock_cmd.Parameters.Add("@PNAME", SqlDbType.VarChar).Value = lblpname.Text;
+        stock_cmd.Parameters.Add("@TYPE", SqlDbType.VarChar).Value = lblindetype.Text;
+        stock_cmd.Parameters.Add("@BEDNO", SqlDbType.VarChar).Value = dropbedno.SelectedItem.ToString();
+        stock_cmd.Parameters.Add("@TESTTYPE", SqlDbType.VarChar).Value = droptesttype.SelectedValue.ToString();
+        stock_cmd.Parameters.Add("@UNAME", SqlDbType.VarChar).Value = lblid.Text;
+        stock_cmd.Parameters.Add("@UID", SqlDbType.VarChar).Value = lbluid.Text;
+        stock_cmd.Parameters.Add("@STATUS", SqlDbType.VarChar).Value = "Waiting";
+        stock_cmd.ExecuteNonQuery();
+        con.Close();
+        //}
+        //catch { }
+    }
+    public void Save()
+    {
+        string constr = ConfigurationManager.ConnectionStrings["abcd"].ConnectionString;
+        using (SqlConnection con = new SqlConnection(constr))
+        {
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.CommandText = "INSERT INTO LABIND_TABLE_1 (INDID,INV,IsSelected) VALUES (@INDID,@INV,@IsSelected)";
+                cmd.Connection = con;
+                con.Open();
+                foreach (GridViewRow row in GridView1.Rows)
+                {
+                    var INV = Convert.ToInt32(GridView1.DataKeys[row.RowIndex].Values[0]);
+                    bool isSelected = (row.FindControl("CheckBox1") as CheckBox).Checked;
+                    cmd.Parameters.Clear();
+                    cmd.Parameters.AddWithValue("@INDID", TXTID.Text);
+                    cmd.Parameters.AddWithValue("@INV", INV);
+                    cmd.Parameters.AddWithValue("@IsSelected", isSelected);
+                    cmd.ExecuteNonQuery();
+                }
+                con.Close();
+               
+            }
+        }
+    }
+    public void Update()
+    {
+        string constr = ConfigurationManager.ConnectionStrings["abcd"].ConnectionString;
+        using (SqlConnection con = new SqlConnection(constr))
+        {
+            using (SqlCommand cmd = new SqlCommand())
+            {
+                cmd.CommandText = "update LABIND_TABLE_1 SET IsSelected=@IsSelected WHERE INDID=@INDID AND INV=@INV";
+                cmd.Connection = con;
+                con.Open();
+                foreach (GridViewRow row in GridView3.Rows)
+                {
+                    var INV = Convert.ToInt32(GridView3.DataKeys[row.RowIndex].Values[0]);
+                    bool isSelected = (row.FindControl("CheckBox2") as CheckBox).Checked;
+                    cmd.Parameters.Clear();
+                    cmd.Parameters.AddWithValue("@INDID", TXTID.Text);
+                    cmd.Parameters.AddWithValue("@INV", INV);
+                    cmd.Parameters.AddWithValue("@IsSelected", isSelected);
+                    cmd.ExecuteNonQuery();
+                }
+                con.Close();
+
+            }
+        }
+    }
+    public void MIND_TABLE_UPDATE()
+    {
+        //try
+        //{
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand stock_cmd = new SqlCommand("UPDATE LABIND_TABLE SET TESTTYPE=@TESTTYPE,PID=@PID,WARD=@WARD,PNAME=@PNAME,BEDNO=@BEDNO WHERE ID=@ID", con);
+        stock_cmd.Parameters.Add("@ID", SqlDbType.VarChar).Value = TXTID.Text;
+        stock_cmd.Parameters.Add("@PID", SqlDbType.VarChar).Value = dropbedno.SelectedValue.ToString();
+        stock_cmd.Parameters.Add("@WARD", SqlDbType.VarChar).Value = lblward.Text;
+        stock_cmd.Parameters.Add("@PNAME", SqlDbType.VarChar).Value = lblpname.Text;
+        stock_cmd.Parameters.Add("@BEDNO", SqlDbType.VarChar).Value = dropbedno.SelectedItem.ToString();
+        stock_cmd.Parameters.Add("@TESTTYPE", SqlDbType.VarChar).Value = droptesttype.SelectedValue.ToString();
+        stock_cmd.ExecuteNonQuery();
+        con.Close();
+
+        //}
+        //catch { }
+    }
+    protected void GridView2_SelectedIndexChanging(object sender, GridViewSelectEventArgs e)
+    {
+        try
+        {
+            var slno = GridView2.DataKeys[e.NewSelectedIndex].Values["ID"].ToString();
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand com = new SqlCommand("select ID,PID,WARD,PNAME,BEDNO,TESTTYPE from LABIND_TABLE where ID='" + slno + "'", con);
+            dr = com.ExecuteReader();
+            if (dr.Read())
+            {
+                btncreate.Visible = false;
+                btnupdate.Visible = true;
+                TXTID.Text = dr["ID"].ToString();
+                dropbedno.SelectedValue = dr["PID"].ToString();
+                droptesttype.SelectedValue = dr["TESTTYPE"].ToString();
+                lblpname.Text = dr["PNAME"].ToString();
+                lblward.Text = dr["WARD"].ToString();
+            }
+            dr.Close();
+            SqlDataAdapter da = new SqlDataAdapter("select A.INV AS ID ,A.IsSelected as IsSelected, B.INV AS INV from LABIND_TABLE_1 A ,TEST_COMPONENT_TABLE B WHERE B.slno=a.INV and A.INDID='" + TXTID.Text + "'", con);
+            DataTable dt = new DataTable();
+            da.Fill(dt);
+            GridView3.SelectedIndex = 0;
+            GridView3.DataSource = null;
+            GridView3.DataSource = dt;
+            GridView3.DataKeyNames = new string[] { "ID" };
+            GridView3.DataBind();
+            btndelete.Visible = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void Button2_Click(object sender, EventArgs e)
+    {
+        if (lblpname.Text == "")
+        {
+            string message = "alert('* Fields are mandatory.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+        }
+        else if (droptesttype.SelectedIndex == 0)
+        {
+            string message = "alert('* Select Test Type.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+        }
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        MIND_TABLE_UPDATE();
+        Update();
+        Response.Redirect("~/NURSE/Labtest_Indent.aspx");
+        con.Close();
+    }
+    protected void Btndelete_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlDataAdapter da = new SqlDataAdapter("delete from LABIND_TABLE where ID='" + TXTID.Text + "'", con);
+            DataSet d = new DataSet();
+            da.Fill(d);
+            SqlDataAdapter da1 = new SqlDataAdapter("delete from LABIND_TABLE_1 where INDID='" + TXTID.Text + "'", con);
+            DataSet d1 = new DataSet();
+            da1.Fill(d1);
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/NURSE/Labtest_Indent.aspx");
+    }
+
+    protected void droptesttype_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlDataAdapter da = new SqlDataAdapter("select A.slno AS ID ,A.INV AS INV from TEST_COMPONENT_TABLE A,TEST_CATEGORY_TABLE B,TEST_NAME_TABLE C WHERE A.ID=C.ID AND C.CATEGORY=B.ID AND B.ID='"+droptesttype.SelectedValue.ToString()+"' AND A.ORGID='" + lblorgid.Text + "'", con);
+        DataTable dt = new DataTable();
+        da.Fill(dt);
+        GridView1.SelectedIndex = 0;
+        GridView1.DataSource = dt;
+        GridView1.DataKeyNames = new string[] { "ID" };
+        GridView1.DataBind();
+        con.Close();
+    }
+    protected void dropward_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            binddata();
+
+            da = new SqlDataAdapter("select PID,BEDNO FROM BED_TABLE where WARD='" + dropward.Text + "' AND ORGID='" + lblorgid.Text + "'", con);
+            DataTable ds = new DataTable();
+            da.Fill(ds);
+            dropbedno.DataSource = ds;
+            dropbedno.DataTextField = "BEDNO";
+            dropbedno.DataValueField = "PID";
+            dropbedno.DataBind();
+            dropbedno.Items.Insert(0, "-----Select-----");
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+}

@@ -1,0 +1,249 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/ACCOUNTS/MasterPage.master" AutoEventWireup="true" CodeFile="Salryovertime.aspx.cs" Inherits="ACCOUNTS_Salryovertime" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
+    <script type="text/javascript">
+
+        function ValidateCret() {
+            if (document.getElementById("<%=txtName.ClientID%>").value == "") {
+                alert("Name Field Is Required !");
+                document.getElementById("<%=txtName.ClientID%>").focus();
+                return false;
+            }
+            if (document.getElementById("<%=txtdate.ClientID%>").value == "") {
+                 alert("Date Field Is Required !");
+                 document.getElementById("<%=txtdate.ClientID%>").focus();
+                return false;
+            }
+           
+         }
+    </script>
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" Runat="Server">
+      <asp:Label ID="lblid" runat="server" Text="Label"></asp:Label>(<asp:Label ID="lblfyear" runat="server" Text="Label"></asp:Label>)
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+
+     <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
+ <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+          <ContentTemplate>
+                <script type = "text/javascript">
+
+                    function SetTarget() {
+
+                        document.forms[0].target = "_blank";
+
+                    }
+        </script>
+<div>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js" type="text/javascript"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js" type="text/javascript"></script>
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="Stylesheet" type="text/css" />
+    <script type="text/javascript">
+        Sys.Application.add_load(function () {
+
+
+            $('.formdate').datepicker({
+                dateFormat: 'dd-mm-yy',
+                changeMonth: true,
+                changeYear: true,
+                minDate: '-75Y',
+                yearRange: "c-75:c+10",
+
+            });
+            $('.todate').datepicker({
+                dateFormat: 'dd-mm-yy',
+                changeMonth: true,
+                changeYear: true,
+                minDate: '-75Y',
+                yearRange: "c-75:c+10",
+            });
+        });
+    </script>
+    
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center">
+        <asp:Label ID="lblorgid" runat="server" Text="Label" Visible="false"> </asp:Label>
+            <asp:Label ID="lbluid" runat="server" Text="Label" Visible="false"> </asp:Label>
+       
+    </td>
+</tr>
+</table>
+   
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:60%; text-decoration: underline; font-weight: 700; color: #000000;" align="center">SALARY OVERTIME PAYMENT</td>
+   
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+    
+   
+     <div id="div1" runat="server" style="border: thin solid #000000">
+    <table width="100%">
+     <tr>
+    <td style="width:20%; text-align: right;" align="right">
+         <asp:TextBox ID="txtIssAtid" runat="server" Visible="false"></asp:TextBox>
+        <asp:Label ID="lblAuto" Visible="false" runat="server" Text=""></asp:Label>
+       <%-- <asp:Label ID="Label1" runat="server" ForeColor="Red" Text="*"></asp:Label>--%>Employee Id :</td>
+    <td style="width:20%" align="left">
+        <asp:DropDownList ID="ddEmpl" runat="server" CssClass="btn btn-default dropdown-toggle" AutoPostBack="true" OnSelectedIndexChanged="ddEmpl_SelectedIndexChanged" >
+            
+        </asp:DropDownList>        
+         </td>
+    <td style="width:20%" align="right">
+        <asp:Label ID="Label2" runat="server" ForeColor="Red" Text="*"></asp:Label>Employee Name :</td>
+    <td style="width:20%" align="left">
+         <asp:TextBox ID="txtName" runat="server"  Text=""></asp:TextBox>
+         </td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%; text-align: right;" align="right"> Date :</td>
+    <td style="width:20%" align="left">
+          <asp:TextBox ID="txtdate" runat="server" CssClass="formdate"></asp:TextBox>
+         </td>
+    <td style="width:20%" align="right">
+       Overtime :</td>
+    <td style="width:20%" align="left">
+       <asp:TextBox ID="txtOvertime" runat="server"  Text="" PATTERN="([0-1]?\d|2[0-3])(?::([0-5]?\d))?"></asp:TextBox>*HH:mm
+         </td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+         <table width="100%">
+     <tr>
+    <td style="width:20%; text-align: right;" align="right">Month :</td>
+    <td style="width:20%" align="left">
+         <asp:DropDownList ID="ddMonth" runat="server" CssClass="btn btn-default dropdown-toggle">
+            <asp:ListItem>JANUARY</asp:ListItem>
+             <asp:ListItem>FEBRUARY</asp:ListItem>
+             <asp:ListItem>MARCH</asp:ListItem>
+             <asp:ListItem>APRIL</asp:ListItem>
+             <asp:ListItem>MAY</asp:ListItem>
+             <asp:ListItem>JUNE</asp:ListItem>
+             <asp:ListItem>JULY</asp:ListItem>
+             <asp:ListItem>AUGUST</asp:ListItem>
+             <asp:ListItem>SEPTEMBER</asp:ListItem>
+             <asp:ListItem>OCTOBER</asp:ListItem>
+             <asp:ListItem>NOVEMBER</asp:ListItem>
+             <asp:ListItem>DECEMBER</asp:ListItem>
+            
+           
+        </asp:DropDownList>
+         </td>
+    <td style="width:20%" align="right">
+     </td>
+    <td style="width:20%" align="left">
+      
+       
+         </td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+           <table width="100%">
+     <tr>
+    <td style="width:20%; text-align: right;" align="right"> </td>
+    <td style="width:20%" align="left">
+        
+         </td>
+    <td style="width:20%" align="right">
+     </td>
+    <td style="width:20%" align="left">
+       
+         </td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+         </div>
+     <div id="div2" runat="server" style="border: thin solid #000000">
+       
+  
+          <table width="100%">
+     <tr>
+    <td style="width:20%" align="left">
+        <asp:Label ID="lblUpId" runat="server" Visible="false" Text="Label"></asp:Label>
+    </td>
+    <td style="text-align: center;" align="right">
+         <asp:Button ID="btncreate" runat="server" Text="Create" CssClass="btn btn-primary btn-sm" OnClientClick="return ValidateCret();" OnClick="btncreate_Click"/>
+&nbsp;<asp:Button ID="btnupdate" runat="server" Text="Update" CssClass="btn btn-primary btn-sm" Visible="False" />
+         &nbsp;<asp:Button ID="btncancel" runat="server" Text="Cancel" CssClass="btn btn-danger btn-sm" OnClick="btncancel_Click"/>
+    
+         </td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+
+
+     </div>
+   
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right">
+      </td>
+    <td style="width:20%" align="left">
+        
+         </td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left">
+       
+         </td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table><table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td align="center">
+
+        <asp:GridView ID="grdSalOver" runat="server" AllowPaging="True" AllowSorting="True" AutoGenerateColumns="False" BackColor="White" BorderColor="#3366CC" BorderStyle="None" BorderWidth="1px" CellPadding="4" >
+            <Columns>
+                <asp:BoundField DataField="DATE" HeaderText="DATE" DataFormatString="{0:MM/dd/yyyy}"/>
+                <asp:BoundField DataField="INVNO" HeaderText="INVOICE&nbsp;NO" />
+                <asp:BoundField DataField="DeptName" HeaderText="DEPARTMENT" />  
+                
+                <asp:CommandField HeaderText="ACTION" SelectText="&nbsp;&nbsp;&nbsp;Edit" ShowSelectButton="true" />
+            </Columns>
+            <FooterStyle BackColor="#99CCCC" ForeColor="#003399" />
+            <HeaderStyle BackColor="#003399" Font-Bold="True" ForeColor="#CCCCFF" />
+            <PagerStyle BackColor="#99CCCC" ForeColor="#003399" HorizontalAlign="Left" />
+            <RowStyle BackColor="White" ForeColor="#003399" />
+            <SelectedRowStyle BackColor="#009999" Font-Bold="True" ForeColor="#CCFF99" />
+            <SortedAscendingCellStyle BackColor="#EDF6F6" />
+            <SortedAscendingHeaderStyle BackColor="#0D4AC4" />
+            <SortedDescendingCellStyle BackColor="#D6DFDF" />
+            <SortedDescendingHeaderStyle BackColor="#002876" />
+        </asp:GridView>
+
+    </td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+    <table width="100%">
+     <tr>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="right"></td>
+    <td style="width:20%" align="left"></td>
+    <td style="width:20%" align="center"></td>
+</tr>
+</table>
+    </div>
+   </ContentTemplate></asp:UpdatePanel>
+
+</asp:Content>
+

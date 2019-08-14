@@ -1,0 +1,299 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class RECEPTION_BedTransfer : System.Web.UI.Page
+{
+    SqlDataReader dr;
+    SqlConnection con;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        lbluid.Text = Session["UID"].ToString();
+        lblorgid.Text = Session["ORGID"].ToString();
+
+        if (!IsPostBack)
+        {
+            binddata();
+            div1.Visible = true;
+            div2.Visible = true;
+        }
+        con.Close();
+        txtdate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
+    }
+
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        try
+        {
+            using (SqlCommand COM = new SqlCommand("FINANCIAL_YEAR", con))
+            {
+                COM.CommandType = CommandType.StoredProcedure;
+                COM.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                dr = COM.ExecuteReader();
+                if (dr.Read())
+                {
+                    lblfyear.Text = dr["FYEAR"].ToString();
+                }
+                dr.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+
+        }
+
+       // SqlDataAdapter da1 = new SqlDataAdapter("SELECT * FROM BED_TABLE ", con);
+        SqlDataAdapter da1 = new SqlDataAdapter("select VN FROM BED_TABLE where VN like '%IP%' ", con);
+        DataTable dt1 = new DataTable();
+        da1.Fill(dt1);
+        //dropbedno.SelectedIndex = 0;
+        DropDownList1.DataSource = dt1;
+        DropDownList1.DataTextField = "VN";
+        DropDownList1.DataValueField = "VN";
+        DropDownList1.DataBind();
+        DropDownList1.Items.Insert(0, "Please Select");
+
+        SqlDataAdapter da2 = new SqlDataAdapter("SELECT DISTINCT NAME FROM BED_MATRIX_TABLE WHERE ORGID='" + lblorgid.Text + "'", con);
+        DataTable dt2 = new DataTable();
+        da2.Fill(dt2);
+        //dropbedno.SelectedIndex = 0;
+        dropward.DataSource = dt2;
+        dropward.DataTextField = "NAME";
+        dropward.DataBind();
+        dropward.Items.Insert(0, "Please Select");
+        con.Close();
+    }
+    protected void btnshowip_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlCommand cm = new SqlCommand("SELECT VN,PNAME,WARD,BEDNO,INSURANCE FROM BED_TABLE WHERE VN= '" + txtip.Text + "' and ORGID='" + lblorgid.Text + "' ", con);
+            dr = cm.ExecuteReader();
+            if (dr.Read())
+            {
+                lblpid.Text = dr["VN"].ToString();
+                lblname.Text = dr["PNAME"].ToString();
+                lblbed.Text = dr["BEDNO"].ToString();
+                lblward.Text = dr["WARD"].ToString();
+                lblinsurance.Text = dr["INSURANCE"].ToString();
+            }
+            dr.Close();
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+    protected void btnshowbed_Click(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand cm = new SqlCommand("SELECT * FROM NEWBORN_TABLE WHERE Mother_id= '" + DropDownList1.Text + "' and ORGID='" + lblorgid.Text + "'", con);
+        dr = cm.ExecuteReader();
+        if (dr.Read())
+        {
+            lblpid.Text = dr["ID"].ToString();
+            lblname.Text = dr["Mother_id"].ToString();
+            //lblbed.Text = dr["BEDNO"].ToString();
+            // lblward.Text = dr["WARD"].ToString();
+            //lblinsurance.Text = dr["INSURANCE"].ToString();
+        }
+        else
+        {
+            dr.Close();
+            lblpid.Text = "";
+            lblname.Text = "";
+            lblbed.Text = "";
+            lblward.Text = "";
+            string message = "alert('Infant No.Not Found. Try New PID.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+           
+        }
+        dr.Close();
+       // SqlCommand cm1 = new SqlCommand("SELECT * FROM BED_TABLE WHERE PNAME= '" + DropDownList1.Text + "' and ORGID='" + lblorgid.Text + "'", con);
+        SqlCommand cm1 = new SqlCommand("SELECT * FROM BED_TABLE WHERE VN= '" + DropDownList1.Text + "' and ORGID='" + lblorgid.Text + "'", con);
+        dr = cm1.ExecuteReader();
+        if (dr.Read())
+        {
+            //lblpid.Text = dr["ID"].ToString();
+            //lblname.Text = dr["Mother_id"].ToString();
+            lblbed.Text = dr["BEDNO"].ToString();
+            lblward.Text = dr["WARD"].ToString();
+            //lblinsurance.Text = dr["INSURANCE"].ToString();
+        }
+        else
+        {
+            dr.Close();
+            lblpid.Text = "";
+            lblname.Text = "";
+            lblbed.Text = "";
+            lblward.Text = "";
+            string message = "alert('No Bed Assigned.')";
+            ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+            return;
+          
+        }
+        dr.Close();
+        con.Close();
+    }
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            if (lblpid.Text == "")
+            {
+                string message = "alert('Select Infant First.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                con.Close();
+                return;
+            }
+            else
+            {
+                if (dropward.SelectedIndex == 0)
+                {
+                    string message = "alert('*Select Ward First.')";
+                    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                    con.Close();
+                    return;
+                }
+                SqlCommand com1 = new SqlCommand("select * from BED_MATRIX_TABLE where BEDNO='" + dropbed.Text + "' AND STATUS='AVAILABLE' and ORGID='" + lblorgid.Text + "'", con);
+                dr = com1.ExecuteReader();
+                if (dr.Read())
+                {
+                    dr.Close();
+                    using (SqlCommand cmd1 = new SqlCommand("usp_BEDTRANSFER", con))
+                    {
+                        cmd1.CommandType = CommandType.StoredProcedure;
+                        cmd1.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+                        cmd1.Parameters.Add("@ORGID", SqlDbType.VarChar).Value = lblorgid.Text;
+                        cmd1.Parameters.Add("@VN", SqlDbType.VarChar).Value = lblpid.Text;
+                        cmd1.Parameters.Add("@NAME", SqlDbType.VarChar).Value = lblname.Text;
+                        cmd1.Parameters.Add("@WARDNAME", SqlDbType.VarChar).Value = lblward.Text;
+                        cmd1.Parameters.Add("@NWARDNAME", SqlDbType.VarChar).Value = dropward.Text;
+                        cmd1.Parameters.Add("@CBEDNO", SqlDbType.VarChar).Value = lblbed.Text;
+                        cmd1.Parameters.Add("@NBEDNO", SqlDbType.VarChar).Value = dropbed.Text;
+                        cmd1.Parameters.Add("@DATE", SqlDbType.DateTime).Value = txtdate.Text;
+                        cmd1.Parameters.Add("@INSURANCE", SqlDbType.VarChar).Value = lblinsurance.Text;
+                        cmd1.ExecuteNonQuery();
+                    }
+                }
+                else
+                {
+                    dr.Close();
+                    con.Close();
+                    string message = "alert('The selected bed is not available. Try new bed.')";
+                    ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                    return;
+
+                }
+
+                binddata();
+                clearcontrol();
+                string message1 = "alert('Successfully Saved.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message1, true);
+
+            }
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        Response.Redirect("~/NURSE/BedTransfer.aspx");
+    }
+    public void clearcontrol()
+    {
+        lblpid.Text = "";
+        lblname.Text = "";
+        lblward.Text = "";
+        lblpid.Text = "";
+        lblbed.Text = "";
+        txtdate.Text = "";
+    }
+    protected void Button3_Click(object sender, EventArgs e)
+    {       
+        Response.Redirect("~/NURSE/BedTransfer.aspx");
+    }
+    protected void dropward_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        try
+        {
+            SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+            con.Open();
+            SqlDataAdapter da1 = new SqlDataAdapter("SELECT BEDNO FROM BED_MATRIX_TABLE WHERE STATUS='AVAILABLE' AND NAME='" + dropward.SelectedItem.Text + "' AND ORGID='" + lblorgid.Text + "' ORDER BY ID ASC", con);
+            DataTable dt1 = new DataTable();
+            da1.Fill(dt1);
+            //dropbedno.SelectedIndex = 0;
+            dropbed.DataSource = dt1;
+            dropbed.DataTextField = "BEDNO";
+            dropbed.DataBind();
+            dropbed.Items.Insert(0, "Please Select");
+            con.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+    }
+
+    protected void Btnrelease_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            if (lblbed.Text == "")
+            {
+                string message = "alert('No Bed Selected. Try New PID.')";
+                ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+                return;
+            }
+            else
+            {
+                SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+                con.Open();
+                SqlCommand cmd1 = new SqlCommand(" UPDATE BED_MATRIX_TABLE SET STATUS='AVAILABLE' WHERE BEDNO='" + lblbed.Text + "'", con);
+                cmd1.ExecuteNonQuery();
+                SqlCommand cmd2 = new SqlCommand("DELETE FROM BED_TABLE WHERE VN='" + lblpid.Text + "'", con);
+                cmd2.ExecuteNonQuery();
+                //SqlCommand cm = new SqlCommand("delete from NEWBORN_TABLE where ID='" + lblpid.Text + "'", con);
+                //cm.ExecuteNonQuery();
+                con.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+      
+    }
+}

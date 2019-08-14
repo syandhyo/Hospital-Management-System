@@ -1,0 +1,128 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Drawing;
+using System.Data.SqlClient;
+using System.Text;
+using System.Configuration;
+
+public partial class ACCOUNTS_Salryovertime : System.Web.UI.Page
+{
+    string num1 = "0";
+    SqlConnection con;
+    SqlDataAdapter da, da1, da2, da3;
+    DataSet ds = new DataSet();
+    SqlCommand com, cmd, cmd1;
+    SqlDataReader dr, dr1, dr2;
+    DataTable dt;
+    GridViewRow gr;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        if (Session["out"] == "INACTIVE")
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        Response.Buffer = true;
+
+        Response.CacheControl = "no-cache";
+        if (Session["NAME"] == null)
+        {
+            Response.Redirect("~/index.aspx");
+        }
+        lblid.Text = Session["NAME"].ToString();
+        // lblorgid.Text = Session["ORGID"].ToString();
+
+        if (!IsPostBack)
+        {
+            binddata();
+            // bindTGrid();
+        }
+        con.Close();
+    }
+    public void binddata()
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand COM = new SqlCommand("SELECT FYEAR FROM FYEAR1_TABLE", con);
+        dr = COM.ExecuteReader();
+        if (dr.Read())
+        {
+            //Label1.Text = dr["FYEAR"].ToString();
+            lblfyear.Text = dr["FYEAR"].ToString();
+        }
+        dr.Close();
+
+        da1 = new SqlDataAdapter("select EMPID,Sname from tblStaff", con);
+        DataTable ds1 = new DataTable();
+        da1.Fill(ds1);
+        ddEmpl.DataSource = ds1;
+        ddEmpl.DataTextField = "EMPID";
+        ddEmpl.DataValueField = "EMPID";
+        ddEmpl.DataBind();
+        ddEmpl.Items.Insert(0, "Please Select");
+        con.Close();
+    }
+    protected void btncreate_Click(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+       // auto();
+        try
+        {
+            using (SqlCommand CM_cmd = new SqlCommand("USP_SALOVERTIME", con))
+            {
+                CM_cmd.CommandType = CommandType.StoredProcedure;
+                CM_cmd.Parameters.Add("@DBOpration", SqlDbType.VarChar).Value = "INSERT";
+
+                CM_cmd.Parameters.Add("@DATE", SqlDbType.Date).Value = Convert.ToDateTime(txtdate.Text).ToString("yyyy-MM-dd");
+                CM_cmd.Parameters.Add("@EMPLOYEID", SqlDbType.VarChar).Value = ddEmpl.SelectedValue;
+
+                CM_cmd.Parameters.Add("@NAME", SqlDbType.VarChar).Value = txtName.Text;
+                CM_cmd.Parameters.Add("@MONTH", SqlDbType.VarChar).Value = ddMonth.SelectedItem.Text;
+                CM_cmd.Parameters.Add("@OVERTIME", SqlDbType.VarChar).Value = txtOvertime.Text;
+                CM_cmd.Parameters.Add("@FYEAR", SqlDbType.VarChar).Value = lblfyear.Text;
+
+                CM_cmd.ExecuteNonQuery();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: '{0}'", ex);
+        }
+        con.Close();
+        clear();
+        string message = "alert('*Inserted  Successfully .')";
+        ScriptManager.RegisterClientScriptBlock((sender as Control), this.GetType(), "alert", message, true);
+        //  Response.Redirect("Salryovertime.aspx");
+    }
+    public void clear()
+    {
+        txtdate.Text = "";
+        txtName.Text = "";
+        txtOvertime.Text = "";
+    }
+    protected void btncancel_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("~/ACCOUNTS/Salryovertime.aspx");
+    }
+    protected void ddEmpl_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["abcd"].ToString());
+        con.Open();
+        SqlCommand COM = new SqlCommand("select EMPID,Sname from tblStaff where EMPID='" + ddEmpl.SelectedValue + "'", con);
+        dr = COM.ExecuteReader();
+        if (dr.Read()) 
+        {
+            txtName.Text = dr["Sname"].ToString();
+        }
+        dr.Close();
+        con.Close();
+    }
+}

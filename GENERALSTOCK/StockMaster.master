@@ -1,0 +1,437 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="StockMaster.master.cs" Inherits="GENERALSTOCK_StockMaster" %>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server" id="j_idt2">
+  
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <br />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/font-awesome.min.css" />
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/theme.css9e5e.css" />
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/font-awesome.css408e.css" />
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/components.css408e.css" />
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/inputswitch.css408e.css" />
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/keyboard.css408e.css" />
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/nanoscroller.cssb45c.css" />
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/layout-blue.cssb45c.css" />
+
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/layout-blue.css" />
+    <link type="text/css" rel="stylesheet" href="../bootstraptemplate/css/nanoscroller.css" />
+
+    <script type="text/javascript" src="../bootstraptemplate/js/jquery.js408e.xhtml"></script>
+    <script type="text/javascript" src="../bootstraptemplate/js/jquery-plugins.js408e.xhtml"></script>
+    <script type="text/javascript" src="../bootstraptemplate/js/core.js408e.xhtml"></script>
+    <script type="text/javascript" src="../bootstraptemplate/js/components.js408e.xhtml"></script>
+    <script type="text/javascript" src="../bootstraptemplate/js/inputswitch.js408e.xhtml"></script>
+    <script type="text/javascript" src="../bootstraptemplate/js/keyboard.js408e.xhtml"></script>
+    <script type="text/javascript" src="../bootstraptemplate/js/nanoscroller.jsb45c.xhtml"></script>
+    <script type="text/javascript" src="../bootstraptemplate/js/layout.jsb45c.xhtml"></script>
+    <script src='<%=ResolveUrl("~/crystalreportviewers13/js/crviewer/crv.js")%>' type="text/javascript"></script>
+    <title>ADMIN</title>
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+    <!--- css for input type ---->
+    <style>
+        .ui-inputfield:focus {
+            outline: 0;
+            -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgb(104, 145, 162);
+            box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgb(104, 145, 162);
+        }
+    </style>
+    <!---End css for input type ---->
+
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div class="layout-wrapper ">
+
+            <input type="hidden" name="j_idt11" value="j_idt11" />
+
+            <div id="layout-megamenu" class="ui-g-12 layout-megamenu layout-megamenu-dark ">
+                <div class="ui-g-12 ui-md-6 ui-lg-3 layout-megamenu-submenu">
+                    <ul>
+                        <li>
+                            <a href="../home.aspx">
+                                <i class="fa fa-fw fa-th-list"></i>
+                                <span>HOME</span>
+                            </a>
+                        </li>
+                        <li>
+
+                            <a href="../admin/adminhome.aspx">
+                                <i class="fa fa-fw fa-th-list"></i>
+                                <span>ADMIN</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="../accounts/default.aspx">
+                                <i class="fa fa-fw fa-server"></i>
+                                <span>ACCOUNTS</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="../LABORATORY/Home.aspx">
+                                <i class="fa fa-fw fa-server"></i>
+                                <span>LAB</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="../RADIOLOGY/Home.aspx">
+                                <i class="fa fa-fw fa-server"></i>
+                                <span>RADIOLOGY</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="../NURSE/home.aspx">
+                                <i class="fa fa-fw fa-users"></i>
+                                <span>NURSE</span>
+                            </a>
+
+                        </li>
+                        <li>
+                            <a href="../OT/Home.aspx">
+                                <i class="fa fa-fw fa-server"></i>
+                                <span>OT</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="../PHARMACYSTORE/home.aspx">
+                                <i class="fa fa-fw fa-database"></i>
+                                <span>PHARMACY</span>
+                            </a>
+
+                        </li>
+
+                        <li>
+                            <a href="../RECEPTION/Default.aspx">
+                                <i class="fa fa-fw fa-bar-chart"></i>
+                                <span>RECEPTION</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="Home.aspx">
+                                <i class="fa fa-fw fa-server"></i>
+                                <span>DEPT. STOCK</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="../STOREKEEPER/Home.aspx">
+                                <i class="fa fa-fw fa-server"></i>
+                                <span>STORE</span>
+                            </a>
+                        </li>
+                         <li>
+                            <a href="../ASSET/Home.aspx">
+                                <i class="fa fa-fw fa-server"></i>
+                                <span>ASSET</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+            <input type="hidden" name="javax.faces.ViewState" id="j_id1:javax.faces.ViewState:0" value="-6706802491831525269:5066372470393129965" autocomplete="off" />
+
+            <div class="layout-topbar">
+                <a href="../home.aspx" class="logo">
+                    <img id="j_idt20" src="../bootstraptemplate/images/logo.png.png?ln=zemusitech" alt="" /></a>
+
+                <a id="menu-button" href="#">
+                    <i class="fa fa-align-left"></i>
+                </a>
+
+                <a id="layout-megamenu-button" href="#">
+                    <i class="fa fa-angle-down"></i>
+                    <span class="mega-menu-title">CATEGORY</span>
+                </a>
+
+                <a id="right-sidebar-button" href="#" style="display:none;" >
+                    <span class="username">Hello
+                                <asp:ContentPlaceHolder ID="ContentPlaceHolder2" runat="server"></asp:ContentPlaceHolder>
+                            </span>
+                </a>
+
+            </div>
+
+            <div class="layout-sidebar layout-sidebar-dark ">
+                <div id="nano-container" class="nano">
+                    <div class="nano-content sidebar-scroll-content">
+                        <div class="user-profile">
+                            <a id="sidebar-profile-button" href="../home.aspx">
+                                <img id="j_idt40" src="../bootstraptemplate/images/avatar.pngb45c.png?ln=zemusitech" alt="" />
+                                <%-- <span class="sidebar-profile-name">Pauline Harrell</span>--%>
+                                
+                            </a>
+                            
+                        </div>
+                        
+                        <input type="hidden" name="menuform" value="menuform" />
+                        <ul id="menuform:j_idt52" class="layout-menu">
+
+ 
+  <li id="menuform:om_hierarchy" role="menuitem" class="ui-menuitem-submenu"><a href="#"><i class="fa fa-fw fa-desktop"></i><span>Dept Stock</span>
+ 	 <i class="layout-menuitem-toggler fa fa-fw fa-angle-down"></i></a>
+  	<ul role="menu">
+ 	 	<li id="menuform:om_sm1" role="menuitem" class="ui-menuitem-submenu"><a href="deptstock_dept_material_master.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Dept Material Master</span></a></li>
+        <li id="Li1" role="menuitem" class="ui-menuitem-submenu"><a href="deptstock_material_request.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Material Request</span></a></li>
+		<li id="Li2" role="menuitem" class="ui-menuitem-submenu"><a href="deptstock_material_receive.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Material Receive</span></a></li>
+        <li id="Li3" role="menuitem" class="ui-menuitem-submenu"><a href="deptstock_material_issue.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Material Issue</span></a></li>
+		<li id="Li4" role="menuitem" class="ui-menuitem-submenu"><a href="deptstock_material_return_dept.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Material Return Dept</span></a></li>
+        <li id="Li5" role="menuitem" class="ui-menuitem-submenu"><a href="deptstock_material_return_store.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Material Return Store</span></a></li>
+		<li id="Li6" role="menuitem" class="ui-menuitem-submenu"><a href="deptstock_stock_transfer.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Stock Transfer</span></a></li>
+		<li id="Li7" role="menuitem" class="ui-menuitem-submenu"><a href="deptstock_stock_transfer_receive.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Stock Transfer Receive</span></a></li>
+        <li id="Li8" role="menuitem" class="ui-menuitem-submenu"><a href="deptstock_material_consumption.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Material Consumption</span></a></li>
+	</ul>
+  </li>
+  <li id="Li9" role="menuitem" class="ui-menuitem-submenu"><a href="#"><i class="fa fa-fw fa-desktop"></i><span>Reports</span>
+ 	 <i class="layout-menuitem-toggler fa fa-fw fa-angle-down"></i></a>
+  	<ul role="menu">
+ 	 	<li id="Li10" role="menuitem" class="ui-menuitem-submenu"><a href="deptstock_stock_report.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Stock Report</span></a></li>
+        <li id="Li11" role="menuitem" class="ui-menuitem-submenu"><a href="deptstock_stock_ledger_report.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Stock Ledger Report</span></a></li>
+		<li id="Li12" role="menuitem" class="ui-menuitem-submenu"><a href="deptstock_material_issue_report.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Material Issue Report</span></a></li>
+        <li id="Li13" role="menuitem" class="ui-menuitem-submenu"><a href="deptstock_material_return_report.aspx"><i class="fa fa-fw fa-sign-in"></i><span>Material Return Report</span></a></li>
+		<li id="Li14" role="menuitem" class="ui-menuitem-submenu"><a href="deptstock_grn_report.aspx"><i class="fa fa-fw fa-sign-in"></i><span>GRN Report</span></a></li>
+	</ul>
+  </li>
+ 
+  </ul>
+                        <script id="menuform:j_idt52_s" type="text/javascript">PrimeFaces.cw("California", "me", { id: "menuform:j_idt52" });</script>
+                        <input type="hidden" name="javax.faces.ViewState" id="j_id1:javax.faces.ViewState:38" value="4458205077111000725:-2545980840278889821" autocomplete="off" />
+
+                    </div>
+                </div>
+            </div>
+            <%--  ///////////////--%>
+            <div id="layout-right-sidebar">
+                <div id="j_idt54" class="ui-tabs ui-widget ui-widget-content ui-corner-all ui-hidden-container ui-tabs-top" data-widget="widget_j_idt54">
+                    <ul class="ui-tabs-nav ui-helper-reset ui-widget-header ui-corner-all" role="tablist">
+                        <li class="ui-tabs-header ui-state-default ui-tabs-selected ui-state-active ui-corner-top" role="tab" aria-expanded="true" aria-selected="true" data-index="0"><a href="#j_idt54:j_idt55" tabindex="-1">
+                            <i class="fa fa-cog"></i></a></li>
+                        <li class="ui-tabs-header ui-state-default ui-corner-top" role="tab" aria-expanded="false" aria-selected="false" data-index="1"><a href="#j_idt54:j_idt58" tabindex="-1">
+                            <i class="fa fa-inbox"></i></a></li>
+                        <li class="ui-tabs-header ui-state-default ui-corner-top" role="tab" aria-expanded="false" aria-selected="false" data-index="2"><a href="#j_idt54:j_idt69" tabindex="-1">
+                            <i class="fa fa-calendar"></i></a></li>
+                    </ul>
+                    <div class="ui-tabs-panels">
+                        <div id="j_idt54:j_idt55" class="ui-tabs-panel ui-widget-content ui-corner-bottom" role="tabpanel" aria-hidden="false" data-index="0">
+                            <div class="submenu-title">
+                                <span>Settings</span>
+                            </div>
+                            <div class="submenu-content settings">
+                                <ul>
+                                    <li>
+                                        <div class="order-settings ui-g-12">
+                                            <i class="fa fa-plus"></i>
+                                            <span>NEW ORDERS</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="sales-settings ui-g-12">
+                                            <i class="fa fa-line-chart"></i>
+                                            <span>TOTAL SALES</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="shipment-settings ui-g-12">
+                                            <i class="fa fa-ship"></i>
+                                            <span>PENDING SHIPMENTS</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="visitors-settings ui-g-12">
+                                            <i class="fa fa-user-circle"></i>
+                                            <span>UNIQUE VISITORS</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="history-settings ui-g-12">
+                                            <i class="fa fa-history"></i>
+                                            <span>SALES HISTORY</span>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="leads-settings ui-g-12">
+                                            <i class="fa fa-handshake-o"></i>
+                                            <span>ALL LEADS</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div id="j_idt54:j_idt58" class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-helper-hidden" role="tabpanel" aria-hidden="true" data-index="1">
+                            <div class="submenu-title">
+                                <span>Inbox</span>
+                            </div>
+                            <div class="submenu-content messages">
+                                <ul>
+                                    <li>
+                                        <div>
+                                            <img id="j_idt54:j_idt61" src="../bootstraptemplate/images/avatar-john.pngb45c.png?ln=california-layout" alt="" />
+                                            <span class="time-stamp">1m</span>
+                                        </div>
+                                        <span class="messager-name">John Swisher</span>
+                                        <span class="message-text">Ab nobis, magnam sunt eum. Laudantium…</span>
+                                    </li>
+                                    <li>
+                                        <div>
+                                            <img id="j_idt54:j_idt63" src="../bootstraptemplate/images/avatar-warren.pngb45c.png?ln=california-layout" alt="" />
+                                            <span class="time-stamp">33m</span>
+                                        </div>
+                                        <span class="messager-name">Warren Shaw</span>
+                                        <span class="message-text">Ab nobis, magnam sunt eum. Laudantium…</span>
+                                    </li>
+                                    <li>
+                                        <div>
+                                            <img id="j_idt54:j_idt65" src="../bootstraptemplate/images/avatar-brenda.pngb45c.png?ln=california-layout" alt="" />
+                                            <span class="time-stamp">2h</span>
+                                        </div>
+                                        <span class="messager-name">Brenda Soto</span>
+                                        <span class="message-text">Ab nobis, magnam sunt eum. Laudantium…</span>
+                                    </li>
+                                    <li>
+                                        <div>
+                                            <img id="j_idt54:j_idt67" src="../bootstraptemplate/images/avatar-arlene.pngb45c.png?ln=california-layout" alt="" />
+                                            <span class="time-stamp">1d</span>
+                                        </div>
+                                        <span class="messager-name">Arlene Welch</span>
+                                        <span class="message-text">Ab nobis, magnam sunt eum. Laudantium…</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div id="j_idt54:j_idt69" class="ui-tabs-panel ui-widget-content ui-corner-bottom ui-helper-hidden" role="tabpanel" aria-hidden="true" data-index="2">
+                            <div class="submenu-title">
+                                <span>Events</span>
+                            </div>
+                            <div class="submenu-content events">
+                                <ul>
+                                    <li>
+                                        <a href="../admin/adminhome.aspx">
+                                            <i class="fa fa-fw fa-th-list"></i>
+                                            <span>ADMIN</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="accounts.aspx">
+                                            <i class="fa fa-fw fa-server"></i>
+                                            <span>ACCOUNTS</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="../LABORATORY/Home.aspx">
+                                            <i class="fa fa-fw fa-server"></i>
+                                            <span>LAB</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="radiology.aspx">
+                                            <i class="fa fa-fw fa-server"></i>
+                                            <span>RADIOLOGY</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="../NURSE/home.aspx">
+                                            <i class="fa fa-fw fa-users"></i>
+                                            <span>NURSE</span>
+                                        </a>
+
+                                    </li>
+                                    <li>
+                                        <a href="ot.aspx">
+                                            <i class="fa fa-fw fa-server"></i>
+                                            <span>OT</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="../PHARMACYSTORE/home.aspx">
+                                            <i class="fa fa-fw fa-database"></i>
+                                            <span>PHARMACY</span>
+                                        </a>
+
+                                    </li>
+
+                                    <li>
+                                        <a href="reception.aspx">
+                                            <i class="fa fa-fw fa-bar-chart"></i>
+                                            <span>RECEPTION</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="dept_stock.aspx">
+                                            <i class="fa fa-fw fa-server"></i>
+                                            <span>DEPT. STOCK</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="store.aspx">
+                                            <i class="fa fa-fw fa-server"></i>
+                                            <span>STORE</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+                    <input type="hidden" id="j_idt54_activeIndex" name="j_idt54_activeIndex" value="0" autocomplete="off" />
+
+                </div>
+                <script id="j_idt54_s" type="text/javascript">PrimeFaces.cw("TabView", "widget_j_idt54", { id: "j_idt54", effectDuration: "normal", scrollable: false });</script>
+            </div>
+
+            <div class="layout-main">
+
+
+                <%-----------------------%>
+
+                <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+                </asp:ContentPlaceHolder>
+
+                <div class="layout-footer ui-g-12">
+                    <div class="ui-g">
+                        <div class="ui-g-12 ui-md-6 footer-left">
+                            <h3>Hospicare</h3>
+                            <p>© 2018 Copyright <a href="http://zemusitech.com/" target="_blank">Zemusi Tech Solutions</a> All rights reserved.</p>
+                        </div>
+                        <div class="ui-g-12 ui-md-6 footer-right">
+                            <a href="#">
+                                <i class="fa fa-twitter"></i>
+                            </a>
+                            <a href="#">
+                                <i class="fa fa-facebook"></i>
+                            </a>
+                            <a href="#">
+                                <i class="fa fa-github"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="j_idt225" style="width: 32px; height: 32px; position: fixed; right: 7px; bottom: 7px">
+            <div id="j_idt225_start" style="display: none">
+                <i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"></i>
+            </div>
+            <div id="j_idt225_complete" style="display: none"></div>
+        </div>
+        <script id="j_idt225_s" type="text/javascript">$(function () { PrimeFaces.cw("AjaxStatus", "widget_j_idt225", { id: "j_idt225" }); });</script>
+
+        <script>
+            $(document).ready(function () {
+
+                $('.user-profile').click(function () {
+                    window.location.href = "../home.aspx";
+
+                });
+            });
+        </script>
+    </form>
+</body>
+</html>
